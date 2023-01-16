@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="author" content="padomay1352" />
+    <title>marklog</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <!-- Font Awesome icons (free version)-->
+    <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
+    <!-- Google fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <link href="css/styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <header class="mb-5">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" id="login-nav">
+            <div class="container">
+                <a class="navbar-brand fs-3" href="index.html">Marklog</a>
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="post-create.html">새글작성</a>
+                    </li>
+                    <li class="nav-item dropdown show">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img class="float-start profile" src="assets/img/user.png">
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="userpost.html">내글보기</a></li>
+                            <li><a class="dropdown-item" href="setting.html">설정</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="logout.html">로그아웃</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" id="logout-nav">
+            <div class="container">
+                <a class="navbar-brand fs-3" href="index.html">Marklog</a>
+                <ul class="nav">
+                    <li class="nav-item"><a class="nav-link text-dark" href="search.html"><i
+                class="fa-solid fa-magnifying-glass"></i></a></li>
+                    <li class="nav-item"><a class="nav-link text-dark" href="login.html">로그인</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <!-- main-->
+    <main class="containe">
+        <div class="my-container">
+            <h3 class="text-center">
+                글 목록
+            </h3>
+            <hr>
+            <nav class="nav nav-pills mb-5">
+                <a class="nav-link active" href="#">전체</a>
+                <a class="nav-link" href="#">github</a>
+                <a class="nav-link" href="#">문제풀이</a>
+            </nav>
+            <div class="card" onclick="location.href='post.html';">
+                <div class="thumbnail">
+                    <img src="assets/img/about-bg.jpg" class="card-img-top search-card-img-height" alt="assets/img/about-bg.jpg">
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Card title</h5>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.
+                    </p>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.
+                    </p>
+                    <p class="card-text text-secondary"><small> quick example text to build on the card title and make up
+              the
+              bulk of the card's content.</small></p>
+                </div>
+            </div>
+            <div class="card" onclick="location.href='post.html';">
+                <div class="thumbnail">
+                    <img src="assets/img/about-bg.jpg" class="card-img-top search-card-img-height" alt="assets/img/about-bg.jpg">
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Card title</h5>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.
+                    </p>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.
+                    </p>
+                    <p class="card-text text-secondary"><small> quick example text to build on the card title and make up
+              the
+              bulk of the card's content.</small></p>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Footer-->
+    <footer class="border-top mb-5">
+        <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+                <div class="col-md-10 col-lg-8 col-xl-7">
+                    <ul class="list-inline text-center">
+                        <li class="list-inline-item">
+                            <a href="https://github.com/padomay1352/marklog-frontend">
+                                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                </span>
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="small text-center text-muted fst-italic">Copyright &copy; padomay1352@gmail.com</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/scripts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+</body>
+
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="author" content="padomay1352" />
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <title>marklog</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
+    <link href="css/styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="d-flex">
+        <form class="w-50 p-3">
+            <header>
+                <div style="height: 5vh;">
+                    <input id="title" type="text" class="w-100 searchitem fw-bold" placeholder="제목을 입력하세요">
+                </div>
+                <hr>
+                <input name='input' placeholder='태그를 입력후 엔터를 누르세요' id="tagInput" class="w-100" type="hidden" style="height: 5vh;">
+            </header>
+            <div style="height: 75vh;">
+                <textarea id="main" class="form-control" tabindex="0"></textarea>
+            </div>
+            <footer class="d-flex justify-content-between" style="height: 5vh;">
+                <button class="btn btn-danger fs-5" type="button" onclick="location.href='index.html'">
+					<i class=""></i>나가기
+				</button>
+                <button id="post" class="btn btn-success fs-5" type="button">출간하기</button>
+            </footer>
+        </form>
+        <section class="w-50">
+            <div id="preview" class="p-5 overflow-scroll vh-100"></div>
+        </section>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
+    <script>
+        //이미지업로드 함수
+        function uploadImage(imageHandler) {
+            var input = document.createElement("input");
+            input.type = "file";
+            input.accept = "image/*";
+            input.id = "uploadInput";
+            input.onchange = function(event) {
+                let xhr = new XMLHttpRequest();
+                var formData = new FormData();
+                xhr.open('POST', 'https://api.imgbb.com/1/upload');
+                formData.append("key", 'ba349a478f0a62e1d11c353fe0ce35c1');
+                formData.append("image", event.target.files[0]);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === xhr.DONE) {
+                        if (xhr.status === 200) {
+                            res = JSON.parse(xhr.response);
+                            url = res.data.image.url;
+                            imageHandler(url);
+                        }
+                    }
+                };
+                xhr.send(formData);
+            };
+            input.click();
+        }
+
+        function drawImage(editor) {
+            var imageHandler = function(url) {
+                imagemd = "![](" + url + ")";
+                var cm = editor.codemirror;
+                cm.replaceSelection(imagemd);
+                cm.focus();
+            }
+            uploadImage(imageHandler)
+        }
+
+        //태그설정
+        const input = document.getElementById('tagInput');
+        let tagify = new Tagify(input);
+
+        //에디터 설정
+        simplemde = new SimpleMDE({
+            element: document.getElementById("main"),
+            spellChecker: false,
+            renderingConfig: {
+                singleLineBreaks: true,
+                codeSyntaxHighlighting: true,
+            },
+            toolbar: ['bold', 'italic', 'heading', '|', 'quote',
+                'unordered-list', 'ordered-list', '|', 'link',
+                'side-by-side', {
+                    name: "image	",
+                    action: drawImage,
+                    className: "fa fa-picture-o",
+                    title: "Insert Image",
+                }
+            ],
+        });
+
+        //에디터에 변경발생시 preview 업데이트
+        simplemde.codemirror.on("change", function() {
+            var preview = document.getElementById('preview')
+            preview.innerHTML = simplemde.markdown(simplemde.value())
+        });
+
+        //post 설정
+
+
+        var postBtn = document.getElementById("post");
+        postBtn.onclick = function(event) {
+            var data = {
+                title: document.getElementById("title").value,
+                content: simplemde.value()
+            };
+            alert(JSON.stringify(data));
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/v1/post');
+            xhr.setRequestHeader("content-type", "application/json");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === xhr.DONE) {
+                    if (xhr.status === 200) {
+                    alert("글이 등록되었습니다.")
+                    window.location.href = '/';
+                    }
+                }
+            };
+            xhr.send(JSON.stringify(data));
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="author" content="padomay1352" />
+    <title>marklog</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <!-- Font Awesome icons (free version)-->
+    <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
+    <!-- Google fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <link href="css/styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <header class="mb-5">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" id="login-nav">
+            <div class="container">
+                <a class="navbar-brand fs-3" href="index.html">Marklog</a>
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="search.html"><i class="fa-solid fa-magnifying-glass"></i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="post-create.html">새글작성</a>
+                    </li>
+                    <li class="nav-item dropdown show">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img class="float-start profile" src="assets/img/user.png">
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="userpost.html">내글보기</a></li>
+                            <li><a class="dropdown-item" href="setting.html">설정</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="logout.html">로그아웃</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" id="logout-nav">
+            <div class="container">
+                <a class="navbar-brand fs-3" href="index.html">Marklog</a>
+                <ul class="nav">
+                    <li class="nav-item"><a class="nav-link text-dark" href="search.html"><i
+                class="fa-solid fa-magnifying-glass"></i></a></li>
+                    <li class="nav-item"><a class="nav-link text-dark" href="login.html">로그인</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- main-->
+    <main class="container my-5">
+        <div class="my-container">
+            <div class="row mb-5 mx-1">
+                <div class="col-3">
+                    <img class="bigprofile mb-2" src="assets/img/user.png">
+                    <button class="btn btn-primary setting-img-btn">업로드</button>
+                    <br>
+                    <button class="btn setting-img-btn">제거</button>
+                </div>
+                <div class="col-8">
+                    <h3><b>김준수</b></h3>
+                    <h5>
+                        안녕하세요 김준수입니다.
+                    </h5>
+                </div>
+            </div>
+
+            <div class="row mb-5 mx-1">
+                <b class="col-3 fs-5">마크로그 제목</b>
+                <div class="col-7">
+                    <input class="form-control" type="text">
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-success">수정</button>
+                </div>
+                <small class="text-black-50 mt-2">개인 페이지 좌측 상단에 나타나는 제목입니다.</small>
+            </div>
+
+            <div class="row mx-1">
+                <b class="fs-5 col-3">회원탈퇴</b>
+                <div class="col-9">
+                    <button class="btn btn-danger">회원탈퇴</button>
+                </div>
+                <small class="text-black-50 mt-2">탈퇴 시 작성하신 포스트 및 댓글이 모두 삭제되며 복구되지 않습니다.</small>
+            </div>
+        </div>
+    </main>
+    <script src="js/scripts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+</body>
+
+</html>

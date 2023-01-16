@@ -1,0 +1,90 @@
+.my-container {
+    max-width: 768px;
+    margin: 0 auto;
+}
+
+.my-container>* {
+    margin-bottom: 20px;
+}
+
+.nav-link {
+    color: black;
+}
+
+.profile {
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+    border-radius: 70%;
+    display: flex;
+    justify-content: center;
+}
+
+.bigprofile {
+    width: 128px;
+    height: 128px;
+    object-fit: cover;
+    border-radius: 70%;
+    display: flex;
+    justify-content: center;
+}
+
+.thumbnail {
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 45%;
+    /* 1:1 ratio */
+}
+
+.thumbnail .card-img-top {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.card-text {
+    line-height: 1.2;
+    height: 3.6em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+.card:hover {
+    border-color: #0d6efd!important;
+    transform: scale(1.1);
+}
+
+.searchitem {
+    font-size: 2em;
+    outline: none;
+    border: none;
+}
+
+.setting-img-btn {
+    width: 128px;
+}
+
+blockquote {
+    color: rgba(0, 0, 0, .7);
+    padding: 10px;
+    padding-bottom: 0px;
+    border-left: 5px solid rgba(0, 0, 0, .1);
+    background: #f2f2f2;
+}
+
+@media (max-width: 800px) {
+    .bigprofile {
+        width: 80px;
+        height: 80px;
+    }
+    .setting-img-btn {
+        width: 80px;
+    }
+}
+
+.CodeMirror {
+    height: 60vh !important;
+}
