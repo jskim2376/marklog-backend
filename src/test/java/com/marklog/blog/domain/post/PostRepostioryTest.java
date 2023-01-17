@@ -27,8 +27,8 @@ public class PostRepostioryTest {
 	
 	@Test
 	public void load_post_save() {
-		String title="테스트게시글";
-		String content="테스트본문";
+		String title="title";
+		String content="title";
 		
 		postRepository.save(Post.builder().title(title).content(content).build());
 		

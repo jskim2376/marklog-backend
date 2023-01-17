@@ -24,13 +24,13 @@ public class PostService {
 	
 	@Transactional
 	public Long update(Long id, PostUpdateRequestDto requestDto) {
-		Post post = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("ÇØ´ç °Ô½Ã±ÛÀÌ ¾ø½À´Ï´Ù. id="+id));
+		Post post = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("ì¡´ìž¬í•˜ì§€ì•ŠëŠ” idìž…ë‹ˆë‹¤="+id));
 		post.update(requestDto.getTitle(), requestDto.getContent());
 		return id;
 	}
 	
 	public PostResponseDto findById(Long id) {
-		Post entity = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("ÇØ´ç °Ô½Ã±ÛÀÌ ¾ø½À´Ï´Ù. id="+id));
+		Post entity = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("ì¡´ìž¬í•˜ì§€ì•ŠëŠ” idìž…ë‹ˆë‹¤="+id));
 		return new PostResponseDto(entity);
 	}
 }

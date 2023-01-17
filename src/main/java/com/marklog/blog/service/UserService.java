@@ -22,13 +22,13 @@ public class UserService {
 	
 	@Transactional
 	public Long update(Long id, PostUpdateRequestDto requestDto) {
-		Users user = usersRepository.findById(id).orElseThrow(()->new IllegalArgumentException("ÇØ´ç °Ô½Ã±ÛÀÌ ¾ø½À´Ï´Ù. id="+id));
+		Users user = usersRepository.findById(id).orElseThrow(()->new IllegalArgumentException("ì¡´ìž¬í•˜ì§€ì•ŠëŠ” idìž…ë‹ˆë‹¤="+id));
 		user.update(requestDto.getTitle(), requestDto.getContent());
 		return id;
 	}
 	
 	public UserResponseDto findById(Long id) {
-		Users entity = usersRepository.findById(id).orElseThrow(()->new IllegalArgumentException("ÇØ´ç °Ô½Ã±ÛÀÌ ¾ø½À´Ï´Ù. id="+id));
+		Users entity = usersRepository.findById(id).orElseThrow(()->new IllegalArgumentException("ì¡´ìž¬í•˜ì§€ì•ŠëŠ” idìž…ë‹ˆë‹¤="+id));
 		return new UserResponseDto(entity);
 	}
 }
