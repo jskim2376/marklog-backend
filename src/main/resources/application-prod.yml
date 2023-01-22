@@ -1,0 +1,11 @@
+spring:
+ activate:
+  on-profile: prod
+ datasource:
+  driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  url: jdbc:sqlserver://marologdb.database.windows.net:1433;database=markologdb
+  username: azureuser@marologdb
+  password: 'azcom@31337#'
+ jpa:
+  hibernate:
+   ddl-auto: none
