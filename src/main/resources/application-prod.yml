@@ -8,4 +8,5 @@ spring:
   password: 'azcom@31337D'
  jpa:
   hibernate:
-   ddl-auto: update
+   ddl-auto: create
+#   dialect: org.hibernatedialect.SQLServer2012Dialect
