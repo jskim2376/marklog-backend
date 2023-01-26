@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 	private final UserService userService;
 	
-	@GetMapping("/api/v1/logincheck")
+	@GetMapping("/v1/logincheck")
 	public SessionUser logincheck(HttpSession session, @LoginUser SessionUser user) {
 		if(user!=null) {
 			return user;
@@ -32,7 +32,7 @@ public class UserController {
 		}
 	}
 	
-	@GetMapping("/api/v1/user/{id}")
+	@GetMapping("/v1/user/{id}")
 	public UserResponseDto user(@PathVariable Long id) {
 		
 		return userService.findById(id);

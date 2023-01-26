@@ -1,10 +1,13 @@
 server:
  use-forward-headers: true
+ servlet:
+  contextPath: /api
  tomcat:
   remoteip.protocol-header: x-forwarded-proto
+ session:
+  store-type: jdbc
 spring:
  profiles:
   default: dev
   include: oauth
- session:
-  store-type: jdbc
+  

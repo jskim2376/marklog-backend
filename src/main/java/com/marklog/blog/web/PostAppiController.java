@@ -19,17 +19,17 @@ import lombok.RequiredArgsConstructor;
 public class PostAppiController {
 	private final PostService postService;
 
-	@PostMapping("/api/v1/post")
+	@PostMapping("/v1/post")
 	public Long save(@RequestBody PostSaveRequestDto requestDto) {
 		return postService.save(requestDto);
 	}
 	
-	@PutMapping("/api/v1/post/{id}")
+	@PutMapping("/v1/post/{id}")
 	public Long update(@PathVariable Long id, @RequestBody PostUpdateRequestDto requestDto) {
 		return postService.update(id, requestDto);
 	}
 	
-	@GetMapping("/api/v1/post/{id}")
+	@GetMapping("/v1/post/{id}")
 	public PostResponseDto findById(@PathVariable Long id) {
 		return postService.findById(id);
 	}
