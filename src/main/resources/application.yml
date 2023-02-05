@@ -4,10 +4,8 @@ server:
   contextPath: /api
  tomcat:
   remoteip.protocol-header: x-forwarded-proto
- session:
-  store-type: jdbc
 spring:
  profiles:
-  default: dev
+  active: dev
   include: oauth
   
