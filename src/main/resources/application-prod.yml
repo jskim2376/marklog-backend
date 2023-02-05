@@ -3,9 +3,9 @@ spring:
   on-profile: prod
  datasource:
   driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-  url: jdbc:sqlserver://marologdb.database.windows.net:1433;database=markologdb
-  username: azureuser@marologdb
-  password: 'azcom@31337#'
+  url: jdbc:sqlserver://marklogdbserver.database.windows.net:1433;database=marklogdb;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
+  username: azuredb
+  password: 'azcom@31337D'
  jpa:
   hibernate:
-   ddl-auto: none
+   ddl-auto: update
