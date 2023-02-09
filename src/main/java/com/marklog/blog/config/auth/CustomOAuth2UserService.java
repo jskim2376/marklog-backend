@@ -7,6 +7,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -33,9 +34,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 		OAuth2User oAuth2User = delegate.loadUser(userRequest);
 		
 		String registratrionId = userRequest.getClientRegistration().getRegistrationId();
-		String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
+		String userNameAttributeKey = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
 		
-        OAuthAttributes attributes = OAuthAttributes.of(registratrionId, userNameAttributeName, oAuth2User.getAttributes());
+        OAuthAttributes attributes = OAuthAttributes.of(registratrionId, userNameAttributeKey, oAuth2User.getAttributes());
 
         Users user = saveOrUpdate(attributes);
         httpSession.setAttribute("user", new SessionUser(user));
@@ -48,7 +49,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         private Users saveOrUpdate(OAuthAttributes attributes){
             Users user = userRepository.findByEmail(attributes.getEmail())
-                    .map(entity -> entity.update(attributes.getName(), attributes.getPicture()))
+                    .map(entity -> entity.update(attributes.getName(), attributes.getPicture(), attributes.getTitle(), null))
                     .orElse(attributes.toEntity());
 
             return userRepository.save(user);

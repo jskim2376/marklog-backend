@@ -12,23 +12,30 @@ import com.marklog.blog.web.dto.PostResponseDto;
 import com.marklog.blog.web.dto.PostSaveRequestDto;
 import com.marklog.blog.web.dto.PostUpdateRequestDto;
 import com.marklog.blog.web.dto.UserResponseDto;
-
+import com.marklog.blog.web.dto.UserUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
 public class UserService {
 	private final UsersRepository usersRepository;
-	
-	@Transactional
-	public Long update(Long id, PostUpdateRequestDto requestDto) {
-		Users user = usersRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
-		user.update(requestDto.getTitle(), requestDto.getContent());
-		return id;
-	}
-	
+
 	public UserResponseDto findById(Long id) {
 		Users entity = usersRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
 		return new UserResponseDto(entity);
 	}
+	
+	@Transactional
+	public Long update(Long id, UserUpdateRequestDto userUpdateRequestDto) {
+		Users user = usersRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
+		user.update(userUpdateRequestDto.getName(), userUpdateRequestDto.getPicture(),  userUpdateRequestDto.getTitle(), userUpdateRequestDto.getIntroduce());
+		return id;
+	}
+	
+	
+	@Transactional
+	public void delete(Long id) {
+		
+		usersRepository.deleteById(id);
+	}	
 }

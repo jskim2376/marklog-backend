@@ -40,6 +40,11 @@ public class Users extends BaseTimeEntity {
     @Column(length=100, nullable = false)
     private String picture;
 
+    @Column(length=200)
+    private String introduce;
+    
+    @Column(length=20, nullable = false)
+    private String title;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -50,17 +55,21 @@ public class Users extends BaseTimeEntity {
     
     
     @Builder
-    public Users(String name, String email, String picture, Role role){
+    public Users(String name, String email, String picture, String title, String introduce, Role role){
         this.name = name;
         this.email = email;
         this.picture = picture;
+        this.title = title;
+        this.introduce = introduce;
         this.role = role;
     }
 
-    public Users update(String name, String picture){
+    public Users update(String name, String picture, String title, String introduce){
         this.name = name;
         this.picture = picture;
-
+        this.title = title;
+        this.introduce = introduce;
+        
         return this;
     }
 
