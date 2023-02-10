@@ -32,7 +32,6 @@ public class UserService {
 
 	@Transactional
 	public void delete(Long id) {
-
 		usersRepository.deleteById(id);
 	}
 }
