@@ -10,7 +10,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
 import com.marklog.blog.domain.BaseTimeEntity;
@@ -32,7 +31,7 @@ public class Users extends BaseTimeEntity {
     @Column(length=50, nullable = false)
     private String email;
 
-    
+
     @Column(length=20, nullable = false)
     private String name;
 
@@ -42,18 +41,18 @@ public class Users extends BaseTimeEntity {
 
     @Column(length=100)
     private String introduce;
-    
+
     @Column(length=20, nullable = false)
     private String title;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
-    
+
     @OneToMany(mappedBy = "user")
     List<Post> posts = new ArrayList<>();
-    
-    
+
+
     @Builder
     public Users(String name, String email, String picture, String title, String introduce, Role role){
         this.name = name;
@@ -69,7 +68,7 @@ public class Users extends BaseTimeEntity {
         this.picture = picture;
         this.title = title;
         this.introduce = introduce;
-        
+
         return this;
     }
 

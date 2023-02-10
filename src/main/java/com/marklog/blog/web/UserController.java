@@ -1,15 +1,8 @@
 package com.marklog.blog.web;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.hibernate.boot.model.naming.IllegalIdentifierException;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.method.P;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
@@ -19,13 +12,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpClientErrorException.BadRequest;
 
 import com.marklog.blog.config.auth.LoginUser;
 import com.marklog.blog.config.auth.dto.SessionUser;
-import com.marklog.blog.domain.user.Users;
 import com.marklog.blog.service.UserService;
 import com.marklog.blog.web.dto.UserResponseDto;
 import com.marklog.blog.web.dto.UserUpdateRequestDto;
@@ -38,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 	private final UserService userService;
 	private final HttpSession session;
-	
+
 	@GetMapping("/user/logincheck")
 	public ResponseEntity loginCheck(@LoginUser SessionUser user) {
 	    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -51,7 +42,7 @@ public class UserController {
 	    }
 	}
 
-	
+
 	@GetMapping("/user/{id}")
 	public ResponseEntity<UserResponseDto> userGet(@PathVariable Long id) {
 		try {
@@ -61,15 +52,16 @@ public class UserController {
 			return ResponseEntity.badRequest().body(null);
 		}
 	}
-	
+
 	@PutMapping("/user/{id}")
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or #id == #user.getId())")
 	public UserResponseDto userPut(@PathVariable Long id, @RequestBody UserUpdateRequestDto userUpdateRequestDto, @LoginUser SessionUser user) {
 		return userService.update(id, userUpdateRequestDto);
 	}
-	
-	@DeleteMapping("/user/{id}")
+
+	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or #id == #user.getId())")
+	@DeleteMapping("/user/{id}")
 	public void userDelete(@PathVariable Long id, @LoginUser SessionUser user) {
 		SecurityContextHolder.clearContext();
 		session.invalidate();

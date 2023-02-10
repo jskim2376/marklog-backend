@@ -22,14 +22,14 @@ public class PostComment extends BaseTimeEntity{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@Column(columnDefinition="TEXT", nullable = false)
 	private String content;
 
 	@ManyToOne
 	@JoinColumn(name = "POST_ID")
 	private Post post;
-	
+
 	@Builder
 	public PostComment(String content) {
 		this.content = content;

@@ -23,12 +23,12 @@ public class PostController {
 	public Long save(@RequestBody PostSaveRequestDto requestDto) {
 		return postService.save(requestDto);
 	}
-	
+
 	@PutMapping("/v1/post/{id}")
 	public Long update(@PathVariable Long id, @RequestBody PostUpdateRequestDto requestDto) {
 		return postService.update(id, requestDto);
 	}
-	
+
 	@GetMapping("/v1/post/{id}")
 	public PostResponseDto findById(@PathVariable Long id) {
 		return postService.findById(id);

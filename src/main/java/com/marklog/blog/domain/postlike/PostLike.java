@@ -1,9 +1,6 @@
 package com.marklog.blog.domain.postlike;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
@@ -29,5 +26,5 @@ public class PostLike {
 	@ManyToOne
 	@JoinColumn(name = "USERS_ID")
 	Users user;
-	
+
 }

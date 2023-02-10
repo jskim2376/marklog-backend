@@ -4,15 +4,11 @@ import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
 
-import com.marklog.blog.domain.post.Post;
-import com.marklog.blog.domain.post.PostRepository;
 import com.marklog.blog.domain.user.Users;
 import com.marklog.blog.domain.user.UsersRepository;
-import com.marklog.blog.web.dto.PostResponseDto;
-import com.marklog.blog.web.dto.PostSaveRequestDto;
-import com.marklog.blog.web.dto.PostUpdateRequestDto;
 import com.marklog.blog.web.dto.UserResponseDto;
 import com.marklog.blog.web.dto.UserUpdateRequestDto;
+
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -24,19 +20,19 @@ public class UserService {
 		Users entity = usersRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
 		return new UserResponseDto(entity);
 	}
-	
+
 	@Transactional
 	public UserResponseDto update(Long id, UserUpdateRequestDto userUpdateRequestDto) {
 		Users user = usersRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
 		user = user.update(userUpdateRequestDto.getName(), userUpdateRequestDto.getPicture(),  userUpdateRequestDto.getTitle(), userUpdateRequestDto.getIntroduce());
-		
+
 		return new UserResponseDto(user);
 	}
-	
-	
+
+
 	@Transactional
 	public void delete(Long id) {
-		
+
 		usersRepository.deleteById(id);
-	}	
+	}
 }
