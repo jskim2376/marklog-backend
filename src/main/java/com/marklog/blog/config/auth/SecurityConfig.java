@@ -46,10 +46,11 @@ public class SecurityConfig{
 	}
 	
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain userChain(HttpSecurity http) throws Exception {
 		http
 		.csrf().disable()
         .logout(logout -> logout
+        	.invalidateHttpSession(true)
             .deleteCookies("SESSION")
         )
 		.exceptionHandling(exceptionHandling -> exceptionHandling
@@ -60,13 +61,6 @@ public class SecurityConfig{
 				.userService(customOAuth2UserService)
 		);
 		return http.build();
-	}
-	
-	public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
-	    @Override
-	    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-	    }
-
 	}
 	
 }

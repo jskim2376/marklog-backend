@@ -39,8 +39,8 @@ public class UserController {
 	private final UserService userService;
 	private final HttpSession session;
 	
-	@GetMapping("/logincheck")
-	public ResponseEntity test(@LoginUser SessionUser user) {
+	@GetMapping("/user/logincheck")
+	public ResponseEntity loginCheck(@LoginUser SessionUser user) {
 	    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
 	    if (principal instanceof DefaultOAuth2User && user != null) {
@@ -63,13 +63,13 @@ public class UserController {
 	}
 	
 	@PutMapping("/user/{id}")
-	@PreAuthorize("isAuthenticated() and (#id == #user.getId() or hasRole('ADMIN'))")
-	public Long userPut(@PathVariable Long id, @RequestBody UserUpdateRequestDto userUpdateRequestDto, @LoginUser SessionUser user) {
+	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or #id == #user.getId())")
+	public UserResponseDto userPut(@PathVariable Long id, @RequestBody UserUpdateRequestDto userUpdateRequestDto, @LoginUser SessionUser user) {
 		return userService.update(id, userUpdateRequestDto);
 	}
 	
 	@DeleteMapping("/user/{id}")
-	@PreAuthorize("isAuthenticated() and (#id == #user.getId() or hasRole('ADMIN'))")
+	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or #id == #user.getId())")
 	public void userDelete(@PathVariable Long id, @LoginUser SessionUser user) {
 		SecurityContextHolder.clearContext();
 		session.invalidate();

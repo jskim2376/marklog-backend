@@ -37,10 +37,10 @@ public class Users extends BaseTimeEntity {
     private String name;
 
 
-    @Column(length=100, nullable = false)
+    @Column(length=200, nullable = false)
     private String picture;
 
-    @Column(length=200)
+    @Column(length=100)
     private String introduce;
     
     @Column(length=20, nullable = false)
