@@ -81,6 +81,27 @@ public class PostServiceTest {
 		assertThat(id).isGreaterThan(0L);
 	}
 
+
+
+	@Test
+	public void testFindByIdPostService() {
+		//given
+		Users user = new Users(name, email, picture, title, introduce, Role.USER);
+		Post post = new Post(title, content, user);
+		Optional<Post> optionalPost = Optional.of(post);
+		when(postRepository.findById(any())).thenReturn(optionalPost);
+
+		PostResponseDto postResponseDto =  new PostResponseDto(post);
+		postService = new PostService(postRepository, userRepository, tagRepository);
+
+		//when
+		PostResponseDto postResponseDtoFound =  postService.findById(id);
+
+		//then
+		assertThat(postResponseDtoFound).isEqualTo(postResponseDto);
+	}
+
+
 	@Test
 	public void testUpdatePostervice() {
 		//given
@@ -111,27 +132,6 @@ public class PostServiceTest {
 		verify(tagRepository, times(3)).save(any());
 		assertThat(getId).isEqualTo(id);
 	}
-
-
-	@Test
-	public void testFindByIdPostService() {
-		//given
-		Users user = new Users(name, email, picture, title, introduce, Role.USER);
-		Post post = new Post(title, content, user);
-		Optional<Post> optionalPost = Optional.of(post);
-		when(postRepository.findById(any())).thenReturn(optionalPost);
-
-		PostResponseDto postResponseDto =  new PostResponseDto(post);
-		postService = new PostService(postRepository, userRepository, tagRepository);
-
-		//when
-		PostResponseDto postResponseDtoFound =  postService.findById(id);
-
-		//then
-		assertThat(postResponseDtoFound).isEqualTo(postResponseDto);
-	}
-
-
 
 	@Test
 	public void testDeletePostService() {

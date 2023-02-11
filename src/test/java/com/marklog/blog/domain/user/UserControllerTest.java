@@ -102,7 +102,7 @@ public class UserControllerTest {
 
 	@WithMockUser(roles="ADMIN")
 	@Test
-	public void testDeleteontroller() throws Exception {
+	public void testDeleteUserController() throws Exception {
 		//given
 		String path = "/v1/user/1";
 

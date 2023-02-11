@@ -40,6 +40,10 @@ public class PostService {
 
 		return post.getId();
 	}
+	public PostResponseDto findById(Long id) {
+		Post entity = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
+		return new PostResponseDto(entity);
+	}
 
 	@Transactional
 	public Long update(Long id, PostUpdateRequestDto requestDto) {
@@ -59,12 +63,8 @@ public class PostService {
 		return id;
 	}
 
-	public PostResponseDto findById(Long id) {
-		Post entity = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
-		return new PostResponseDto(entity);
-	}
-
 	public void delete(Long id) {
 		postRepository.deleteById(id);
 	}
+
 }

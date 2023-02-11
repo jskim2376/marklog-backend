@@ -1,5 +1,9 @@
 package com.marklog.blog.web.dto;
 
+import java.time.LocalDateTime;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
 import com.marklog.blog.domain.post.Post;
 
 import lombok.EqualsAndHashCode;
@@ -9,13 +13,19 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @EqualsAndHashCode
 public class PostResponseDto {
-	private final Long id;
+	@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+	private final LocalDateTime createdDate;
+	@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+	private final LocalDateTime modifiedDate;
 	private final String title;
 	private final String content;
 
 	public PostResponseDto(Post entity) {
-		this.id = entity.getId();
+		this.createdDate = entity.getCreatedDate();
+		this.modifiedDate = entity.getModifiedDate();
 		this.title = entity.getTitle();
 		this.content = entity.getContent();
 	}
+	
+	
 }
