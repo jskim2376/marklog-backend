@@ -23,9 +23,10 @@ public class PostRepostioryTest {
 	@Autowired
 	UsersRepository usersRepository;
 
+
 	String title="title";
 	String content="title";
-	
+
 	String name = "name";
 	String email = "test@gmail.com";
 	String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
@@ -37,27 +38,27 @@ public class PostRepostioryTest {
 		//given
 		LocalDateTime now = LocalDateTime.of(2019, 6,4,0,0,0);
 		Users user = new Users(name,email, picture, userTitle, introduce, Role.USER);
-		usersRepository.save(user);		
+		usersRepository.save(user);
 		Post post = new Post(title, content, user);
 
 		//when
-		Post savedPost = postRepository.save(post);	
+		Post savedPost = postRepository.save(post);
 
 		//then
 		assertThat(savedPost.getCreatedDate()).isAfter(now);
 		assertThat(savedPost.getModifiedDate()).isAfter(now);
 	}
-	
+
 	@Test
 	public void testSavePostRepository() {
 		//given
 		Users user = new Users(name,email, picture, userTitle, introduce, Role.USER);
-		usersRepository.save(user);		
+		usersRepository.save(user);
 		Post post = new Post(title, content, user);
 
 		//when
 		Post savedPost = postRepository.save(post);
-		
+
 		//then
 		assertThat(savedPost).isSameAs(post);
 	}
@@ -68,61 +69,61 @@ public class PostRepostioryTest {
 		Users user = new Users(name,email, picture, userTitle, introduce, Role.USER);
 		Post post = new Post(title, content, user);
 
-		//when		
+		//when
 		//then
 		assertThrows(InvalidDataAccessApiUsageException.class, () -> postRepository.save(post));
 	}
-	
+
 	@Test
 	public void testFindByIdPostRepostiroy() {
 		//given
 		Users user = new Users(name,email, picture, userTitle, introduce, Role.USER);
-		usersRepository.save(user);		
+		usersRepository.save(user);
 		Post post = new Post(title, content, user);
 		Post savedPost = postRepository.save(post);
-			
-		//when		
+
+		//when
 		Post findPost = postRepository.findById(savedPost.getId()).get();
-		
+
 		//then
 		assertThat(savedPost).isSameAs(findPost);
 	}
-	
+
 	@Test
 	public void testFindAllPostRepostiroy() {
 		//given
 		Users user = new Users(name,email, picture, userTitle, introduce, Role.USER);
-		usersRepository.save(user);		
+		usersRepository.save(user);
 		Post post = new Post(title, content, user);
 		Post post2 = new Post(title+"2", content+"2", user);
 		postRepository.save(post);
 		postRepository.save(post2);
-		
+
 		//when
 		List<Post> foundPostList = postRepository.findAll();
-		
+
 		//then
 		assertThat(foundPostList.get(0)).isSameAs(post);
 		assertThat(foundPostList.get(1)).isSameAs(post2);
 	}
 
-	
-	
-	
+
+
+
     @Test
 	public void testDeletePostReposeitory() {
 		//given
 		Users user = new Users(name, email, picture, title, introduce, Role.USER);
-		usersRepository.save(user);		
+		usersRepository.save(user);
 		Post post = new Post(title, content, user);
 		Post savedPost = postRepository.save(post);
-		
+
 		//when
 		postRepository.delete(savedPost);
 
 		//then
 		assertThrows(IllegalArgumentException.class, () -> postRepository.findById(savedPost.getId()).orElseThrow(() -> new IllegalArgumentException()));
-		
+
 	}
-	
+
 }

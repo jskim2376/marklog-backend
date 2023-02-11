@@ -16,8 +16,8 @@ public class UserRepositoryTest {
 	public static String email = "test@gmail.com";
 	public static String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
 	public static String title = "title";
-	public static String introduce = "introduce";		
-	
+	public static String introduce = "introduce";
+
 	@Test
 	public void testSaveUserRepository() {
 		//given
@@ -26,15 +26,15 @@ public class UserRepositoryTest {
 		// when
 		Users savedUser = userRepository.save(user);
         // then
-        
+
 		assertThat(savedUser).isSameAs(user);
 	}
-	
+
     @Test
 	public void testFindByIduserRepository() {
 		//given
 		Users user = new Users(name, email, picture, title, introduce, Role.USER);
-		
+
 		//when
 		Users savedUser = userRepository.save(user);
 		Users foundUser = userRepository.findById(savedUser.getId()).get();
@@ -51,14 +51,14 @@ public class UserRepositoryTest {
 	public void testDeleteUserReposeitory() {
 		//given
 		Users user = new Users(name, email, picture, title, introduce, Role.USER);
-		
+
 		//when
 		Users savedUser = userRepository.save(user);
 		userRepository.delete(user);
 
 		//then
 		assertThrows(IllegalArgumentException.class, () -> userRepository.findById(savedUser.getId()).orElseThrow(() -> new IllegalArgumentException()));
-		
+
 	}
 
 }

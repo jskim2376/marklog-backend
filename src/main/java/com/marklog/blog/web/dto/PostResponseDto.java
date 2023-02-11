@@ -2,10 +2,12 @@ package com.marklog.blog.web.dto;
 
 import com.marklog.blog.domain.post.Post;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
+@EqualsAndHashCode
 public class PostResponseDto {
 	private final Long id;
 	private final String title;

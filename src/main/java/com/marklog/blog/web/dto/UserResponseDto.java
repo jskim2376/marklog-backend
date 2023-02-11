@@ -1,16 +1,17 @@
 package com.marklog.blog.web.dto;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 import com.marklog.blog.domain.user.Users;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@EqualsAndHashCode
 public class UserResponseDto {
 	private LocalDateTime createdDate;
 	private LocalDateTime modifiedDate;
@@ -41,26 +42,6 @@ public class UserResponseDto {
 		this.picture = picture;
 		this.title = title;
 		this.introduce = introduce;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(createdDate, email, introduce, modifiedDate, name, picture, title);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		UserResponseDto other = (UserResponseDto) obj;
-		return Objects.equals(createdDate, other.createdDate) && Objects.equals(email, other.email)
-				&& Objects.equals(introduce, other.introduce) && Objects.equals(modifiedDate, other.modifiedDate)
-				&& Objects.equals(name, other.name) && Objects.equals(picture, other.picture)
-				&& Objects.equals(title, other.title);
 	}
 
 

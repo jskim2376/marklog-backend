@@ -33,11 +33,9 @@ public class PostService {
 
 		Post post = Post.builder().title(requestDto.getTitle()).content(requestDto.getContent()).user(user).build();
 		post = postRepository.save(post);
-
 		for(String tagName: tagNames) {
 			Tag tag = Tag.builder().name(tagName).post(post).build();
 			tagRepository.save(tag);
-
 		}
 
 		return post.getId();
@@ -64,5 +62,9 @@ public class PostService {
 	public PostResponseDto findById(Long id) {
 		Post entity = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
 		return new PostResponseDto(entity);
+	}
+
+	public void delete(Long id) {
+		postRepository.deleteById(id);
 	}
 }
