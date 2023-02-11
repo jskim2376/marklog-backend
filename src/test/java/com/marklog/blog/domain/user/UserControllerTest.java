@@ -27,7 +27,7 @@ import com.marklog.blog.service.UserService;
 import com.marklog.blog.web.UserController;
 import com.marklog.blog.web.dto.UserResponseDto;
 import com.marklog.blog.web.dto.UserUpdateRequestDto;
-@ExtendWith(SpringExtension.class)
+
 @MockBean(JpaMetamodelMappingContext.class)
 @WebMvcTest(controllers = UserController.class)
 public class UserControllerTest {

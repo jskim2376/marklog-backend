@@ -34,14 +34,15 @@ public class Post extends BaseTimeEntity{
 	@Column(columnDefinition="TEXT", nullable = false)
 	private String content;
 
-	@OneToMany(mappedBy = "post")
-	private List<PostComment> postComments = new ArrayList<>();
-
-	@ManyToOne
+	@ManyToOne(optional = false)
 	private Users user;
 
 	@OneToMany(mappedBy = "post")
 	private List<Tag> tags = new ArrayList<>();
+
+	@OneToMany(mappedBy = "post")
+	private List<PostComment> postComments = new ArrayList<>();
+
 
 	@Builder
 	public Post(String title, String content, Users user) {
