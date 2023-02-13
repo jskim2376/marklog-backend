@@ -23,10 +23,12 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.marklog.blog.config.auth.JwtTokenProvider;
 import com.marklog.blog.service.PostService;
 import com.marklog.blog.web.PostController;
 import com.marklog.blog.web.dto.PostResponseDto;
@@ -35,6 +37,7 @@ import com.marklog.blog.web.dto.PostUpdateRequestDto;
 
 @MockBean(JpaMetamodelMappingContext.class)
 @WebMvcTest(controllers = PostController.class)
+@ContextConfiguration(classes = {PostController.class, JwtTokenProvider.class})
 public class PostControllerTest {
 	@Autowired
 	private MockMvc mvc;
@@ -82,11 +85,9 @@ public class PostControllerTest {
 		String path = "/v1/post/"+id;
 		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content);
 		when(postService.findById(anyLong())).thenReturn(postResponseDto);
-		System.out.println(time);
 		//when
 		ResultActions ra = mvc.perform(get(path));
 		//then
-		System.out.println(time.toString());
 		ra.andExpect(status().isOk())
 		.andExpect(jsonPath("$.createdDate").value(time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
 		.andExpect(jsonPath("$.modifiedDate").value(time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))

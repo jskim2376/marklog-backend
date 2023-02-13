@@ -19,6 +19,7 @@ public class SecurityConfig{
 	private final JwtOAuth2LoginSuccessHandler jwtOAuth2LoginSuccessHandler;
 	private final JwtAuthentificationFilter jwtAuthentificationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
 	@Bean
 	public RoleHierarchy roleHierarchy() {
 	    RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
@@ -36,10 +37,6 @@ public class SecurityConfig{
         .and()
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
-        .logout(logout -> logout
-        	.invalidateHttpSession(true)
-            .deleteCookies("SESSION")
-        )
 		.exceptionHandling(exceptionHandling -> exceptionHandling
 				.authenticationEntryPoint(jwtAuthenticationEntryPoint)
 		)

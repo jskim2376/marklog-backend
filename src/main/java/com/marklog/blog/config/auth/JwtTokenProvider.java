@@ -6,7 +6,6 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,10 +24,7 @@ import lombok.Getter;
 @Getter
 @Component
 public class JwtTokenProvider{
-	@Autowired
 	private Key key;
-
-
 	private Long accesstoken_expired;
 	private Long refreshtoken_expired;
 

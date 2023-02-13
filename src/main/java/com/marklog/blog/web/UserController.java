@@ -48,7 +48,6 @@ public class UserController {
 	@DeleteMapping("/user/{id}")
 	public void userDelete(@PathVariable Long id) {
 		SecurityContextHolder.clearContext();
-		session.invalidate();
 		userService.delete(id);
 	}
 }

@@ -17,10 +17,11 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.marklog.blog.config.auth.JwtTokenProvider;
 import com.marklog.blog.service.UserService;
 import com.marklog.blog.web.UserController;
 import com.marklog.blog.web.dto.UserResponseDto;
@@ -28,6 +29,7 @@ import com.marklog.blog.web.dto.UserUpdateRequestDto;
 
 @MockBean(JpaMetamodelMappingContext.class)
 @WebMvcTest(controllers = UserController.class)
+@ContextConfiguration(classes = {UserController.class, JwtTokenProvider.class})
 public class UserControllerTest {
 	@Autowired
 	private MockMvc mvc;
@@ -45,6 +47,7 @@ public class UserControllerTest {
 	@BeforeAll
 	public static void setUp() {
 		time = LocalDateTime.now();
+
 	}
 
 	@WithMockUser(roles="USER")
@@ -65,8 +68,7 @@ public class UserControllerTest {
 		.andExpect(jsonPath("$.name").value(name))
 		.andExpect(jsonPath("$.picture").value(picture))
 		.andExpect(jsonPath("$.title").value(title))
-		.andExpect(jsonPath("$.introduce").value(introduce))
-		.andDo(MockMvcResultHandlers.print());
+		.andExpect(jsonPath("$.introduce").value(introduce));
 	}
 
 	@WithMockUser(roles="ADMIN")
@@ -92,7 +94,6 @@ public class UserControllerTest {
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(asJsonString(updateRequestDto)))
 			.andExpect(status().isOk())
-			.andDo(MockMvcResultHandlers.print())
 			.andExpect(jsonPath("$.name").value(putName))
 			.andExpect(jsonPath("$.picture").value(putPicture))
 			.andExpect(jsonPath("$.title").value(putTitle))

@@ -14,7 +14,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.marklog.blog.domain.tag.Tag;
 import com.marklog.blog.domain.tag.TagRepository;
@@ -27,7 +27,7 @@ import com.marklog.blog.web.dto.PostSaveRequestDto;
 import com.marklog.blog.web.dto.PostUpdateRequestDto;
 
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class PostServiceTest {
 	@Mock
 	UsersRepository userRepository;
@@ -60,18 +60,11 @@ public class PostServiceTest {
 		when(post.getId()).thenReturn(id);
 		when(postRepository.save(any())).thenReturn(post);
 
-		System.out.println(postRepository.save(post));
-
 		List<String> tagList = new ArrayList<>();
 		tagList.add("java");
 		tagList.add("testTag");
-		for(String tagName: tagList) {
-			Tag tag = Tag.builder().name(tagName).post(post).build();
-			when(tagRepository.save(tag)).thenReturn(tag);
-		}
 
 		postService = new PostService(postRepository, userRepository, tagRepository);
-
 		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(title, content, id, tagList);
 
 		//when
@@ -93,7 +86,6 @@ public class PostServiceTest {
 
 		PostResponseDto postResponseDto =  new PostResponseDto(post);
 		postService = new PostService(postRepository, userRepository, tagRepository);
-
 		//when
 		PostResponseDto postResponseDtoFound =  postService.findById(id);
 
