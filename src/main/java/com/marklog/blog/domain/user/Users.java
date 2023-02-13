@@ -1,7 +1,9 @@
 package com.marklog.blog.domain.user;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -70,6 +72,14 @@ public class Users extends BaseTimeEntity {
         this.introduce = introduce;
 
         return this;
+    }
+
+    public Map<String, Object> toAttributes(){
+    	Map <String, Object> map = new HashMap<>();
+    	map.put("id", this.id);
+    	map.put("email", this.email);
+    	return map;
+
     }
 
     public String getRoleKey(){

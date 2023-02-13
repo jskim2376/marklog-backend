@@ -39,6 +39,11 @@ public class OAuthAttributes {
                 .build();
     }
 
+    public Map<String, Object> toMap(){
+		return attributes;
+
+    }
+
 
     public static OAuthAttributes of(String registrationId, String userNameAttributeKey, Map<String, Object> attributes){
         return ofGoogle(userNameAttributeKey, attributes);

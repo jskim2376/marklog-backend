@@ -15,7 +15,5 @@ spring:
   console:
    enabled: true
    path: /h2-console
- session:
-  store-type: jdbc
   jdbc:
    initialize-schema: always
