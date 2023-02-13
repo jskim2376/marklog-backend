@@ -72,6 +72,7 @@ public class PostControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(asJsonString(postSaveRequestDto))
 		);
+
 		//then
 		ra
 		.andExpect(status().isCreated())
@@ -83,16 +84,19 @@ public class PostControllerTest {
 	public void testGetPostConrtoller() throws Exception {
 		//given
 		String path = "/v1/post/"+id;
-		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content);
+		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, 1L);
 		when(postService.findById(anyLong())).thenReturn(postResponseDto);
+
 		//when
 		ResultActions ra = mvc.perform(get(path));
+
 		//then
 		ra.andExpect(status().isOk())
 		.andExpect(jsonPath("$.createdDate").value(time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
 		.andExpect(jsonPath("$.modifiedDate").value(time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
 		.andExpect(jsonPath("$.title").value(title))
-		.andExpect(jsonPath("$.content").value(content));
+		.andExpect(jsonPath("$.content").value(content))
+		.andExpect(jsonPath("$.userId").value(1L));
 	}
 
 	@WithMockUser(roles="USER")
@@ -107,6 +111,8 @@ public class PostControllerTest {
 		tagList.add("testTag");
 		PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(title2, content2, tagList);
 		when(postService.update(id, postUpdateRequestDto)).thenReturn(id);
+		PostResponseDto postResponseDto = new PostResponseDto(time, time, title2, content2, id);
+		when(postService.findById(id)).thenReturn(postResponseDto);
 
 		//when
 		ResultActions ra = mvc.perform(
@@ -115,6 +121,7 @@ public class PostControllerTest {
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(asJsonString(postUpdateRequestDto))
 		);
+
 		//then
 		ra.
 		andExpect(status().isOk())
@@ -128,10 +135,12 @@ public class PostControllerTest {
 		String path = "/v1/post/1";
 
 		//when
-		//then
-		mvc.perform(
+		ResultActions ra = mvc.perform(
 				delete(path).with(SecurityMockMvcRequestPostProcessors.csrf())
-		)
+		);
+
+		//then
+		ra
 		.andExpect(status().isNoContent());
 	}
 

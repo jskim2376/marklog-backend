@@ -86,6 +86,7 @@ public class PostServiceTest {
 
 		PostResponseDto postResponseDto =  new PostResponseDto(post);
 		postService = new PostService(postRepository, userRepository, tagRepository);
+
 		//when
 		PostResponseDto postResponseDtoFound =  postService.findById(id);
 
