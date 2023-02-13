@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.marklog.blog.config.auth.LoginUser;
-import com.marklog.blog.config.auth.dto.SessionUser;
 import com.marklog.blog.service.UserService;
 import com.marklog.blog.web.dto.UserResponseDto;
 import com.marklog.blog.web.dto.UserUpdateRequestDto;
@@ -30,19 +27,6 @@ public class UserController {
 	private final UserService userService;
 	private final HttpSession session;
 
-	@GetMapping("/user/logincheck")
-	public ResponseEntity loginCheck(@LoginUser SessionUser user) {
-	    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-	    if (principal instanceof DefaultOAuth2User && user != null) {
-	        return  ResponseEntity.ok(null);
-	    }
-	    else {
-	        return  ResponseEntity.badRequest().build();
-	    }
-	}
-
-
 	@GetMapping("/user/{id}")
 	public ResponseEntity<UserResponseDto> userGet(@PathVariable Long id) {
 		try {
@@ -54,17 +38,16 @@ public class UserController {
 	}
 
 	@PutMapping("/user/{id}")
-	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or #id == #user.getId())")
-	public UserResponseDto userPut(@PathVariable Long id, @RequestBody UserUpdateRequestDto userUpdateRequestDto, @LoginUser SessionUser user) {
+	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or principal.id==#id)")
+	public UserResponseDto userPut(@PathVariable Long id, @RequestBody UserUpdateRequestDto userUpdateRequestDto) {
 		return userService.update(id, userUpdateRequestDto);
 	}
 
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or #id == #user.getId())")
+	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or principal.id==#id)")
 	@DeleteMapping("/user/{id}")
-	public void userDelete(@PathVariable Long id, @LoginUser SessionUser user) {
+	public void userDelete(@PathVariable Long id) {
 		SecurityContextHolder.clearContext();
-		session.invalidate();
 		userService.delete(id);
 	}
 }

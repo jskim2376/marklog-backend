@@ -8,4 +8,6 @@ spring:
  profiles:
   active: dev
   include: oauth
-  
+jwt:
+ accesstoken_expired: 3600000
+ refreshtoken_expired: 86400000

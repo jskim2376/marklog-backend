@@ -26,6 +26,5 @@ public class PostResponseDto {
 		this.title = entity.getTitle();
 		this.content = entity.getContent();
 	}
-	
-	
+
 }

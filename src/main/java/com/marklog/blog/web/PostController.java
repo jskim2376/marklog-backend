@@ -2,7 +2,6 @@ package com.marklog.blog.web;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,13 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.marklog.blog.config.auth.LoginUser;
-import com.marklog.blog.config.auth.dto.SessionUser;
 import com.marklog.blog.service.PostService;
+import com.marklog.blog.web.dto.PostIdResponseDto;
 import com.marklog.blog.web.dto.PostResponseDto;
 import com.marklog.blog.web.dto.PostSaveRequestDto;
 import com.marklog.blog.web.dto.PostUpdateRequestDto;
-import com.nimbusds.jose.shaded.json.JSONObject;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,11 +29,10 @@ public class PostController {
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@PreAuthorize("isAuthenticated()")
 @PostMapping("/post")
-	public JSONObject save(@RequestBody PostSaveRequestDto requestDto) {
-		JSONObject obj = new JSONObject();
-
-		obj.put("id",postService.save(requestDto));
-		return obj;
+	public PostIdResponseDto save(@RequestBody PostSaveRequestDto requestDto) {
+		Long id = postService.save(requestDto);
+		PostIdResponseDto postIdResponseDto = new PostIdResponseDto(id);
+		return postIdResponseDto;
 	}
 
 
@@ -45,18 +41,18 @@ public class PostController {
 		return postService.findById(id);
 	}
 
-	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or #id == #user.getId())")
+	@PreAuthorize("isAuthenticated()")
 	@PutMapping("/post/{id}")
-	public JSONObject update(@PathVariable Long id, @RequestBody PostUpdateRequestDto requestDto, @LoginUser SessionUser user) {
-		JSONObject obj = new JSONObject();
-		obj.put("id", postService.update(id, requestDto));
-		return obj;
+	public PostIdResponseDto update(@PathVariable Long id, @RequestBody PostUpdateRequestDto requestDto) {
+		Long updatedId = postService.update(id, requestDto);
+		PostIdResponseDto postIdResponseDto = new PostIdResponseDto(updatedId);
+		return postIdResponseDto;
 	}
-	
+
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or #id == #user.getId())")
+	@PreAuthorize("isAuthenticated()")
 	@DeleteMapping("/post/{id}")
-	public void userDelete(@PathVariable Long id, @LoginUser SessionUser user) {
+	public void userDelete(@PathVariable Long id) {
 		postService.delete(id);
 	}
 }

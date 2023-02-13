@@ -6,16 +6,19 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig{
-	private final CustomOAuth2UserService customOAuth2UserService;
-
+	private final JwtOAuth2UserService jwtOAuth2UserService;
+	private final JwtOAuth2LoginSuccessHandler jwtOAuth2LoginSuccessHandler;
+	private final JwtAuthentificationFilter jwtAuthentificationFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
 	@Bean
 	public RoleHierarchy roleHierarchy() {
@@ -26,19 +29,23 @@ public class SecurityConfig{
 
 	@Bean
 	public SecurityFilterChain userChain(HttpSecurity http) throws Exception {
-		http
+        http
+        .formLogin().disable()
+        .httpBasic().disable()
 		.csrf().disable()
-        .logout(logout -> logout
-        	.invalidateHttpSession(true)
-            .deleteCookies("SESSION")
-        )
+        .headers().frameOptions().disable()
+        .and()
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
 		.exceptionHandling(exceptionHandling -> exceptionHandling
-				.authenticationEntryPoint(new BasicAuthenticationEntryPoint())
+				.authenticationEntryPoint(jwtAuthenticationEntryPoint)
 		)
 		.oauth2Login(oauth2Login -> oauth2Login
+				.successHandler(jwtOAuth2LoginSuccessHandler)
 				.userInfoEndpoint()
-				.userService(customOAuth2UserService)
-		);
+				.userService(jwtOAuth2UserService)
+		)
+        .addFilterBefore(jwtAuthentificationFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
 
