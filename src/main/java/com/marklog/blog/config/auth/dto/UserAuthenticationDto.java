@@ -1,22 +1,20 @@
-package com.marklog.blog.web.dto;
-
-import java.time.LocalDateTime;
-import java.util.Collection;
-
-import org.springframework.security.core.GrantedAuthority;
+package com.marklog.blog.config.auth.dto;
 
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.Users;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
+@EqualsAndHashCode
+@RequiredArgsConstructor
 public class UserAuthenticationDto {
-	private Long id;
-	private String email;
-	private Role role;
-	
+	private final Long id;
+	private final String email;
+	private final Role role;
+
 	public UserAuthenticationDto(Users user) {
 		super();
 		this.id = user.getId();

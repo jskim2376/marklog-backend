@@ -12,12 +12,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.marklog.blog.service.UserService;
+
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Component
 public class JwtAuthentificationFilter extends OncePerRequestFilter {
 	private final JwtTokenProvider jwtTokenProvider;
+	private final UserService userService;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -25,7 +28,7 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
 
 		String token = jwtTokenProvider.parseBearerToken(request);
 	    if (token != null && jwtTokenProvider.validateToken(token)) {
-	    	Authentication authentication = jwtTokenProvider.getAuthentication(token);
+	    	Authentication authentication = jwtTokenProvider.getAuthentication(token, userService);
 	    	SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
 		filterChain.doFilter(request, response);

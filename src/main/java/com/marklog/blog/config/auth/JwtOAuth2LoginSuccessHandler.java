@@ -13,16 +13,14 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.marklog.blog.domain.user.UsersRepository;
 import com.marklog.blog.web.dto.AccessTokenDto;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Component
-public class JwtOauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler{
+public class JwtOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler{
 		private final JwtTokenProvider jwt;
-		private final UsersRepository usersRepository;
 
 	    @Override
 		public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
@@ -43,9 +41,8 @@ public class JwtOauthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessH
 	        		.sameSite("strict")
 	        		.httpOnly(true)
 //	        		.secure(true)
-	        		.maxAge((int) (jwt.refreshtoken_expired / 1000))
+	        		.maxAge((int) (jwt.getRefreshtoken_expired() / 1000))
 	        		.build();
 	        response.addHeader("Set-Cookie", responseCookie.toString());
-	        return;
 	}
 }

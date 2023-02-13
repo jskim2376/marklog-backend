@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 
 import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
@@ -17,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig{
 	private final JwtOAuth2UserService jwtOAuth2UserService;
-	private final JwtOauthLoginSuccessHandler jwtOauthLoginSuccessHandler;
+	private final JwtOAuth2LoginSuccessHandler jwtOAuth2LoginSuccessHandler;
 	private final JwtAuthentificationFilter jwtAuthentificationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	@Bean
@@ -45,7 +44,7 @@ public class SecurityConfig{
 				.authenticationEntryPoint(jwtAuthenticationEntryPoint)
 		)
 		.oauth2Login(oauth2Login -> oauth2Login
-				.successHandler(jwtOauthLoginSuccessHandler)
+				.successHandler(jwtOAuth2LoginSuccessHandler)
 				.userInfoEndpoint()
 				.userService(jwtOAuth2UserService)
 		)

@@ -1,6 +1,7 @@
 package com.marklog.blog.config.auth;
 
 import java.util.Collections;
+import java.util.Map;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -15,22 +16,30 @@ import com.marklog.blog.config.auth.dto.OAuthAttributes;
 import com.marklog.blog.domain.user.Users;
 import com.marklog.blog.service.UserService;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-@RequiredArgsConstructor
+@Setter
 @Service
 public class JwtOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User>{
+
+
 	private final UserService userService;
+	private OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate;
+
+	public JwtOAuth2UserService(UserService userService) {
+		super();
+		this.userService = userService;
+		this.delegate = new DefaultOAuth2UserService();
+	}
+
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-		OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
-		OAuth2User oAuth2User = delegate.loadUser(userRequest);
-
 		String registratrionId = userRequest.getClientRegistration().getRegistrationId();
 		String userNameAttributeKey = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
-        OAuthAttributes attributes = OAuthAttributes.of(registratrionId, userNameAttributeKey, oAuth2User.getAttributes());
+		Map<String, Object> attributes = delegate.loadUser(userRequest).getAttributes();
+		OAuthAttributes oAuthAttributes = OAuthAttributes.of(registratrionId, userNameAttributeKey, attributes);
 
-        Users user = userService.saveOrUpdate(attributes);
+        Users user = userService.saveOrUpdate(oAuthAttributes);
 
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority(user.getRoleKey())),
@@ -38,4 +47,5 @@ public class JwtOAuth2UserService implements OAuth2UserService<OAuth2UserRequest
                 "id"
         );
     }
+
 }

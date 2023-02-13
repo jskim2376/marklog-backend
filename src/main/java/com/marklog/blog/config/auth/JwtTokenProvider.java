@@ -11,34 +11,36 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Component;
 
-import com.marklog.blog.domain.user.Users;
+import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
 import com.marklog.blog.service.UserService;
-import com.marklog.blog.web.dto.UserAuthenticationDto;
-import com.marklog.blog.web.dto.UserResponseDto;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 
+@Getter
 @Component
 public class JwtTokenProvider{
 	@Autowired
-	UserService userService;
 	private Key key;
 
-	@Value("#{T(java.lang.Long).parseLong('${jwt.accesstoken_expired}')}")
-	public Long accesstoken_expired;
-	@Value("#{T(java.lang.Long).parseLong('${jwt.refreshtoken_expired}')}")
-	public Long refreshtoken_expired;
-	
-	
-	public JwtTokenProvider(UserService userService) {
-		this.userService = userService;
+
+	private Long accesstoken_expired;
+	private Long refreshtoken_expired;
+
+	public JwtTokenProvider(
+			@Value("#{T(java.lang.Long).parseLong('${jwt.accesstoken_expired}')}")
+			Long accesstoken_expired,
+			@Value("#{T(java.lang.Long).parseLong('${jwt.refreshtoken_expired}')}")
+			Long refreshtoken_expired
+			){
 		this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+		this.accesstoken_expired = accesstoken_expired;
+		this.refreshtoken_expired = refreshtoken_expired;
 	}
 
 	public String createAccessToken(Long id, String email) {
@@ -64,7 +66,7 @@ public class JwtTokenProvider{
 		}
 	}
 
-	public Authentication getAuthentication(String token) {
+	public Authentication getAuthentication(String token, UserService userService) {
 		Long id = getId(token);
 		UserAuthenticationDto userAuthenticationDto = userService.findAuthenticationDtoById(id);
 		return new UsernamePasswordAuthenticationToken(userAuthenticationDto, null
@@ -83,11 +85,9 @@ public class JwtTokenProvider{
 		return Long.parseLong(Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getId());
 
 	}
-	
+
 	public String getEmail(String token) {
 		return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
 
 	}
-
-
 }

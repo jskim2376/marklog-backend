@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 public class JwtController {
 	private	final JwtTokenProvider jwtTokenProvider;
-	
+
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/token/check")
 	public ResponseEntity loginCheck() {
@@ -37,8 +37,8 @@ public class JwtController {
 			return ResponseEntity.ok(accessTokenDto);
 		}
 		else {
-	        return  ResponseEntity.badRequest().body(null);			
+	        return  ResponseEntity.badRequest().body(null);
 		}
-		
+
 	}
 }
