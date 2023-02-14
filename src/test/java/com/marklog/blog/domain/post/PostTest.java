@@ -2,6 +2,9 @@ package com.marklog.blog.domain.post;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -9,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -33,25 +37,21 @@ import reactor.core.publisher.Mono;
 public class PostTest {
 	@LocalServerPort
 	private int port;
-
 	@Autowired
 	UsersRepository usersRepository;
-
 	@Autowired
 	JwtTokenProvider jwtTokenProvider;
 
 	WebClient wc;
 	ObjectMapper objectMapper;
 	Users user1;
-	Users user2;
-	Users user3;
 	String accessToken1;
 	String accessToken2;
 	String accessTokenAdmin;
 
+	String uri = "/api/v1/post/";
 	String postTitle = "post title";
 	String postContent = "post content";
-
 	@BeforeAll
 	public void setUp() {
 		wc = WebClient.create("http://localhost:" + port);
@@ -69,34 +69,27 @@ public class PostTest {
 		accessToken1 = jwtTokenProvider.createAccessToken(user1.getId(), email);
 		System.out.println(user1.getId());
 
-		user2 = new Users(name, 222 + email, picture, title, introduce, Role.USER);
+		Users user2 = new Users(name, 222 + email, picture, title, introduce, Role.USER);
 		usersRepository.save(user2);
-		accessToken2 = jwtTokenProvider.createAccessToken(user2.getId(), 2+email);
+		accessToken2 = jwtTokenProvider.createAccessToken(user2.getId(), 2 + email);
 		System.out.println(user2.getId());
 
-		user3 = new Users(name, 333 + email, picture, title, introduce, Role.ADMIN);
+		Users user3 = new Users(name, 333 + email, picture, title, introduce, Role.ADMIN);
 		usersRepository.save(user3);
-		accessTokenAdmin = jwtTokenProvider.createAccessToken(user3.getId(), 3+email);
+		accessTokenAdmin = jwtTokenProvider.createAccessToken(user3.getId(), 3 + email);
 
 	}
 
 	public Long createPost() {
 		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, user1.getId(), null);
-		ResponseEntity<String> responseEntity = wc.post().uri("/api/v1/post")
-				.header("Authorization", "Bearer " + accessToken1)
+		ResponseEntity<String> responseEntity = wc.post().uri(uri).header("Authorization", "Bearer " + accessToken1)
 				.body(Mono.just(postSaveRequestDto), PostSaveRequestDto.class).retrieve().toEntity(String.class)
 				.block();
 
-		// then-ready
-		ObjectMapper objectMapper = new ObjectMapper();
-		TestPostIdResponseDto testPostIdResponseDto;
-		try {
-			testPostIdResponseDto = objectMapper.readValue(responseEntity.getBody(), TestPostIdResponseDto.class);
-			return testPostIdResponseDto.getId();
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-			return 0L;
-		}
+		HttpHeaders header = responseEntity.getHeaders();
+		// then
+		String location = header.getLocation().toString();
+		return Long.valueOf(location.substring(uri.length()));
 	}
 
 	@Test
@@ -105,18 +98,40 @@ public class PostTest {
 		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, user1.getId(), null);
 
 		// when
-		ResponseEntity<String> responseEntity = wc.post().uri("/api/v1/post")
+		ResponseEntity<String> responseEntity = wc.post().uri(uri).header("Authorization", "Bearer " + accessToken1)
+				.body(Mono.just(postSaveRequestDto), PostSaveRequestDto.class).retrieve().toEntity(String.class)
+				.block();
+
+		// then-ready
+		HttpHeaders header = responseEntity.getHeaders();
+
+		// then
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		assertThat(header.getLocation().toString()).startsWith(uri);
+	}
+
+	@Test
+	public void testPostPost_태그랑() throws JsonMappingException, JsonProcessingException {
+		// given
+		List<String> tags = new ArrayList<>();
+		tags.add("hihi");
+		tags.add("tag2");
+
+		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, user1.getId(), tags);
+
+		// when
+		ResponseEntity<String> responseEntity = wc.post().uri(uri)
 				.header("Authorization", "Bearer " + accessToken1)
 				.body(Mono.just(postSaveRequestDto), PostSaveRequestDto.class).retrieve().toEntity(String.class)
 				.block();
 
 		// then-ready
-		TestPostIdResponseDto postIdResponseDto = objectMapper.readValue(responseEntity.getBody(),
-				TestPostIdResponseDto.class);
+		HttpHeaders header = responseEntity.getHeaders();
 
 		// then
-		assertThat(postIdResponseDto.getId()).isGreaterThan(0);
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		assertThat(header.getLocation().toString()).startsWith(uri);
+		throw new JsonMappingException("asd");
 	}
 
 	@Test
@@ -124,7 +139,7 @@ public class PostTest {
 		// given
 		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, null, null);
 		// when
-		ResponseEntity<String> responseEntity = wc.post().uri("/api/v1/post/")
+		ResponseEntity<String> responseEntity = wc.post().uri(uri)
 				.body(Mono.just(postSaveRequestDto), PostSaveRequestDto.class)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
@@ -137,7 +152,7 @@ public class PostTest {
 		Long id = createPost();
 
 		// when
-		ResponseEntity<String> responseEntity = wc.get().uri("/api/v1/post/" + id).retrieve().toEntity(String.class)
+		ResponseEntity<String> responseEntity = wc.get().uri(uri + id).retrieve().toEntity(String.class)
 				.block();
 
 		// then-ready
@@ -154,7 +169,7 @@ public class PostTest {
 	public void testGetPost_게시글이_없을때() throws JsonMappingException, JsonProcessingException {
 		// given
 		// when
-		ResponseEntity<String> responseEntity = wc.get().uri("/api/v1/post/" + 0L)
+		ResponseEntity<String> responseEntity = wc.get().uri(uri + 0L)
 				.header("Authorization", "Bearer " + accessTokenAdmin)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
@@ -171,18 +186,21 @@ public class PostTest {
 		PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(newPostTitle, newPostContent, null);
 
 		// when
-		ResponseEntity<String> putResponseEntity = wc.put().uri("/api/v1/post/" + id)
+		ResponseEntity<String> putResponseEntity = wc.put().uri(uri + id)
 				.header("Authorization", "Bearer " + accessToken1)
 				.body(Mono.just(postUpdateRequestDto), PostUpdateRequestDto.class)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 
 		// then-ready
-		ResponseEntity<String> getResponseEntity = wc.get().uri("/api/v1/post/" + id)
+		HttpHeaders header = putResponseEntity.getHeaders();
+		
+		ResponseEntity<String> getResponseEntity = wc.get().uri(header.getLocation().toString())
 				.header("Authorization", "Bearer " + accessToken1).retrieve().toEntity(String.class).block();
 		TestPostResponseDto getPostResponseDto = objectMapper.readValue(getResponseEntity.getBody(),
 				TestPostResponseDto.class);
 
 		// then
+		assertThat(header.getLocation().toString()).isEqualTo(uri+id);
 		assertThat(putResponseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 		assertThat(getPostResponseDto.getTitle()).isEqualTo(postUpdateRequestDto.getTitle());
 		assertThat(getPostResponseDto.getContent()).isEqualTo(postUpdateRequestDto.getContent());
@@ -197,7 +215,7 @@ public class PostTest {
 		PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(newPostTitle, newPostContent, null);
 
 		// when
-		ResponseEntity<String> responseEntity = wc.put().uri("/api/v1/post/" + 0L)
+		ResponseEntity<String> responseEntity = wc.put().uri(uri + 0L)
 				.header("Authorization", "Bearer " + accessTokenAdmin)
 				.body(Mono.just(postUpdateRequestDto), PostUpdateRequestDto.class)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
@@ -215,7 +233,7 @@ public class PostTest {
 		PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(newPostTitle, newPostContent, null);
 
 		// when
-		ResponseEntity<String> responseEntity = wc.put().uri("/api/v1/post/" + id)
+		ResponseEntity<String> responseEntity = wc.put().uri(uri + id)
 				.body(Mono.just(postUpdateRequestDto), PostUpdateRequestDto.class)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
@@ -232,7 +250,7 @@ public class PostTest {
 		PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(newPostTitle, newPostContent, null);
 
 		// when
-		ResponseEntity<String> responseEntity = wc.put().uri("/api/v1/post/" + id)
+		ResponseEntity<String> responseEntity = wc.put().uri(uri + id)
 				.header("Authorization", "Bearer " + accessToken2)
 				.body(Mono.just(postUpdateRequestDto), PostUpdateRequestDto.class)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
@@ -250,11 +268,14 @@ public class PostTest {
 		PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(newPostTitle, newPostContent, null);
 
 		// when
-		ResponseEntity<String> responseEntity = wc.put().uri("/api/v1/post/" + id)
+		ResponseEntity<String> responseEntity = wc.put().uri(uri + id)
 				.header("Authorization", "Bearer " + accessTokenAdmin)
 				.body(Mono.just(postUpdateRequestDto), PostUpdateRequestDto.class)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
+
+		HttpHeaders header = responseEntity.getHeaders();
 		// then
+		assertThat(header.getLocation().toString()).isEqualTo(uri+id);
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 	}
 
@@ -264,11 +285,11 @@ public class PostTest {
 		Long id = createPost();
 
 		// when
-		ResponseEntity<String> responseEntity = wc.delete().uri("/api/v1/post/" + id)
+		ResponseEntity<String> responseEntity = wc.delete().uri(uri + id)
 				.header("Authorization", "Bearer " + accessToken1)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 
-		ResponseEntity<String> responseEntity2 = wc.get().uri("/api/v1/post/" + id)
+		ResponseEntity<String> responseEntity2 = wc.get().uri(uri + id)
 				.header("Authorization", "Bearer " + accessToken1)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
@@ -280,7 +301,7 @@ public class PostTest {
 	public void testDeletePost_게시글이_없을때() throws JsonMappingException, JsonProcessingException {
 		// given
 		// when
-		ResponseEntity<String> responseEntity = wc.delete().uri("/api/v1/post/" + 0L)
+		ResponseEntity<String> responseEntity = wc.delete().uri(uri + 0L)
 				.header("Authorization", "Bearer " + accessTokenAdmin)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
@@ -292,7 +313,7 @@ public class PostTest {
 		Long id = createPost();
 
 		// when
-		ResponseEntity<String> responseEntity = wc.delete().uri("/api/v1/post/" + id)
+		ResponseEntity<String> responseEntity = wc.delete().uri(uri + id)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -304,7 +325,7 @@ public class PostTest {
 		Long id = createPost();
 
 		// when
-		ResponseEntity<String> responseEntity = wc.delete().uri("/api/v1/post/" + id)
+		ResponseEntity<String> responseEntity = wc.delete().uri(uri + id)
 				.header("Authorization", "Bearer " + accessToken2)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 
@@ -318,7 +339,7 @@ public class PostTest {
 		Long id = createPost();
 
 		// when
-		ResponseEntity<String> responseEntity = wc.delete().uri("/api/v1/post/" + id)
+		ResponseEntity<String> responseEntity = wc.delete().uri(uri + id)
 				.header("Authorization", "Bearer " + accessTokenAdmin)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 

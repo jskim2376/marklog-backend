@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.marklog.blog.config.auth.JwtTokenProvider;
 import com.marklog.blog.dto.TestUserResponseDto;
-import com.marklog.blog.service.UserService;
 import com.marklog.blog.web.dto.PostUpdateRequestDto;
 import com.marklog.blog.web.dto.UserUpdateRequestDto;
 
@@ -28,30 +28,24 @@ import reactor.core.publisher.Mono;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserTest {
-
 	@LocalServerPort
 	private int port;
-
 	@Autowired
 	UsersRepository usersRepository;
-
-	@Autowired
-	UserService userService;
-
 	@Autowired
 	JwtTokenProvider jwtTokenProvider;
-
-	String name = "name";
-	String email = "test@gmail.com";
-	String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
-	String title = "title";
-	String introduce = "introduce";
 
 	WebClient wc;
 	ObjectMapper objectMapper;
 	String accessTokenUser;
 	String accessTokenSub;
 	String accessTokenAdmin;
+	
+	String name = "name";
+	String email = "test@gmail.com";
+	String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
+	String title = "title";
+	String introduce = "introduce";
 
 	String postTitle = "post title";
 	String postContent = "post content";
@@ -97,6 +91,7 @@ public class UserTest {
 
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(testUserResponseDto.getCreatedDate()).isEqualTo(testUserResponseDto.getModifiedDate());
 		assertThat(testUserResponseDto.getEmail()).isEqualTo("testGetUser"+email);
 		assertThat(testUserResponseDto.getName()).isEqualTo(name);
 		assertThat(testUserResponseDto.getPicture()).isEqualTo(picture);
@@ -124,19 +119,13 @@ public class UserTest {
 				.header("Authorization", "Bearer " + accessTokenUser)
 				.body(Mono.just(userUpdateRequestDto), PostUpdateRequestDto.class)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
-
-		ResponseEntity<String> getTesponseEntity = wc.get().uri(uri + id).retrieve().toEntity(String.class).block();
-
+		
 		//then-ready
-		TestUserResponseDto getTestUserResponseDto = objectMapper.readValue(getTesponseEntity.getBody(),
-				TestUserResponseDto.class);
+		HttpHeaders header = putResponseEntity.getHeaders();
+
 		// then
 		assertThat(putResponseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-		assertThat(getTestUserResponseDto.getName()).isEqualTo(name+2);
-		assertThat(getTestUserResponseDto.getPicture()).isEqualTo(picture+2);
-		assertThat(getTestUserResponseDto.getTitle()).isEqualTo(title+2);
-		assertThat(getTestUserResponseDto.getIntroduce()).isEqualTo(introduce+2);
-		assertThat(getTestUserResponseDto.getModifiedDate()).isAfter(getTestUserResponseDto.getCreatedDate());
+		assertThat(header.getLocation().toString()).isEqualTo(uri+id);
 	}
 
 	@Test
@@ -191,7 +180,12 @@ public class UserTest {
 				.header("Authorization", "Bearer " + accessTokenAdmin)
 				.body(Mono.just(userUpdateRequestDto), PostUpdateRequestDto.class)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
+		
+		//then-ready
+		HttpHeaders header = responseEntity.getHeaders();
+
 		// then
+		assertThat(header.getLocation().toString()).isEqualTo(uri+id);
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 	}
 

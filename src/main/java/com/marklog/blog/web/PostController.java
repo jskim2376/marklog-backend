@@ -1,6 +1,7 @@
 package com.marklog.blog.web;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,10 +33,13 @@ public class PostController {
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/post")
-	public ResponseEntity<PostIdResponseDto> save(@RequestBody PostSaveRequestDto requestDto) {
+	public ResponseEntity save(@RequestBody PostSaveRequestDto requestDto) {
+
 		Long id = postService.save(requestDto);
-		PostIdResponseDto postIdResponseDto = new PostIdResponseDto(id);
-		return new ResponseEntity<>(postIdResponseDto, HttpStatus.CREATED);
+		
+		HttpHeaders header = new HttpHeaders();
+		header.add(HttpHeaders.LOCATION, "/api/v1/post/"+id);
+		return new ResponseEntity<>(header, HttpStatus.CREATED);
 	}
 
 	@GetMapping("/post/{id}")
@@ -52,8 +56,10 @@ public class PostController {
 	public ResponseEntity update(@PathVariable Long id, @RequestBody PostUpdateRequestDto requestDto,
 			Authentication authentication) {
 		try {
+			HttpHeaders header = new HttpHeaders();
+			header.add(HttpHeaders.LOCATION, "/api/v1/post/"+id);
 			postService.update(id, requestDto);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(header, HttpStatus.NO_CONTENT);
 		} catch (IllegalArgumentException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
