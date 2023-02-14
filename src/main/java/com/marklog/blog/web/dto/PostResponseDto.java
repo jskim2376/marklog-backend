@@ -6,20 +6,22 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.marklog.blog.domain.post.Post;
 
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 @Getter
-@RequiredArgsConstructor
 @EqualsAndHashCode
+@AllArgsConstructor
+@NoArgsConstructor
 public class PostResponseDto {
 	@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-	private final LocalDateTime createdDate;
+	private LocalDateTime createdDate;
 	@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-	private final LocalDateTime modifiedDate;
-	private final String title;
-	private final String content;
-	private final Long userId;
+	private LocalDateTime modifiedDate;
+	private String title;
+	private String content;
+	private Long userId;
 
 	public PostResponseDto(Post entity) {
 		this.createdDate = entity.getCreatedDate();

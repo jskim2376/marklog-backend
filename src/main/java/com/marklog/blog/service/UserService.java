@@ -24,11 +24,9 @@ public class UserService {
 	}
 
 	@Transactional
-	public UserResponseDto update(Long id, UserUpdateRequestDto userUpdateRequestDto) {
+	public void update(Long id, UserUpdateRequestDto userUpdateRequestDto) {
 		Users user = usersRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
-		user = user.update(userUpdateRequestDto.getName(), userUpdateRequestDto.getPicture(),  userUpdateRequestDto.getTitle(), userUpdateRequestDto.getIntroduce());
-
-		return new UserResponseDto(user);
+		user.update(userUpdateRequestDto.getName(), userUpdateRequestDto.getPicture(),  userUpdateRequestDto.getTitle(), userUpdateRequestDto.getIntroduce());
 	}
 
 	@Transactional

@@ -1,10 +1,12 @@
 package com.marklog.blog.web.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class AccessTokenDto {
-	private final String access_token;
+	private String access_token;
 }
