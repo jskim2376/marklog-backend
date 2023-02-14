@@ -1,6 +1,8 @@
 package com.marklog.blog.config.auth;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,6 +19,7 @@ public class SecurityConfig{
 	private final JwtOAuth2LoginSuccessHandler jwtOAuth2LoginSuccessHandler;
 	private final JwtAuthentificationFilter jwtAuthentificationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final CustomPermissionEvaluator customPermissionEvaluator;
 
 	@Bean
 	public RoleHierarchy roleHierarchy() {
@@ -45,6 +48,13 @@ public class SecurityConfig{
 		)
         .addFilterBefore(jwtAuthentificationFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
+	}
+	//
+	@Bean
+	public MethodSecurityExpressionHandler createExpressionHandler() {
+		DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+		expressionHandler.setPermissionEvaluator(customPermissionEvaluator);
+		return expressionHandler;
 	}
 
 }

@@ -110,7 +110,6 @@ public class PostControllerTest {
 		tagList.add("java");
 		tagList.add("testTag");
 		PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(title2, content2, tagList);
-		when(postService.update(id, postUpdateRequestDto)).thenReturn(id);
 		PostResponseDto postResponseDto = new PostResponseDto(time, time, title2, content2, id);
 		when(postService.findById(id)).thenReturn(postResponseDto);
 
@@ -124,8 +123,7 @@ public class PostControllerTest {
 
 		//then
 		ra.
-		andExpect(status().isOk())
-		.andExpect(jsonPath("$.id").value(id));
+		andExpect(status().isNoContent());
 	}
 
 	@WithMockUser(roles="ADMIN")

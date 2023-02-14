@@ -48,10 +48,9 @@ public class PostService {
 	}
 
 	@Transactional
-	public Long update(Long id, PostUpdateRequestDto requestDto) {
+	public void update(Long id, PostUpdateRequestDto requestDto) {
 		Post post = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
 		post.update(requestDto.getTitle(), requestDto.getContent());
-
 
 		List<Tag> tags = tagRepository.findByPost(post);
 		for(Tag tag : tags) {
@@ -63,8 +62,6 @@ public class PostService {
 				tagRepository.save(Tag.builder().name(tagName).post(post).build());
 			}
 		}
-
-		return id;
 	}
 
 	public void delete(Long id) {

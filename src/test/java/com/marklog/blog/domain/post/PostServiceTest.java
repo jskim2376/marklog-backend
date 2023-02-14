@@ -118,12 +118,11 @@ public class PostServiceTest {
 		PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(title+'2', content+"2", tagListRequest);
 
 		//when
-		Long getId = postService.update(id, postUpdateRequestDto);
+		postService.update(id, postUpdateRequestDto);
 
 		//then
 		verify(tagRepository, times(2)).delete(any());
 		verify(tagRepository, times(3)).save(any());
-		assertThat(getId).isEqualTo(id);
 	}
 
 	@Test

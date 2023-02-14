@@ -29,9 +29,7 @@ import com.marklog.blog.web.dto.PostUpdateRequestDto;
 import reactor.core.publisher.Mono;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-//@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-
 public class PostTest {
 	@LocalServerPort
 	private int port;
@@ -61,7 +59,7 @@ public class PostTest {
 		objectMapper.registerModule(new JavaTimeModule());
 
 		String name = "name";
-		String email = "test@gmail.com";
+		String email = "postTest@gmail.com";
 		String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
 		String title = "title";
 		String introduce = "introduce";
@@ -69,14 +67,16 @@ public class PostTest {
 		user1 = new Users(name, email, picture, title, introduce, Role.USER);
 		usersRepository.save(user1);
 		accessToken1 = jwtTokenProvider.createAccessToken(user1.getId(), email);
+		System.out.println(user1.getId());
 
-		user2 = new Users(name, 2 + email, picture, title, introduce, Role.USER);
+		user2 = new Users(name, 222 + email, picture, title, introduce, Role.USER);
 		usersRepository.save(user2);
-		accessToken2 = jwtTokenProvider.createAccessToken(user2.getId(), email);
+		accessToken2 = jwtTokenProvider.createAccessToken(user2.getId(), 2+email);
+		System.out.println(user2.getId());
 
-		user3 = new Users(name, 3 + email, picture, title, introduce, Role.ADMIN);
+		user3 = new Users(name, 333 + email, picture, title, introduce, Role.ADMIN);
 		usersRepository.save(user3);
-		accessTokenAdmin = jwtTokenProvider.createAccessToken(user3.getId(), email);
+		accessTokenAdmin = jwtTokenProvider.createAccessToken(user3.getId(), 3+email);
 
 	}
 
@@ -155,6 +155,7 @@ public class PostTest {
 		// given
 		// when
 		ResponseEntity<String> responseEntity = wc.get().uri("/api/v1/post/" + 0L)
+				.header("Authorization", "Bearer " + accessTokenAdmin)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -178,16 +179,14 @@ public class PostTest {
 		// then-ready
 		ResponseEntity<String> getResponseEntity = wc.get().uri("/api/v1/post/" + id)
 				.header("Authorization", "Bearer " + accessToken1).retrieve().toEntity(String.class).block();
-		TestPostIdResponseDto putPostIdResponseDto = objectMapper.readValue(putResponseEntity.getBody(),
-				TestPostIdResponseDto.class);
 		TestPostResponseDto getPostResponseDto = objectMapper.readValue(getResponseEntity.getBody(),
 				TestPostResponseDto.class);
 
 		// then
-		assertThat(putResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(putPostIdResponseDto.getId()).isEqualTo(id);
+		assertThat(putResponseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 		assertThat(getPostResponseDto.getTitle()).isEqualTo(postUpdateRequestDto.getTitle());
 		assertThat(getPostResponseDto.getContent()).isEqualTo(postUpdateRequestDto.getContent());
+		assertThat(getPostResponseDto.getCreatedDate()).isBefore(getPostResponseDto.getModifiedDate());
 	}
 
 	@Test
@@ -199,7 +198,7 @@ public class PostTest {
 
 		// when
 		ResponseEntity<String> responseEntity = wc.put().uri("/api/v1/post/" + 0L)
-				.header("Authorization", "Bearer " + accessToken1)
+				.header("Authorization", "Bearer " + accessTokenAdmin)
 				.body(Mono.just(postUpdateRequestDto), PostUpdateRequestDto.class)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
@@ -256,7 +255,7 @@ public class PostTest {
 				.body(Mono.just(postUpdateRequestDto), PostUpdateRequestDto.class)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 	}
 
 	@Test
@@ -282,7 +281,7 @@ public class PostTest {
 		// given
 		// when
 		ResponseEntity<String> responseEntity = wc.delete().uri("/api/v1/post/" + 0L)
-				.header("Authorization", "Bearer " + accessToken1)
+				.header("Authorization", "Bearer " + accessTokenAdmin)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
