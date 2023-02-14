@@ -3,6 +3,7 @@ package com.marklog.blog.web;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +60,7 @@ public class UserController {
 			SecurityContextHolder.clearContext();
 			userService.delete(id);
 			return ResponseEntity.noContent().build();
-		} catch (IllegalArgumentException e) {
+		} catch (EmptyResultDataAccessException e) {
 			return ResponseEntity.notFound().build();
 		}
 	}

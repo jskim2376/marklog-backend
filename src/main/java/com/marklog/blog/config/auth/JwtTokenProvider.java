@@ -6,6 +6,7 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.hibernate.boot.model.naming.IllegalIdentifierException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -64,9 +65,14 @@ public class JwtTokenProvider{
 
 	public Authentication getAuthentication(String token, UserService userService) {
 		Long id = getId(token);
-		UserAuthenticationDto userAuthenticationDto = userService.findAuthenticationDtoById(id);
-		return new UsernamePasswordAuthenticationToken(userAuthenticationDto, null
-				,Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
+		try {
+			UserAuthenticationDto userAuthenticationDto = userService.findAuthenticationDtoById(id);
+			return new UsernamePasswordAuthenticationToken(userAuthenticationDto, null
+					,Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
+		}catch(IllegalArgumentException e){
+			return null;
+		}
+
 	}
 
 	public String parseBearerToken(HttpServletRequest request) {

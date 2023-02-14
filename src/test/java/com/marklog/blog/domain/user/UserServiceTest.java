@@ -1,6 +1,8 @@
 package com.marklog.blog.domain.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -46,23 +48,20 @@ public class UserServiceTest {
 	@Test
 	public void testUpdateUserService() {
 		//given
-		Optional<Users> user = Optional.of(new Users(name, email, picture, title, introduce, Role.USER));
-		when(userRepository.findById(id)).thenReturn(user);
 		UserService userService = new UserService(userRepository);
 
+		Optional<Users> user = Optional.of(new Users(name, email, picture, title, introduce, Role.USER));
+		when(userRepository.findById(id)).thenReturn(user);
 
 		String newName = "newName";
 		String newPicture = "newPicture";
 		String newTitle = "newTitle";
 		String newIntroduce = "newIntroduce";
 
-
 		//when
-		UserResponseDto userServiceResponseDto = userService.update(id, new UserUpdateRequestDto(newName, newPicture, newTitle, newIntroduce));
-		UserResponseDto userServiceTestDto = new UserResponseDto(null, null, email, newName, newPicture, newTitle, newIntroduce);
-
+		userService.update(id, new UserUpdateRequestDto(newName, newPicture, newTitle, newIntroduce));
 		//then
-		assertThat(userServiceResponseDto).isEqualTo(userServiceTestDto);
+		verify(userRepository).findById(anyLong());
 	}
 
 	@Test

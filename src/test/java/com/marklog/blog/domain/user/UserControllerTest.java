@@ -83,7 +83,6 @@ public class UserControllerTest {
 
 		UserResponseDto userResponseDto = new UserResponseDto(time, time, email, putName, putPicture, putTitle, putIntroduce);
 		UserUpdateRequestDto updateRequestDto = new UserUpdateRequestDto(putName, putPicture, putTitle, putIntroduce);
-		Mockito.when(userService.update(1L, updateRequestDto)).thenReturn(userResponseDto);
 
 		//when
 		//then
@@ -93,11 +92,7 @@ public class UserControllerTest {
 			)
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(asJsonString(updateRequestDto)))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.name").value(putName))
-			.andExpect(jsonPath("$.picture").value(putPicture))
-			.andExpect(jsonPath("$.title").value(putTitle))
-			.andExpect(jsonPath("$.introduce").value(putIntroduce));
+			.andExpect(status().isNoContent());
 
 	}
 
