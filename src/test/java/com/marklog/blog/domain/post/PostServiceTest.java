@@ -19,8 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.marklog.blog.domain.tag.Tag;
 import com.marklog.blog.domain.tag.TagRepository;
 import com.marklog.blog.domain.user.Role;
-import com.marklog.blog.domain.user.Users;
-import com.marklog.blog.domain.user.UsersRepository;
+import com.marklog.blog.domain.user.User;
+import com.marklog.blog.domain.user.UserRepository;
 import com.marklog.blog.service.PostService;
 import com.marklog.blog.web.dto.PostResponseDto;
 import com.marklog.blog.web.dto.PostSaveRequestDto;
@@ -30,7 +30,7 @@ import com.marklog.blog.web.dto.PostUpdateRequestDto;
 @ExtendWith(MockitoExtension.class)
 public class PostServiceTest {
 	@Mock
-	UsersRepository userRepository;
+	UserRepository userRepository;
 
 	@Mock
 	PostRepository postRepository;
@@ -53,7 +53,7 @@ public class PostServiceTest {
 	@Test
 	public void testSavePostService() {
 		//given
-		Users user = new Users(name, email, picture, title, introduce, Role.USER);
+		User user = new User(name, email, picture, title, introduce, Role.USER);
 		when(userRepository.getReferenceById(id)).thenReturn(user);
 
 		Post post = spy(new Post(title, content, user));
@@ -79,7 +79,7 @@ public class PostServiceTest {
 	@Test
 	public void testFindByIdPostService() {
 		//given
-		Users user = new Users(name, email, picture, title, introduce, Role.USER);
+		User user = new User(name, email, picture, title, introduce, Role.USER);
 		Post post = new Post(title, content, user);
 		Optional<Post> optionalPost = Optional.of(post);
 		when(postRepository.findById(any())).thenReturn(optionalPost);
@@ -98,7 +98,7 @@ public class PostServiceTest {
 	@Test
 	public void testUpdatePostervice() {
 		//given
-		Users user = new Users(name, email, picture, title, introduce, Role.USER);
+		User user = new User(name, email, picture, title, introduce, Role.USER);
 		Post post = new Post(title, content, user);
 		Optional<Post> optionalPost = Optional.of(post);
 		when(postRepository.findById(any())).thenReturn(optionalPost);

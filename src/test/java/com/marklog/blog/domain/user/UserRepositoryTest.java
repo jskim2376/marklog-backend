@@ -10,7 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 @DataJpaTest
 public class UserRepositoryTest {
 	@Autowired
-	UsersRepository userRepository;
+	UserRepository userRepository;
 
 	public static String name = "name";
 	public static String email = "test@gmail.com";
@@ -21,10 +21,10 @@ public class UserRepositoryTest {
 	@Test
 	public void testSaveUserRepository() {
 		//given
-		Users user = new Users(name, email, picture, title, introduce, Role.USER);
+		User user = new User(name, email, picture, title, introduce, Role.USER);
 
 		// when
-		Users savedUser = userRepository.save(user);
+		User savedUser = userRepository.save(user);
         // then
 
 		assertThat(savedUser).isSameAs(user);
@@ -33,11 +33,11 @@ public class UserRepositoryTest {
     @Test
 	public void testFindByIduserRepository() {
 		//given
-		Users user = new Users(name, email, picture, title, introduce, Role.USER);
+		User user = new User(name, email, picture, title, introduce, Role.USER);
 
 		//when
-		Users savedUser = userRepository.save(user);
-		Users foundUser = userRepository.findById(savedUser.getId()).get();
+		User savedUser = userRepository.save(user);
+		User foundUser = userRepository.findById(savedUser.getId()).get();
 
 		//then
 		assertThat(savedUser).isSameAs(foundUser);
@@ -50,10 +50,10 @@ public class UserRepositoryTest {
     @Test
 	public void testDeleteUserReposeitory() {
 		//given
-		Users user = new Users(name, email, picture, title, introduce, Role.USER);
+		User user = new User(name, email, picture, title, introduce, Role.USER);
 
 		//when
-		Users savedUser = userRepository.save(user);
+		User savedUser = userRepository.save(user);
 		userRepository.delete(user);
 
 		//then

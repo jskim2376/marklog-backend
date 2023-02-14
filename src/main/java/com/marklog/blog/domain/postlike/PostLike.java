@@ -7,7 +7,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import com.marklog.blog.domain.post.Post;
-import com.marklog.blog.domain.user.Users;
+import com.marklog.blog.domain.user.User;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +25,6 @@ public class PostLike {
 	@Id
 	@ManyToOne
 	@JoinColumn(name = "USERS_ID")
-	Users user;
+	User user;
 
 }

@@ -14,7 +14,7 @@ import javax.persistence.OneToMany;
 import com.marklog.blog.domain.BaseTimeEntity;
 import com.marklog.blog.domain.post.comment.PostComment;
 import com.marklog.blog.domain.tag.Tag;
-import com.marklog.blog.domain.user.Users;
+import com.marklog.blog.domain.user.User;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -35,7 +35,7 @@ public class Post extends BaseTimeEntity{
 	private String content;
 
 	@ManyToOne(optional = false)
-	private Users user;
+	private User user;
 
 	@OneToMany(mappedBy = "post")
 	private List<Tag> tags = new ArrayList<>();
@@ -45,7 +45,7 @@ public class Post extends BaseTimeEntity{
 
 
 	@Builder
-	public Post(String title, String content, Users user) {
+	public Post(String title, String content, User user) {
 		this.title = title;
 		this.content = content;
 		this.user = user;

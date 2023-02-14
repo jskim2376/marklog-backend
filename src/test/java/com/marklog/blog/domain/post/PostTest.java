@@ -23,8 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.marklog.blog.config.auth.JwtTokenProvider;
 import com.marklog.blog.domain.user.Role;
-import com.marklog.blog.domain.user.Users;
-import com.marklog.blog.domain.user.UsersRepository;
+import com.marklog.blog.domain.user.User;
+import com.marklog.blog.domain.user.UserRepository;
 import com.marklog.blog.dto.TestPostIdResponseDto;
 import com.marklog.blog.dto.TestPostResponseDto;
 import com.marklog.blog.web.dto.PostSaveRequestDto;
@@ -38,13 +38,13 @@ public class PostTest {
 	@LocalServerPort
 	private int port;
 	@Autowired
-	UsersRepository usersRepository;
+	UserRepository userRepository;
 	@Autowired
 	JwtTokenProvider jwtTokenProvider;
 
 	WebClient wc;
 	ObjectMapper objectMapper;
-	Users user1;
+	User user1;
 	String accessToken1;
 	String accessToken2;
 	String accessTokenAdmin;
@@ -64,18 +64,18 @@ public class PostTest {
 		String title = "title";
 		String introduce = "introduce";
 
-		user1 = new Users(name, email, picture, title, introduce, Role.USER);
-		usersRepository.save(user1);
+		user1 = new User(name, email, picture, title, introduce, Role.USER);
+		userRepository.save(user1);
 		accessToken1 = jwtTokenProvider.createAccessToken(user1.getId(), email);
 		System.out.println(user1.getId());
 
-		Users user2 = new Users(name, 222 + email, picture, title, introduce, Role.USER);
-		usersRepository.save(user2);
+		User user2 = new User(name, 222 + email, picture, title, introduce, Role.USER);
+		userRepository.save(user2);
 		accessToken2 = jwtTokenProvider.createAccessToken(user2.getId(), 2 + email);
 		System.out.println(user2.getId());
 
-		Users user3 = new Users(name, 333 + email, picture, title, introduce, Role.ADMIN);
-		usersRepository.save(user3);
+		User user3 = new User(name, 333 + email, picture, title, introduce, Role.ADMIN);
+		userRepository.save(user3);
 		accessTokenAdmin = jwtTokenProvider.createAccessToken(user3.getId(), 3 + email);
 
 	}

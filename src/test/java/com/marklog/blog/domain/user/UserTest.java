@@ -31,7 +31,7 @@ public class UserTest {
 	@LocalServerPort
 	private int port;
 	@Autowired
-	UsersRepository usersRepository;
+	UserRepository userRepository;
 	@Autowired
 	JwtTokenProvider jwtTokenProvider;
 
@@ -57,21 +57,21 @@ public class UserTest {
 		objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new JavaTimeModule());
 
-		Users userSub = new Users(name, 2 + email, picture, title, introduce, Role.USER);
-		usersRepository.save(userSub);
+		User userSub = new User(name, 2 + email, picture, title, introduce, Role.USER);
+		userRepository.save(userSub);
 		accessTokenSub = jwtTokenProvider.createAccessToken(userSub.getId(), email);
 
-		Users userAdmin = new Users(name, 3 + email, picture, title, introduce, Role.ADMIN);
-		usersRepository.save(userAdmin);
+		User userAdmin = new User(name, 3 + email, picture, title, introduce, Role.ADMIN);
+		userRepository.save(userAdmin);
 		accessTokenAdmin = jwtTokenProvider.createAccessToken(userAdmin.getId(), email);
 	}
 
 	public Long createUser(String emailName) {
-		Users user = new Users(name, emailName+email, picture, title, introduce, Role.USER);
+		User user = new User(name, emailName+email, picture, title, introduce, Role.USER);
 		try {
-			user = usersRepository.findByEmail(email).orElseThrow(()->new IllegalArgumentException("존재하지않는 email입니다."));
+			user = userRepository.findByEmail(email).orElseThrow(()->new IllegalArgumentException("존재하지않는 email입니다."));
 		}catch(IllegalArgumentException e){
-			usersRepository.save(user);
+			userRepository.save(user);
 		}
 		accessTokenUser = jwtTokenProvider.createAccessToken(user.getId(), email);
 		return user.getId();

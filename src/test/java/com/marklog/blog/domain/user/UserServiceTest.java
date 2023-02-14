@@ -20,7 +20,7 @@ import com.marklog.blog.web.dto.UserUpdateRequestDto;
 @ExtendWith(SpringExtension.class)
 public class UserServiceTest {
 	@MockBean
-	UsersRepository userRepository;
+	UserRepository userRepository;
 
 	public static Long id = 1L;
 	public static String name = "name";
@@ -32,7 +32,7 @@ public class UserServiceTest {
 	@Test
 	public void testFindByIdUserService() {
 		//given
-		Optional<Users> user = Optional.of(new Users(name, email, picture, title, introduce, Role.USER));
+		Optional<User> user = Optional.of(new User(name, email, picture, title, introduce, Role.USER));
 		when(userRepository.findById(id)).thenReturn(user);
 		UserService userService = new UserService(userRepository);
 
@@ -50,7 +50,7 @@ public class UserServiceTest {
 		//given
 		UserService userService = new UserService(userRepository);
 
-		Optional<Users> user = Optional.of(new Users(name, email, picture, title, introduce, Role.USER));
+		Optional<User> user = Optional.of(new User(name, email, picture, title, introduce, Role.USER));
 		when(userRepository.findById(id)).thenReturn(user);
 
 		String newName = "newName";

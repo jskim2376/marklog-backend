@@ -19,7 +19,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import com.marklog.blog.config.auth.JwtOAuth2UserService;
 import com.marklog.blog.domain.user.Role;
-import com.marklog.blog.domain.user.Users;
+import com.marklog.blog.domain.user.User;
 import com.marklog.blog.service.UserService;
 
 
@@ -38,7 +38,7 @@ public class JwtOAuth2UserServiceTest {
 	OAuth2User oauth2User;
 
 	@Mock
-	Users user;
+	User user;
 	@Test
 	public void testJwtOAuth2UserService() {
 		//given

@@ -2,7 +2,7 @@ package com.marklog.blog.dto;
 
 import java.time.LocalDateTime;
 
-import com.marklog.blog.domain.user.Users;
+import com.marklog.blog.domain.user.User;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -22,7 +22,7 @@ public class TestUserResponseDto {
 	private String title;
 	private String introduce;
 
-	public TestUserResponseDto(Users entity) {
+	public TestUserResponseDto(User entity) {
 		this.createdDate = entity.getCreatedDate();
 		this.modifiedDate = entity.getModifiedDate();
 		this.email = entity.getEmail();

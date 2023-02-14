@@ -12,8 +12,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import com.marklog.blog.domain.user.Role;
-import com.marklog.blog.domain.user.Users;
-import com.marklog.blog.domain.user.UsersRepository;
+import com.marklog.blog.domain.user.User;
+import com.marklog.blog.domain.user.UserRepository;
 
 @DataJpaTest
 public class PostRepostioryTest {
@@ -21,7 +21,7 @@ public class PostRepostioryTest {
 	PostRepository postRepository;
 
 	@Autowired
-	UsersRepository usersRepository;
+	UserRepository userRepository;
 
 
 	String title="title";
@@ -37,8 +37,8 @@ public class PostRepostioryTest {
 	public void testBaseTimeEntity() {
 		//given
 		LocalDateTime now = LocalDateTime.of(2019, 6,4,0,0,0);
-		Users user = new Users(name,email, picture, userTitle, introduce, Role.USER);
-		usersRepository.save(user);
+		User user = new User(name,email, picture, userTitle, introduce, Role.USER);
+		userRepository.save(user);
 		Post post = new Post(title, content, user);
 
 		//when
@@ -52,8 +52,8 @@ public class PostRepostioryTest {
 	@Test
 	public void testSavePostRepository() {
 		//given
-		Users user = new Users(name,email, picture, userTitle, introduce, Role.USER);
-		usersRepository.save(user);
+		User user = new User(name,email, picture, userTitle, introduce, Role.USER);
+		userRepository.save(user);
 		Post post = new Post(title, content, user);
 
 		//when
@@ -66,7 +66,7 @@ public class PostRepostioryTest {
 	@Test
 	public void testSavePostRepository_Users_optional_테스트() {
 		//given
-		Users user = new Users(name,email, picture, userTitle, introduce, Role.USER);
+		User user = new User(name,email, picture, userTitle, introduce, Role.USER);
 		Post post = new Post(title, content, user);
 
 		//when
@@ -77,8 +77,8 @@ public class PostRepostioryTest {
 	@Test
 	public void testFindByIdPostRepostiroy() {
 		//given
-		Users user = new Users(name,email, picture, userTitle, introduce, Role.USER);
-		usersRepository.save(user);
+		User user = new User(name,email, picture, userTitle, introduce, Role.USER);
+		userRepository.save(user);
 		Post post = new Post(title, content, user);
 		Post savedPost = postRepository.save(post);
 
@@ -92,8 +92,8 @@ public class PostRepostioryTest {
 	@Test
 	public void testFindAllPostRepostiroy() {
 		//given
-		Users user = new Users(name,email, picture, userTitle, introduce, Role.USER);
-		usersRepository.save(user);
+		User user = new User(name,email, picture, userTitle, introduce, Role.USER);
+		userRepository.save(user);
 		Post post = new Post(title, content, user);
 		Post post2 = new Post(title+"2", content+"2", user);
 		postRepository.save(post);
@@ -113,8 +113,8 @@ public class PostRepostioryTest {
     @Test
 	public void testDeletePostReposeitory() {
 		//given
-		Users user = new Users(name, email, picture, title, introduce, Role.USER);
-		usersRepository.save(user);
+		User user = new User(name, email, picture, title, introduce, Role.USER);
+		userRepository.save(user);
 		Post post = new Post(title, content, user);
 		Post savedPost = postRepository.save(post);
 

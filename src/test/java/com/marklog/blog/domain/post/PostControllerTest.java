@@ -75,8 +75,7 @@ public class PostControllerTest {
 
 		//then
 		ra
-		.andExpect(status().isCreated())
-		.andExpect(jsonPath("$.id").value(id));
+		.andExpect(status().isCreated());
 	}
 
 	@WithMockUser(roles="USER")

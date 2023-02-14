@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import com.marklog.blog.config.auth.dto.OAuthAttributes;
-import com.marklog.blog.domain.user.Users;
+import com.marklog.blog.domain.user.User;
 import com.marklog.blog.service.UserService;
 
 import lombok.Setter;
@@ -39,7 +39,7 @@ public class JwtOAuth2UserService implements OAuth2UserService<OAuth2UserRequest
 		Map<String, Object> attributes = delegate.loadUser(userRequest).getAttributes();
 		OAuthAttributes oAuthAttributes = OAuthAttributes.of(registratrionId, userNameAttributeKey, attributes);
 
-        Users user = userService.saveOrUpdate(oAuthAttributes);
+        User user = userService.saveOrUpdate(oAuthAttributes);
 
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority(user.getRoleKey())),

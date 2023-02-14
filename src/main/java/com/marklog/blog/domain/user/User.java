@@ -13,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 import com.marklog.blog.domain.BaseTimeEntity;
 import com.marklog.blog.domain.post.Post;
@@ -23,8 +24,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@Table(name="users")
 @Entity
-public class Users extends BaseTimeEntity {
+public class User extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,7 +58,7 @@ public class Users extends BaseTimeEntity {
 
 
     @Builder
-    public Users(String name, String email, String picture, String title, String introduce, Role role){
+    public User(String name, String email, String picture, String title, String introduce, Role role){
         this.name = name;
         this.email = email;
         this.picture = picture;
@@ -65,7 +67,7 @@ public class Users extends BaseTimeEntity {
         this.role = role;
     }
 
-    public Users update(String name, String picture, String title, String introduce){
+    public User update(String name, String picture, String title, String introduce){
         this.name = name;
         this.picture = picture;
         this.title = title;

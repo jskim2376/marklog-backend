@@ -30,7 +30,7 @@ public class UserMockMvcTest {
 	@Autowired
 	MockMvc mvc;
 	@Autowired
-	UsersRepository usersRepository;
+	UserRepository userRepository;
     @PersistenceContext
     EntityManager entityManager;
 
@@ -48,7 +48,7 @@ public class UserMockMvcTest {
 		title = "title";
 		introduce = "introduce";
 
-        Users user =  Users.builder()
+        User user =  User.builder()
                 .name(name)
                 .email(email)
                 .picture(picture)
@@ -56,12 +56,12 @@ public class UserMockMvcTest {
                 .introduce(introduce)
                 .role(Role.USER)
                 .build();
-        user = usersRepository.save(user);
+        user = userRepository.save(user);
 }
 
     @AfterEach
     public void teardown() {
-    	usersRepository.deleteAll();
+    	userRepository.deleteAll();
     	entityManager
             .createNativeQuery("ALTER TABLE users ALTER COLUMN `id` RESTART WITH 1")
             .executeUpdate();

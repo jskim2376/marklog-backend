@@ -10,8 +10,8 @@ import com.marklog.blog.domain.post.Post;
 import com.marklog.blog.domain.post.PostRepository;
 import com.marklog.blog.domain.tag.Tag;
 import com.marklog.blog.domain.tag.TagRepository;
-import com.marklog.blog.domain.user.Users;
-import com.marklog.blog.domain.user.UsersRepository;
+import com.marklog.blog.domain.user.User;
+import com.marklog.blog.domain.user.UserRepository;
 import com.marklog.blog.web.dto.PostResponseDto;
 import com.marklog.blog.web.dto.PostSaveRequestDto;
 import com.marklog.blog.web.dto.PostUpdateRequestDto;
@@ -22,12 +22,12 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class PostService {
 	private final PostRepository postRepository;
-	private final UsersRepository usersRepository;
+	private final UserRepository userRepository;
 	private final TagRepository tagRepository;
 
 	@Transactional
 	public Long save(PostSaveRequestDto requestDto) {
-		Users user = usersRepository.getReferenceById(requestDto.getUserId());
+		User user = userRepository.getReferenceById(requestDto.getUserId());
 		List<String> tagNames = requestDto.getTags();
 
 

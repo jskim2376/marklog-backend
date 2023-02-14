@@ -3,7 +3,7 @@ package com.marklog.blog.config.auth.dto;
 import java.util.Map;
 
 import com.marklog.blog.domain.user.Role;
-import com.marklog.blog.domain.user.Users;
+import com.marklog.blog.domain.user.User;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -29,8 +29,8 @@ public class OAuthAttributes {
 		this.title = title;
 	}
 
-    public Users toEntity(){
-        return Users.builder()
+    public User toEntity(){
+        return User.builder()
                 .name(name)
                 .email(email)
                 .picture(picture)
