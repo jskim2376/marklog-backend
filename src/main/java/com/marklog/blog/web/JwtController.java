@@ -26,7 +26,6 @@ public class JwtController {
         return  ResponseEntity.ok(null);
 	}
 
-	@ResponseStatus(value = HttpStatus.CREATED)
 	@GetMapping("/token/refresh")
 	public ResponseEntity<AccessTokenDto> refresh(@CookieValue(value="refresh_token") String refresh_token) {
 		if(refresh_token != null && jwtTokenProvider.validateToken(refresh_token)) {
@@ -39,6 +38,5 @@ public class JwtController {
 		else {
 	        return  ResponseEntity.badRequest().body(null);
 		}
-
 	}
 }

@@ -69,12 +69,10 @@ public class PostTest {
 		user1 = new User(name, email, picture, title, introduce, Role.USER);
 		userRepository.save(user1);
 		accessToken1 = jwtTokenProvider.createAccessToken(user1.getId(), email);
-		System.out.println(user1.getId());
 
 		User user2 = new User(name, 222 + email, picture, title, introduce, Role.USER);
 		userRepository.save(user2);
 		accessToken2 = jwtTokenProvider.createAccessToken(user2.getId(), 2 + email);
-		System.out.println(user2.getId());
 
 		User user3 = new User(name, 333 + email, picture, title, introduce, Role.ADMIN);
 		userRepository.save(user3);
