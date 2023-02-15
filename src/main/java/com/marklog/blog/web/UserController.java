@@ -32,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 	private final UserService userService;
 
+	@PreAuthorize("isAuthenticated() and hasRole('ADMIN')")
 	@GetMapping("/user")
 	public Page<UserResponseDto> getAllUsers(Pageable pageable) {
 	    return userService.findAll(pageable);

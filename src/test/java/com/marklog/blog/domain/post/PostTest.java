@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -145,7 +147,25 @@ public class PostTest {
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
 	}
+	@Test
+	public void testGetAllPost() throws JsonMappingException, JsonProcessingException, JSONException {
+		// given
+		Long id = createPost();
 
+		// when
+		ResponseEntity<String> responseEntity = wc.get().uri(uri).retrieve().toEntity(String.class)
+				.block();
+		// then-ready
+		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
+		String getTitle = jsonObject.getJSONArray("content").getJSONObject(0).getString("title");
+		Long size = jsonObject.getLong("size");
+
+		// then
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getTitle).isEqualTo(postTitle);
+		assertThat(size).isEqualTo(20);
+	}
+	
 	@Test
 	public void testGetPost() throws JsonMappingException, JsonProcessingException {
 		// given

@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.marklog.blog.domain.post.Post;
@@ -15,6 +17,7 @@ import com.marklog.blog.domain.user.UserRepository;
 import com.marklog.blog.web.dto.PostResponseDto;
 import com.marklog.blog.web.dto.PostSaveRequestDto;
 import com.marklog.blog.web.dto.PostUpdateRequestDto;
+import com.marklog.blog.web.dto.UserResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +33,6 @@ public class PostService {
 		User user = userRepository.getReferenceById(userId);
 		List<String> tagNames = requestDto.getTags();
 
-
 		Post post = Post.builder().title(requestDto.getTitle()).content(requestDto.getContent()).user(user).build();
 		post = postRepository.save(post);
 		if(tagNames != null) {
@@ -45,6 +47,11 @@ public class PostService {
 	public PostResponseDto findById(Long id) {
 		Post entity = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
 		return new PostResponseDto(entity);
+	}
+	
+	public Page<PostResponseDto> findAll(Pageable pageable) {
+		Page<PostResponseDto> pageUserResponseDto =  postRepository.findAll(pageable).map(PostResponseDto::toDto);
+		return pageUserResponseDto;
 	}
 
 	@Transactional

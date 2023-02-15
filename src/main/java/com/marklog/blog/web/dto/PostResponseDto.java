@@ -30,5 +30,8 @@ public class PostResponseDto {
 		this.content = entity.getContent();
 		this.userId = entity.getUser().getId();
 	}
-
+	
+	public static PostResponseDto toDto(Post entity) {
+		return new PostResponseDto(entity);
+	}
 }

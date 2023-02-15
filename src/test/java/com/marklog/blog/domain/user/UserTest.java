@@ -93,7 +93,7 @@ public class UserTest {
 
 		// when
 		ResponseEntity<String> responseEntity = wc.get().uri(uri)
-				.header("Authorization", "Bearer " + accessTokenUser)
+				.header("Authorization", "Bearer " + accessTokenAdmin)
 				.attribute("page", 0)
 				.attribute("size", 20)
 				.retrieve().toEntity(String.class).block();

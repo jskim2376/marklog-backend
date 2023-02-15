@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
@@ -73,6 +75,27 @@ public class PostRepostioryTest {
 		//then
 		assertThrows(InvalidDataAccessApiUsageException.class, () -> postRepository.save(post));
 	}
+	
+    @Test
+	public void testFindAllPostRepository() {
+		//given
+		User user = new User(name, email, picture, title, introduce, Role.USER);
+		userRepository.save(user);
+		Post post = new Post(title, content, user);
+		postRepository.save(post);
+
+		//when
+		PageRequest pageRequest = PageRequest.of(0, 4);
+		Page<Post> page = postRepository.findAll(pageRequest);
+		List<Post> postList = page.getContent();
+
+		//then
+		assertThat(postList.get(0).getTitle()).isEqualTo(title);
+		assertThat(postList.get(0).getContent()).isEqualTo(content);
+		assertThat(page.getTotalElements()).isEqualTo(1);
+		assertThat(page.getTotalPages()).isEqualTo(1);
+
+	}
 
 	@Test
 	public void testFindByIdPostRepostiroy() {
@@ -88,26 +111,6 @@ public class PostRepostioryTest {
 		//then
 		assertThat(savedPost).isSameAs(findPost);
 	}
-
-	@Test
-	public void testFindAllPostRepostiroy() {
-		//given
-		User user = new User(name,email, picture, userTitle, introduce, Role.USER);
-		userRepository.save(user);
-		Post post = new Post(title, content, user);
-		Post post2 = new Post(title+"2", content+"2", user);
-		postRepository.save(post);
-		postRepository.save(post2);
-
-		//when
-		List<Post> foundPostList = postRepository.findAll();
-
-		//then
-		assertThat(foundPostList.get(0)).isSameAs(post);
-		assertThat(foundPostList.get(1)).isSameAs(post2);
-	}
-
-
 
 
     @Test

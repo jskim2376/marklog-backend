@@ -15,6 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import com.marklog.blog.domain.tag.Tag;
 import com.marklog.blog.domain.tag.TagRepository;
@@ -22,9 +26,11 @@ import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
 import com.marklog.blog.service.PostService;
+import com.marklog.blog.service.UserService;
 import com.marklog.blog.web.dto.PostResponseDto;
 import com.marklog.blog.web.dto.PostSaveRequestDto;
 import com.marklog.blog.web.dto.PostUpdateRequestDto;
+import com.marklog.blog.web.dto.UserResponseDto;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -73,8 +79,33 @@ public class PostServiceTest {
 		//then
 		assertThat(id).isGreaterThan(0L);
 	}
+	
+	@Test
+	public void testFinAllUserService() {
+		//given
+		User user = new User(name, email, picture, title, introduce, Role.USER);
+		Post post = new Post(title, content, user);
+		List<Post> contents = new ArrayList<>();
+		contents.add(post);
+		
+		int pageCount = 0;
+		int size=20;
+		Pageable pageable = PageRequest.of(pageCount, size);
+		Page<Post> page = new PageImpl<>(contents, pageable, 1);
 
+		when(postRepository.findAll(pageable)).thenReturn(page);
+		
+		PostService postService = new PostService(postRepository, userRepository, tagRepository);
 
+		//when
+		Page<PostResponseDto> pageUserResponseDto =  postService.findAll(pageable);
+
+		//then
+		assertThat(pageUserResponseDto.getContent().get(0).getTitle()).isEqualTo(title);
+		assertThat(pageUserResponseDto.getContent().get(0).getContent()).isEqualTo(content);
+		assertThat(pageUserResponseDto.getSize()).isEqualTo(size);
+		assertThat(pageUserResponseDto.getTotalElements()).isEqualTo(1);
+	}
 
 	@Test
 	public void testFindByIdPostService() {
