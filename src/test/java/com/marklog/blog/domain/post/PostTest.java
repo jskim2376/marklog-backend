@@ -81,7 +81,7 @@ public class PostTest {
 	}
 
 	public Long createPost() {
-		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, user1.getId(), null);
+		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, null);
 		ResponseEntity<String> responseEntity = wc.post().uri(uri).header("Authorization", "Bearer " + accessToken1)
 				.body(Mono.just(postSaveRequestDto), PostSaveRequestDto.class).retrieve().toEntity(String.class)
 				.block();
@@ -95,7 +95,7 @@ public class PostTest {
 	@Test
 	public void testPostPost() throws JsonMappingException, JsonProcessingException {
 		// given
-		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, user1.getId(), null);
+		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, null);
 
 		// when
 		ResponseEntity<String> responseEntity = wc.post().uri(uri).header("Authorization", "Bearer " + accessToken1)
@@ -117,7 +117,7 @@ public class PostTest {
 		tags.add("hihi");
 		tags.add("tag2");
 
-		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, user1.getId(), tags);
+		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, tags);
 
 		// when
 		ResponseEntity<String> responseEntity = wc.post().uri(uri)
@@ -137,7 +137,7 @@ public class PostTest {
 	@Test
 	public void testPostPost_인증이_없을때() throws JsonMappingException, JsonProcessingException {
 		// given
-		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, null, null);
+		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, null);
 		// when
 		ResponseEntity<String> responseEntity = wc.post().uri(uri)
 				.body(Mono.just(postSaveRequestDto), PostSaveRequestDto.class)

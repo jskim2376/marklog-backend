@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
 import com.marklog.blog.service.PostService;
 import com.marklog.blog.web.dto.PostIdResponseDto;
 import com.marklog.blog.web.dto.PostResponseDto;
@@ -33,13 +34,22 @@ public class PostController {
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/post")
-	public ResponseEntity save(@RequestBody PostSaveRequestDto requestDto) {
-
-		Long id = postService.save(requestDto);
+	public ResponseEntity save(@RequestBody PostSaveRequestDto requestDto, Authentication authentication) {
+		Long authUserId = ((UserAuthenticationDto) authentication.getPrincipal()).getId();
+		Long id = postService.save(authUserId, requestDto);
 		
 		HttpHeaders header = new HttpHeaders();
 		header.add(HttpHeaders.LOCATION, "/api/v1/post/"+id);
 		return new ResponseEntity<>(header, HttpStatus.CREATED);
+	}
+	
+	@GetMapping("/post/{id}")
+	public ResponseEntity<PostResponseDto> findById(@PathVariable Long id) {
+		try {
+			return new ResponseEntity<>(postService.findById(id), HttpStatus.OK);
+		} catch (IllegalArgumentException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
 	}
 
 	@GetMapping("/post/{id}")
@@ -58,7 +68,9 @@ public class PostController {
 		try {
 			HttpHeaders header = new HttpHeaders();
 			header.add(HttpHeaders.LOCATION, "/api/v1/post/"+id);
-			postService.update(id, requestDto);
+			Long authUserId = ((UserAuthenticationDto) authentication.getPrincipal()).getId();
+			
+			postService.update(id,authUserId, requestDto);
 			return new ResponseEntity<>(header, HttpStatus.NO_CONTENT);
 		} catch (IllegalArgumentException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

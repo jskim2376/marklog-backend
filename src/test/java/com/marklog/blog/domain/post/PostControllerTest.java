@@ -63,8 +63,8 @@ public class PostControllerTest {
 		List<String> tagList = new ArrayList<>();
 		tagList.add("java");
 		tagList.add("testTag");
-		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(path, path, id, tagList);
-		when(postService.save(any())).thenReturn(id);
+		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(path, path, tagList);
+		when(postService.save(anyLong(), any())).thenReturn(id);
 
 		//when
 		ResultActions ra = mvc.perform(
