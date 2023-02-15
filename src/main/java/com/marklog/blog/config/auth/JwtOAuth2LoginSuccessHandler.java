@@ -40,7 +40,7 @@ public class JwtOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccess
 	        		.path("/api")
 	        		.sameSite("strict")
 	        		.httpOnly(true)
-//	        		.secure(true)
+	        		.secure(true)
 	        		.maxAge((int) (jwt.getRefreshtoken_expired() / 1000))
 	        		.build();
 	        response.addHeader("Set-Cookie", responseCookie.toString());

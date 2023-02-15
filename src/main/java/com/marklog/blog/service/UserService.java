@@ -2,6 +2,8 @@ package com.marklog.blog.service;
 
 import javax.transaction.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.marklog.blog.config.auth.dto.OAuthAttributes;
@@ -17,6 +19,11 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class UserService {
 	private final UserRepository userRepository;
+	
+	public Page<UserResponseDto> findAll(Pageable pageable) {
+		Page<UserResponseDto> pageUserResponseDto =  userRepository.findAll(pageable).map(UserResponseDto::toDto);
+		return pageUserResponseDto;
+	}
 
 	public UserResponseDto findById(Long id) {
 		User entity = userRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));

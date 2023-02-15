@@ -31,4 +31,8 @@ public class UserResponseDto {
 		this.title = entity.getTitle();
 		this.introduce = entity.getIntroduce();
 	}
+	
+	public static UserResponseDto toDto(final User user) {
+		return new UserResponseDto(user);
+	}
 }

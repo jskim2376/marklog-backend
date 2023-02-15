@@ -2,16 +2,22 @@ package com.marklog.blog.domain.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,11 +27,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.marklog.blog.config.auth.JwtTokenProvider;
 import com.marklog.blog.dto.TestUserResponseDto;
 import com.marklog.blog.web.dto.PostUpdateRequestDto;
+import com.marklog.blog.web.dto.UserResponseDto;
 import com.marklog.blog.web.dto.UserUpdateRequestDto;
 
 import reactor.core.publisher.Mono;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserTest {
 	@LocalServerPort
@@ -76,6 +84,31 @@ public class UserTest {
 		accessTokenUser = jwtTokenProvider.createAccessToken(user.getId(), email);
 		return user.getId();
 	}
+	
+	
+	@Test
+	public void testGetAllUser() throws JsonMappingException, JsonProcessingException, JSONException {
+		// given
+		Long id = createUser("testAllGetUser");
+
+		// when
+		ResponseEntity<String> responseEntity = wc.get().uri(uri)
+				.header("Authorization", "Bearer " + accessTokenUser)
+				.attribute("page", 0)
+				.attribute("size", 20)
+				.retrieve().toEntity(String.class).block();
+
+		// then-ready
+		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
+		String getName = jsonObject.getJSONArray("content").getJSONObject(0).getString("name");
+		Long size = jsonObject.getLong("size");
+		
+//		// then
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(size).isEqualTo(20);
+		assertThat(getName).isEqualTo(name);
+	}
+	
 
 	@Test
 	public void testGetUser() throws JsonMappingException, JsonProcessingException {

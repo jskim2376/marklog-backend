@@ -65,10 +65,10 @@ public class PostServiceTest {
 		tagList.add("testTag");
 
 		postService = new PostService(postRepository, userRepository, tagRepository);
-		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(title, content, id, tagList);
+		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(title, content, tagList);
 
 		//when
-		Long id = postService.save(postSaveRequestDto);
+		Long id = postService.save(1L,postSaveRequestDto);
 
 		//then
 		assertThat(id).isGreaterThan(0L);
@@ -118,7 +118,7 @@ public class PostServiceTest {
 		PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(title+'2', content+"2", tagListRequest);
 
 		//when
-		postService.update(id, postUpdateRequestDto);
+		postService.update(id, 1L, postUpdateRequestDto);
 
 		//then
 		verify(tagRepository, times(2)).delete(any());

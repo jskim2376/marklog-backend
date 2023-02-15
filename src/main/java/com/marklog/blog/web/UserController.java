@@ -1,9 +1,10 @@
 package com.marklog.blog.web;
 
 
-import javax.servlet.http.HttpSession;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.marklog.blog.domain.user.User;
+import com.marklog.blog.domain.user.UserRepository;
 import com.marklog.blog.service.UserService;
 import com.marklog.blog.web.dto.UserResponseDto;
 import com.marklog.blog.web.dto.UserUpdateRequestDto;
@@ -28,8 +31,12 @@ import lombok.RequiredArgsConstructor;
 @RestController
 public class UserController {
 	private final UserService userService;
-	private final HttpSession session;
 
+	@GetMapping("/user")
+	public Page<UserResponseDto> getAllUsers(Pageable pageable) {
+	    return userService.findAll(pageable);
+	}
+	
 	@GetMapping("/user/{id}")
 	public ResponseEntity<UserResponseDto> userGet(@PathVariable Long id) {
 		try {

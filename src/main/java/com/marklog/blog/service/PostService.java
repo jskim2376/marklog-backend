@@ -26,8 +26,8 @@ public class PostService {
 	private final TagRepository tagRepository;
 
 	@Transactional
-	public Long save(PostSaveRequestDto requestDto) {
-		User user = userRepository.getReferenceById(requestDto.getUserId());
+	public Long save(Long userId, PostSaveRequestDto requestDto) {
+		User user = userRepository.getReferenceById(userId);
 		List<String> tagNames = requestDto.getTags();
 
 
@@ -48,7 +48,7 @@ public class PostService {
 	}
 
 	@Transactional
-	public void update(Long id, PostUpdateRequestDto requestDto) {
+	public void update(Long id, Long userId, PostUpdateRequestDto requestDto) {
 		Post post = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
 		post.update(requestDto.getTitle(), requestDto.getContent());
 
