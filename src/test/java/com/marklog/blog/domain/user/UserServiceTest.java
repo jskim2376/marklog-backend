@@ -76,7 +76,7 @@ public class UserServiceTest {
 		UserResponseDto userServiceTestDto = new UserResponseDto(user.get());
 
 		//then
-		assertThat(userServiceResponseDto).isEqualTo(userServiceTestDto);
+		assertThat(userServiceResponseDto).usingRecursiveComparison().isEqualTo(userServiceTestDto);
 	}
 
 

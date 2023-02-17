@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserUpdateRequestDto {

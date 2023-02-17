@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +23,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.marklog.blog.config.auth.JwtTokenProvider;
-import com.marklog.blog.dto.TestUserResponseDto;
 import com.marklog.blog.web.dto.PostUpdateRequestDto;
 import com.marklog.blog.web.dto.UserResponseDto;
 import com.marklog.blog.web.dto.UserUpdateRequestDto;
@@ -119,8 +116,8 @@ public class UserTest {
 		ResponseEntity<String> responseEntity = wc.get().uri(uri + id).retrieve().toEntity(String.class).block();
 
 		// then-ready
-		TestUserResponseDto testUserResponseDto = objectMapper.readValue(responseEntity.getBody(),
-				TestUserResponseDto.class);
+		UserResponseDto testUserResponseDto = objectMapper.readValue(responseEntity.getBody(),
+				UserResponseDto.class);
 
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
