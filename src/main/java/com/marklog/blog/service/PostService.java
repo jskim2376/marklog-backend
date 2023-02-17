@@ -17,7 +17,6 @@ import com.marklog.blog.domain.user.UserRepository;
 import com.marklog.blog.web.dto.PostResponseDto;
 import com.marklog.blog.web.dto.PostSaveRequestDto;
 import com.marklog.blog.web.dto.PostUpdateRequestDto;
-import com.marklog.blog.web.dto.UserResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,7 +30,7 @@ public class PostService {
 	@Transactional
 	public Long save(Long userId, PostSaveRequestDto requestDto) {
 		User user = userRepository.getReferenceById(userId);
-		List<String> tagNames = requestDto.getTags();
+		List<String> tagNames = requestDto.getTagList();
 
 		Post post = Post.builder().title(requestDto.getTitle()).content(requestDto.getContent()).user(user).build();
 		post = postRepository.save(post);
@@ -48,7 +47,7 @@ public class PostService {
 		Post entity = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
 		return new PostResponseDto(entity);
 	}
-	
+
 	public Page<PostResponseDto> findAll(Pageable pageable) {
 		Page<PostResponseDto> pageUserResponseDto =  postRepository.findAll(pageable).map(PostResponseDto::toDto);
 		return pageUserResponseDto;
@@ -63,7 +62,7 @@ public class PostService {
 		for(Tag tag : tags) {
 			tagRepository.delete(tag);
 		}
-		List<String> tagNames = requestDto.getTagNames();
+		List<String> tagNames = requestDto.getTagList();
 		if(tagNames != null) {
 			for(String tagName: tagNames) {
 				tagRepository.save(Tag.builder().name(tagName).post(post).build());

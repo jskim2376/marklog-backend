@@ -26,11 +26,9 @@ import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
 import com.marklog.blog.service.PostService;
-import com.marklog.blog.service.UserService;
 import com.marklog.blog.web.dto.PostResponseDto;
 import com.marklog.blog.web.dto.PostSaveRequestDto;
 import com.marklog.blog.web.dto.PostUpdateRequestDto;
-import com.marklog.blog.web.dto.UserResponseDto;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -62,7 +60,12 @@ public class PostServiceTest {
 		User user = new User(name, email, picture, title, introduce, Role.USER);
 		when(userRepository.getReferenceById(id)).thenReturn(user);
 
-		Post post = spy(new Post(title, content, user));
+		List<Tag> tags = new ArrayList<>();
+		tags.add(new Tag(null, "tag1"));
+		tags.add(new Tag(null, "tag2"));
+
+		Post post = spy(new Post(title, content, user, tags));
+
 		when(post.getId()).thenReturn(id);
 		when(postRepository.save(any())).thenReturn(post);
 
@@ -79,22 +82,26 @@ public class PostServiceTest {
 		//then
 		assertThat(id).isGreaterThan(0L);
 	}
-	
+
 	@Test
 	public void testFinAllUserService() {
 		//given
 		User user = new User(name, email, picture, title, introduce, Role.USER);
-		Post post = new Post(title, content, user);
+		List<Tag> tags = new ArrayList<>();
+		tags.add(new Tag(null, "tag1"));
+		tags.add(new Tag(null, "tag2"));
+
+		Post post = new Post(title, content, user, tags);
 		List<Post> contents = new ArrayList<>();
 		contents.add(post);
-		
+
 		int pageCount = 0;
 		int size=20;
 		Pageable pageable = PageRequest.of(pageCount, size);
 		Page<Post> page = new PageImpl<>(contents, pageable, 1);
 
 		when(postRepository.findAll(pageable)).thenReturn(page);
-		
+
 		PostService postService = new PostService(postRepository, userRepository, tagRepository);
 
 		//when
@@ -111,18 +118,24 @@ public class PostServiceTest {
 	public void testFindByIdPostService() {
 		//given
 		User user = new User(name, email, picture, title, introduce, Role.USER);
-		Post post = new Post(title, content, user);
+
+		List<Tag> tags = new ArrayList<>();
+		tags.add(new Tag(null, "tag1"));
+		tags.add(new Tag(null, "tag2"));
+
+		Post post = new Post(title, content, user, tags);
+		PostResponseDto postResponseDto =  new PostResponseDto(post);
 		Optional<Post> optionalPost = Optional.of(post);
 		when(postRepository.findById(any())).thenReturn(optionalPost);
 
-		PostResponseDto postResponseDto =  new PostResponseDto(post);
 		postService = new PostService(postRepository, userRepository, tagRepository);
 
 		//when
 		PostResponseDto postResponseDtoFound =  postService.findById(id);
 
 		//then
-		assertThat(postResponseDtoFound).isEqualTo(postResponseDto);
+		assertThat(postResponseDtoFound).usingRecursiveComparison().isEqualTo(postResponseDto);
+
 	}
 
 
@@ -130,7 +143,11 @@ public class PostServiceTest {
 	public void testUpdatePostervice() {
 		//given
 		User user = new User(name, email, picture, title, introduce, Role.USER);
-		Post post = new Post(title, content, user);
+		List<Tag> tags = new ArrayList<>();
+		tags.add(new Tag(null, "tag1"));
+		tags.add(new Tag(null, "tag2"));
+
+		Post post = new Post(title, content, user, tags);
 		Optional<Post> optionalPost = Optional.of(post);
 		when(postRepository.findById(any())).thenReturn(optionalPost);
 

@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class PostSaveRequestDto {
 	private String title;
 	private String content;
-	private List<String> tags;
+	private List<String> tagList;
 
 }

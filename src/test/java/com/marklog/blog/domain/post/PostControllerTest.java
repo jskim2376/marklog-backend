@@ -39,15 +39,14 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.marklog.blog.config.auth.JwtTokenProvider;
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
+import com.marklog.blog.domain.tag.Tag;
 import com.marklog.blog.domain.user.Role;
-import com.marklog.blog.domain.user.User;
 import com.marklog.blog.service.PostService;
 import com.marklog.blog.web.PostController;
 import com.marklog.blog.web.dto.PostResponseDto;
 import com.marklog.blog.web.dto.PostSaveRequestDto;
 import com.marklog.blog.web.dto.PostUpdateRequestDto;
-import com.marklog.blog.web.dto.UserResponseDto;
-import com.marklog.blog.web.dto.UserUpdateRequestDto;
+import com.marklog.blog.web.dto.TagResponseDto;
 
 @MockBean(JpaMetamodelMappingContext.class)
 @WebMvcTest(controllers = PostController.class)
@@ -95,7 +94,11 @@ public class PostControllerTest {
 	@Test
 	public void testGetAllUserConrtoller() throws Exception {
 		// given
-		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, id);
+		List<Tag> tags = new ArrayList<>();
+		tags.add(new Tag(null, "tag1"));
+		tags.add(new Tag(null, "tag2"));
+
+		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, id, TagResponseDto.toEntityDto(tags));
 		List<PostResponseDto> content = new ArrayList<>();
 		content.add(postResponseDto);
 
@@ -118,7 +121,11 @@ public class PostControllerTest {
 	public void testGetPostConrtoller() throws Exception {
 		// given
 		String path = "/v1/post/" + id;
-		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, 1L);
+		List<Tag> tags = new ArrayList<>();
+		tags.add(new Tag(null, "tag1"));
+		tags.add(new Tag(null, "tag2"));
+
+		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, id, TagResponseDto.toEntityDto(tags));
 		when(postService.findById(anyLong())).thenReturn(postResponseDto);
 
 		// when
@@ -138,12 +145,19 @@ public class PostControllerTest {
 		String path = "/v1/post/" + id;
 		String title2 = "title2";
 		String content2 = "content2";
+
 		List<String> tagList = new ArrayList<>();
 		tagList.add("java");
 		tagList.add("testTag");
 		PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(title2, content2, tagList);
-		PostResponseDto postResponseDto = new PostResponseDto(time, time, title2, content2, id);
+
+		List<Tag> tags = new ArrayList<>();
+		tags.add(new Tag(null, "tag1"));
+		tags.add(new Tag(null, "tag2"));
+
+		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, id, TagResponseDto.toEntityDto(tags));
 		when(postService.findById(id)).thenReturn(postResponseDto);
+
 		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(1L, "test@test.com", Role.USER);
 		Authentication authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null, Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
 

@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -27,8 +28,7 @@ import com.marklog.blog.config.auth.JwtTokenProvider;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
-import com.marklog.blog.dto.TestPostIdResponseDto;
-import com.marklog.blog.dto.TestPostResponseDto;
+import com.marklog.blog.web.dto.PostResponseDto;
 import com.marklog.blog.web.dto.PostSaveRequestDto;
 import com.marklog.blog.web.dto.PostUpdateRequestDto;
 
@@ -54,6 +54,7 @@ public class PostTest {
 	String uri = "/api/v1/post/";
 	String postTitle = "post title";
 	String postContent = "post content";
+
 	@BeforeAll
 	public void setUp() {
 		wc = WebClient.create("http://localhost:" + port);
@@ -99,8 +100,8 @@ public class PostTest {
 
 		// when
 		ResponseEntity<String> responseEntity = wc.post().uri(uri).header("Authorization", "Bearer " + accessToken1)
-				.body(Mono.just(postSaveRequestDto), PostSaveRequestDto.class).retrieve().toEntity(String.class)
-				.block();
+				.contentType(MediaType.APPLICATION_JSON).bodyValue(objectMapper.writeValueAsString(postSaveRequestDto))
+				.retrieve().toEntity(String.class).block();
 
 		// then-ready
 		HttpHeaders header = responseEntity.getHeaders();
@@ -120,18 +121,26 @@ public class PostTest {
 		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, tags);
 
 		// when
-		ResponseEntity<String> responseEntity = wc.post().uri(uri)
-				.header("Authorization", "Bearer " + accessToken1)
-				.body(Mono.just(postSaveRequestDto), PostSaveRequestDto.class).retrieve().toEntity(String.class)
-				.block();
+		ResponseEntity<String> responseEntity = wc.post().uri(uri).header("Authorization", "Bearer " + accessToken1)
+				.contentType(MediaType.APPLICATION_JSON).bodyValue(objectMapper.writeValueAsString(postSaveRequestDto))
+				.retrieve().toEntity(String.class).block();
 
 		// then-ready
 		HttpHeaders header = responseEntity.getHeaders();
 
+		ResponseEntity<String> responseEntity2 = wc.get().uri(header.getLocation().toString()).retrieve()
+				.toEntity(String.class).block();
+		PostResponseDto testPostResponseDto = objectMapper.readValue(responseEntity2.getBody(), PostResponseDto.class);
+
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(header.getLocation().toString()).startsWith(uri);
-		throw new JsonMappingException("asd");
+
+		// then
+		assertThat(testPostResponseDto.getTitle()).isEqualTo(postTitle);
+		assertThat(testPostResponseDto.getContent()).isEqualTo(postContent);
+		assertThat(testPostResponseDto.getTagList().get(0).getName()).isEqualTo(tags.get(0));
+
 	}
 
 	@Test
@@ -140,19 +149,20 @@ public class PostTest {
 		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, null);
 		// when
 		ResponseEntity<String> responseEntity = wc.post().uri(uri)
-				.body(Mono.just(postSaveRequestDto), PostSaveRequestDto.class)
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(objectMapper.writeValueAsString(postSaveRequestDto))
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
 	}
+
 	@Test
 	public void testGetAllPost() throws JsonMappingException, JsonProcessingException, JSONException {
 		// given
 		Long id = createPost();
 
 		// when
-		ResponseEntity<String> responseEntity = wc.get().uri(uri).retrieve().toEntity(String.class)
-				.block();
+		ResponseEntity<String> responseEntity = wc.get().uri(uri).retrieve().toEntity(String.class).block();
 		// then-ready
 		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
 		String getTitle = jsonObject.getJSONArray("content").getJSONObject(0).getString("title");
@@ -163,19 +173,17 @@ public class PostTest {
 		assertThat(getTitle).isEqualTo(postTitle);
 		assertThat(size).isEqualTo(20);
 	}
-	
+
 	@Test
 	public void testGetPost() throws JsonMappingException, JsonProcessingException {
 		// given
 		Long id = createPost();
 
 		// when
-		ResponseEntity<String> responseEntity = wc.get().uri(uri + id).retrieve().toEntity(String.class)
-				.block();
+		ResponseEntity<String> responseEntity = wc.get().uri(uri + id).retrieve().toEntity(String.class).block();
 
 		// then-ready
-		TestPostResponseDto testPostResponseDto = objectMapper.readValue(responseEntity.getBody(),
-				TestPostResponseDto.class);
+		PostResponseDto testPostResponseDto = objectMapper.readValue(responseEntity.getBody(), PostResponseDto.class);
 
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -206,19 +214,19 @@ public class PostTest {
 		// when
 		ResponseEntity<String> putResponseEntity = wc.put().uri(uri + id)
 				.header("Authorization", "Bearer " + accessToken1)
-				.body(Mono.just(postUpdateRequestDto), PostUpdateRequestDto.class)
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(objectMapper.writeValueAsString(postUpdateRequestDto))
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 
 		// then-ready
 		HttpHeaders header = putResponseEntity.getHeaders();
-		
+
 		ResponseEntity<String> getResponseEntity = wc.get().uri(header.getLocation().toString())
 				.header("Authorization", "Bearer " + accessToken1).retrieve().toEntity(String.class).block();
-		TestPostResponseDto getPostResponseDto = objectMapper.readValue(getResponseEntity.getBody(),
-				TestPostResponseDto.class);
+		PostResponseDto getPostResponseDto = objectMapper.readValue(getResponseEntity.getBody(), PostResponseDto.class);
 
 		// then
-		assertThat(header.getLocation().toString()).isEqualTo(uri+id);
+		assertThat(header.getLocation().toString()).isEqualTo(uri + id);
 		assertThat(putResponseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 		assertThat(getPostResponseDto.getTitle()).isEqualTo(postUpdateRequestDto.getTitle());
 		assertThat(getPostResponseDto.getContent()).isEqualTo(postUpdateRequestDto.getContent());
@@ -235,7 +243,8 @@ public class PostTest {
 		// when
 		ResponseEntity<String> responseEntity = wc.put().uri(uri + 0L)
 				.header("Authorization", "Bearer " + accessTokenAdmin)
-				.body(Mono.just(postUpdateRequestDto), PostUpdateRequestDto.class)
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(objectMapper.writeValueAsString(postUpdateRequestDto))
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -252,7 +261,8 @@ public class PostTest {
 
 		// when
 		ResponseEntity<String> responseEntity = wc.put().uri(uri + id)
-				.body(Mono.just(postUpdateRequestDto), PostUpdateRequestDto.class)
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(objectMapper.writeValueAsString(postUpdateRequestDto))
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -268,9 +278,9 @@ public class PostTest {
 		PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(newPostTitle, newPostContent, null);
 
 		// when
-		ResponseEntity<String> responseEntity = wc.put().uri(uri + id)
-				.header("Authorization", "Bearer " + accessToken2)
-				.body(Mono.just(postUpdateRequestDto), PostUpdateRequestDto.class)
+		ResponseEntity<String> responseEntity = wc.put().uri(uri + id).header("Authorization", "Bearer " + accessToken2)
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(objectMapper.writeValueAsString(postUpdateRequestDto))
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
@@ -288,12 +298,13 @@ public class PostTest {
 		// when
 		ResponseEntity<String> responseEntity = wc.put().uri(uri + id)
 				.header("Authorization", "Bearer " + accessTokenAdmin)
-				.body(Mono.just(postUpdateRequestDto), PostUpdateRequestDto.class)
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(objectMapper.writeValueAsString(postUpdateRequestDto))
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 
 		HttpHeaders header = responseEntity.getHeaders();
 		// then
-		assertThat(header.getLocation().toString()).isEqualTo(uri+id);
+		assertThat(header.getLocation().toString()).isEqualTo(uri + id);
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 	}
 

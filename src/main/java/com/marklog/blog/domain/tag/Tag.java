@@ -34,6 +34,4 @@ public class Tag {
 		this.post = post;
 		this.name = name;
 	}
-
-
 }

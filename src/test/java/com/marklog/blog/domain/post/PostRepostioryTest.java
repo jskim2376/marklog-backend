@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import com.marklog.blog.domain.tag.Tag;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
@@ -41,7 +43,12 @@ public class PostRepostioryTest {
 		LocalDateTime now = LocalDateTime.of(2019, 6,4,0,0,0);
 		User user = new User(name,email, picture, userTitle, introduce, Role.USER);
 		userRepository.save(user);
-		Post post = new Post(title, content, user);
+
+		List<Tag> tags = new ArrayList<>();
+		tags.add(new Tag(null, "tag1"));
+		tags.add(new Tag(null, "tag2"));
+
+		Post post = new Post(title, content, user, tags);
 
 		//when
 		Post savedPost = postRepository.save(post);
@@ -56,7 +63,12 @@ public class PostRepostioryTest {
 		//given
 		User user = new User(name,email, picture, userTitle, introduce, Role.USER);
 		userRepository.save(user);
-		Post post = new Post(title, content, user);
+
+		List<Tag> tags = new ArrayList<>();
+		tags.add(new Tag(null, "tag1"));
+		tags.add(new Tag(null, "tag2"));
+
+		Post post = new Post(title, content, user, tags);
 
 		//when
 		Post savedPost = postRepository.save(post);
@@ -69,19 +81,29 @@ public class PostRepostioryTest {
 	public void testSavePostRepository_Users_optional_테스트() {
 		//given
 		User user = new User(name,email, picture, userTitle, introduce, Role.USER);
-		Post post = new Post(title, content, user);
+
+		List<Tag> tags = new ArrayList<>();
+		tags.add(new Tag(null, "tag1"));
+		tags.add(new Tag(null, "tag2"));
+
+		Post post = new Post(title, content, user, tags);
 
 		//when
 		//then
 		assertThrows(InvalidDataAccessApiUsageException.class, () -> postRepository.save(post));
 	}
-	
+
     @Test
 	public void testFindAllPostRepository() {
 		//given
 		User user = new User(name, email, picture, title, introduce, Role.USER);
 		userRepository.save(user);
-		Post post = new Post(title, content, user);
+
+		List<Tag> tags = new ArrayList<>();
+		tags.add(new Tag(null, "tag1"));
+		tags.add(new Tag(null, "tag2"));
+
+		Post post = new Post(title, content, user, tags);
 		postRepository.save(post);
 
 		//when
@@ -102,13 +124,19 @@ public class PostRepostioryTest {
 		//given
 		User user = new User(name,email, picture, userTitle, introduce, Role.USER);
 		userRepository.save(user);
-		Post post = new Post(title, content, user);
+
+		List<Tag> tags = new ArrayList<>();
+		tags.add(new Tag(null, "tag1"));
+		tags.add(new Tag(null, "tag2"));
+
+		Post post = new Post(title, content, user, tags);
 		Post savedPost = postRepository.save(post);
 
 		//when
 		Post findPost = postRepository.findById(savedPost.getId()).get();
 
 		//then
+		assertThat(findPost.getTags().get(0).getName()).isEqualTo("tag1");
 		assertThat(savedPost).isSameAs(findPost);
 	}
 
@@ -118,7 +146,12 @@ public class PostRepostioryTest {
 		//given
 		User user = new User(name, email, picture, title, introduce, Role.USER);
 		userRepository.save(user);
-		Post post = new Post(title, content, user);
+
+		List<Tag> tags = new ArrayList<>();
+		tags.add(new Tag(null, "tag1"));
+		tags.add(new Tag(null, "tag2"));
+
+		Post post = new Post(title, content, user, tags);
 		Post savedPost = postRepository.save(post);
 
 		//when

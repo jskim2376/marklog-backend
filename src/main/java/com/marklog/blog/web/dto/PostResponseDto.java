@@ -1,17 +1,16 @@
 package com.marklog.blog.web.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.marklog.blog.domain.post.Post;
 
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 @Getter
-@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostResponseDto {
@@ -22,6 +21,7 @@ public class PostResponseDto {
 	private String title;
 	private String content;
 	private Long userId;
+	private List<TagResponseDto> tagList;
 
 	public PostResponseDto(Post entity) {
 		this.createdDate = entity.getCreatedDate();
@@ -29,8 +29,9 @@ public class PostResponseDto {
 		this.title = entity.getTitle();
 		this.content = entity.getContent();
 		this.userId = entity.getUser().getId();
+		this.tagList = TagResponseDto.toEntityDto(entity.getTags());
 	}
-	
+
 	public static PostResponseDto toDto(Post entity) {
 		return new PostResponseDto(entity);
 	}
