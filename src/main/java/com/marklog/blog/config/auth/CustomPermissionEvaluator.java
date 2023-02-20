@@ -7,8 +7,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
+import com.marklog.blog.controller.dto.PostResponseDto;
 import com.marklog.blog.service.PostService;
-import com.marklog.blog.web.dto.PostResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,13 +27,13 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 	public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType,
 			Object permission) {
 		// TODO Auto-generated method stub
-		if(authentication!=null) {
-			if(targetType.equals("post")) {
-				Long postId = (Long)targetId;
+		if (authentication != null) {
+			if (targetType.equals("post")) {
+				Long postId = (Long) targetId;
 				PostResponseDto postResponseDto = postService.findById(postId);
 				Long postUserId = postResponseDto.getUserId();
 				Long authUserId = ((UserAuthenticationDto) authentication.getPrincipal()).getId();
-				if(postUserId == authUserId) {
+				if (postUserId == authUserId) {
 					return true;
 				}
 			}

@@ -25,7 +25,7 @@ public class UserRepositoryTest {
 	public static String title = "title";
 	public static String introduce = "introduce";
 
-	
+
     @Test
 	public void testFindAllRepository() {
 		//given

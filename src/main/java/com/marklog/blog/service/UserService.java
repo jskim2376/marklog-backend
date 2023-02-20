@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 
 import com.marklog.blog.config.auth.dto.OAuthAttributes;
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
+import com.marklog.blog.controller.dto.UserResponseDto;
+import com.marklog.blog.controller.dto.UserUpdateRequestDto;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
-import com.marklog.blog.web.dto.UserResponseDto;
-import com.marklog.blog.web.dto.UserUpdateRequestDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class UserService {
 	private final UserRepository userRepository;
-	
+
 	public Page<UserResponseDto> findAll(Pageable pageable) {
 		Page<UserResponseDto> pageUserResponseDto =  userRepository.findAll(pageable).map(UserResponseDto::toDto);
 		return pageUserResponseDto;

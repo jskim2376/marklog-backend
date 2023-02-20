@@ -13,7 +13,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.marklog.blog.web.dto.AccessTokenDto;
+import com.marklog.blog.controller.dto.AccessTokenDto;
 
 import lombok.RequiredArgsConstructor;
 
