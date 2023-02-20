@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import com.marklog.blog.domain.user.User;
 
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,7 +29,7 @@ public class UserResponseDto {
 		this.title = entity.getTitle();
 		this.introduce = entity.getIntroduce();
 	}
-	
+
 	public static UserResponseDto toDto(final User user) {
 		return new UserResponseDto(user);
 	}

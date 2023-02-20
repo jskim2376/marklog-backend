@@ -22,6 +22,7 @@ public class PostResponseDto {
 	private String content;
 	private Long userId;
 	private List<TagResponseDto> tagList;
+	private Boolean like;
 
 	public PostResponseDto(Post entity) {
 		this.createdDate = entity.getCreatedDate();
@@ -30,9 +31,14 @@ public class PostResponseDto {
 		this.content = entity.getContent();
 		this.userId = entity.getUser().getId();
 		this.tagList = TagResponseDto.toEntityDto(entity.getTags());
+		this.like=false;
 	}
 
 	public static PostResponseDto toDto(Post entity) {
 		return new PostResponseDto(entity);
+	}
+	
+	public void setLike(Boolean like) {
+		this.like=like;
 	}
 }

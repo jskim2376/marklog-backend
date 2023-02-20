@@ -8,7 +8,6 @@ import javax.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ContextConfiguration;
@@ -24,11 +23,11 @@ import com.marklog.blog.web.JwtController;
 public class JwtControllerTest {
 	@Autowired
 	private MockMvc mvc;
-	
+
 	@Autowired
 	private JwtTokenProvider jwtTokenProvider;
-	
-	
+
+
 	@WithMockUser(roles = "USER")
 	@Test
 	public void testCheckJwtConrtoller() throws Exception{
@@ -37,27 +36,27 @@ public class JwtControllerTest {
 
 		// when
 		ResultActions ra = mvc.perform(get(path).with(SecurityMockMvcRequestPostProcessors.csrf()));
-		
+
 		// then
 		ra.andExpect(status().isOk());
 	}
-	
+
 	@WithMockUser(roles = "USER")
 	@Test
 	public void testRefreshJwtController() throws Exception {
 		String path = "/v1/token/refresh";
 		String refreshToken = jwtTokenProvider.createRefreshToken(1L, "test@gmail.com");
 		Cookie cookie = new Cookie("refresh_token", refreshToken);
-		
+
 		// when
 		ResultActions ra = mvc.perform(get(path).with(SecurityMockMvcRequestPostProcessors.csrf()).cookie(cookie));
 
 		ResultActions raBad = mvc.perform(get(path).with(SecurityMockMvcRequestPostProcessors.csrf()));
-		
+
 		// then
 		ra.andExpect(status().isOk());
 		raBad.andExpect(status().isBadRequest());
-		
+
 	}
 
 }

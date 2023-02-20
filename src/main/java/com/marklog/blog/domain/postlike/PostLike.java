@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Entity
-@IdClass(PostLikeId.class)
+@IdClass(PostLikeIdClass.class)
 public class PostLike {
 	@Id
 	@ManyToOne
@@ -27,4 +27,8 @@ public class PostLike {
 	@JoinColumn(name = "USERS_ID")
 	User user;
 
+	public PostLike(Post post, User user){
+		this.post=post;
+		this.user=user;
+	}
 }

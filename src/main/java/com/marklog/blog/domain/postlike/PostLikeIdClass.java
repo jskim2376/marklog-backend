@@ -3,7 +3,12 @@ package com.marklog.blog.domain.postlike;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class PostLikeId implements Serializable{
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor
+public class PostLikeIdClass implements Serializable{
 	private Long post;
 	private Long user;
 
@@ -18,7 +23,7 @@ public class PostLikeId implements Serializable{
 			return true;
 		if ((obj == null) || (getClass() != obj.getClass()))
 			return false;
-		PostLikeId other = (PostLikeId) obj;
+		PostLikeIdClass other = (PostLikeIdClass) obj;
 		return Objects.equals(post, other.post) && Objects.equals(user, other.user);
 	}
 

@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.marklog.blog.domain.user.User;
-import com.marklog.blog.domain.user.UserRepository;
 import com.marklog.blog.service.UserService;
 import com.marklog.blog.web.dto.UserResponseDto;
 import com.marklog.blog.web.dto.UserUpdateRequestDto;
@@ -37,7 +35,7 @@ public class UserController {
 	public Page<UserResponseDto> getAllUsers(Pageable pageable) {
 	    return userService.findAll(pageable);
 	}
-	
+
 	@GetMapping("/user/{id}")
 	public ResponseEntity<UserResponseDto> userGet(@PathVariable Long id) {
 		try {

@@ -68,6 +68,14 @@ public class PostControllerTest {
 		time = LocalDateTime.now();
 	}
 
+	public static String asJsonString(final Object obj) {
+		try {
+			return new ObjectMapper().writeValueAsString(obj);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	@Test
 	public void testPostPostConrtoller() throws Exception {
 		// given
@@ -90,7 +98,7 @@ public class PostControllerTest {
 		ra.andExpect(status().isCreated());
 	}
 
-	@WithMockUser(roles = "USER")
+	@WithMockUser
 	@Test
 	public void testGetAllUserConrtoller() throws Exception {
 		// given
@@ -98,7 +106,7 @@ public class PostControllerTest {
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
 
-		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, id, TagResponseDto.toEntityDto(tags));
+		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, id, TagResponseDto.toEntityDto(tags), null);
 		List<PostResponseDto> content = new ArrayList<>();
 		content.add(postResponseDto);
 
@@ -109,34 +117,36 @@ public class PostControllerTest {
 		when(postService.findAll(pageable)).thenReturn(page);
 
 		// when
-		ResultActions ra = mvc.perform(get("/v1/post"));
+		ResultActions ra = mvc.perform(get("/v1/post").with(SecurityMockMvcRequestPostProcessors.csrf()));
 		// then
 		ra.andExpect(status().isOk()).andExpect(jsonPath("$.size").value(20))
 				.andExpect(jsonPath("$.totalElements").value(1)).andExpect(jsonPath("$.content[0].title").value(title));
 
 	}
 
-	@WithMockUser(roles = "USER")
+	@WithMockUser
 	@Test
 	public void testGetPostConrtoller() throws Exception {
 		// given
 		String path = "/v1/post/" + id;
 		List<Tag> tags = new ArrayList<>();
-		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
 
-		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, id, TagResponseDto.toEntityDto(tags));
+		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, id, TagResponseDto.toEntityDto(tags), false);
 		when(postService.findById(anyLong())).thenReturn(postResponseDto);
-
+		when(postService.postLikeFindById(id, id)).thenReturn(true);
+		
+		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(id, "test@test.com", Role.USER);
+		Authentication authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null, Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
 		// when
-		ResultActions ra = mvc.perform(get(path));
+		ResultActions ra = mvc.perform(get(path).with(SecurityMockMvcRequestPostProcessors.csrf()).with(SecurityMockMvcRequestPostProcessors.authentication(authentication)));
 
 		// then
 		ra.andExpect(status().isOk())
 				.andExpect(jsonPath("$.createdDate").value(time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
 				.andExpect(jsonPath("$.modifiedDate").value(time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
 				.andExpect(jsonPath("$.title").value(title)).andExpect(jsonPath("$.content").value(content))
-				.andExpect(jsonPath("$.userId").value(1L));
+				.andExpect(jsonPath("$.userId").value(1L)).andExpect(jsonPath("$.like").value(true));
 	}
 
 	@Test
@@ -155,7 +165,7 @@ public class PostControllerTest {
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
 
-		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, id, TagResponseDto.toEntityDto(tags));
+		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, id, TagResponseDto.toEntityDto(tags), null);
 		when(postService.findById(id)).thenReturn(postResponseDto);
 
 		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(1L, "test@test.com", Role.USER);
@@ -169,24 +179,54 @@ public class PostControllerTest {
 		ra.andExpect(status().isNoContent());
 	}
 
-	@WithMockUser(roles = "ADMIN")
 	@Test
 	public void testDeletePostController() throws Exception {
 		// given
 		String path = "/v1/post/1";
+		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(1L, "test@test.com", Role.USER);
+		Authentication authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null, Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
+
+		
+		// when
+		ResultActions ra = mvc.perform(delete(path)
+				.with(SecurityMockMvcRequestPostProcessors.csrf())
+				.with(SecurityMockMvcRequestPostProcessors.authentication(authentication)));
+
+		// then
+		ra.andExpect(status().isNoContent());
+	}
+	
+	@Test
+	public void testSavePostLikeByPostConrtoller() throws Exception {
+		// given
+		String path = "/v1/post/like/1";
+		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(1L, "test@test.com", Role.USER);
+		Authentication authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null, Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
+		// when
+		ResultActions ra = mvc.perform(post(path)
+				.with(SecurityMockMvcRequestPostProcessors.csrf())
+				.with(SecurityMockMvcRequestPostProcessors.authentication(authentication)));
+//				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(postSaveRequestDto)));
+
+		// then
+		ra.andExpect(status().isCreated());
+	}
+	
+	
+	@Test
+	public void testDeletePostLikeByPostController() throws Exception {
+		// given
+		String path = "/v1/post/like/1";
+		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(1L, "test@test.com", Role.USER);
+		Authentication authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null, Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
 
 		// when
-		ResultActions ra = mvc.perform(delete(path).with(SecurityMockMvcRequestPostProcessors.csrf()));
+		ResultActions ra = mvc.perform(delete(path)
+				.with(SecurityMockMvcRequestPostProcessors.authentication(authentication))
+				.with(SecurityMockMvcRequestPostProcessors.csrf()));
 
 		// then
 		ra.andExpect(status().isNoContent());
 	}
 
-	public static String asJsonString(final Object obj) {
-		try {
-			return new ObjectMapper().writeValueAsString(obj);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
 }
