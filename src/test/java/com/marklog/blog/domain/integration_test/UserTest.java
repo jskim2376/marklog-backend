@@ -72,16 +72,16 @@ public class UserTest {
 	}
 
 	public Long createUser(String emailName) {
-		User user = new User(name, emailName+email, picture, title, introduce, Role.USER);
+		User user = new User(name, emailName + email, picture, title, introduce, Role.USER);
 		try {
-			user = userRepository.findByEmail(email).orElseThrow(()->new IllegalArgumentException("존재하지않는 email입니다."));
-		}catch(IllegalArgumentException e){
+			user = userRepository.findByEmail(email)
+					.orElseThrow(() -> new IllegalArgumentException("존재하지않는 email입니다."));
+		} catch (IllegalArgumentException e) {
 			userRepository.save(user);
 		}
 		accessTokenUser = jwtTokenProvider.createAccessToken(user.getId(), email);
 		return user.getId();
 	}
-
 
 	@Test
 	public void testGetAllUser() throws JsonMappingException, JsonProcessingException, JSONException {
@@ -89,11 +89,8 @@ public class UserTest {
 		Long id = createUser("testAllGetUser");
 
 		// when
-		ResponseEntity<String> responseEntity = wc.get().uri(uri)
-				.header("Authorization", "Bearer " + accessTokenAdmin)
-				.attribute("page", 0)
-				.attribute("size", 20)
-				.retrieve().toEntity(String.class).block();
+		ResponseEntity<String> responseEntity = wc.get().uri(uri).header("Authorization", "Bearer " + accessTokenAdmin)
+				.attribute("page", 0).attribute("size", 20).retrieve().toEntity(String.class).block();
 
 		// then-ready
 		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
@@ -106,7 +103,6 @@ public class UserTest {
 		assertThat(getName).isEqualTo(name);
 	}
 
-
 	@Test
 	public void testGetUser() throws JsonMappingException, JsonProcessingException {
 		// given
@@ -116,13 +112,12 @@ public class UserTest {
 		ResponseEntity<String> responseEntity = wc.get().uri(uri + id).retrieve().toEntity(String.class).block();
 
 		// then-ready
-		UserResponseDto testUserResponseDto = objectMapper.readValue(responseEntity.getBody(),
-				UserResponseDto.class);
+		UserResponseDto testUserResponseDto = objectMapper.readValue(responseEntity.getBody(), UserResponseDto.class);
 
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(testUserResponseDto.getCreatedDate()).isEqualTo(testUserResponseDto.getModifiedDate());
-		assertThat(testUserResponseDto.getEmail()).isEqualTo("testGetUser"+email);
+		assertThat(testUserResponseDto.getEmail()).isEqualTo("testGetUser" + email);
 		assertThat(testUserResponseDto.getName()).isEqualTo(name);
 		assertThat(testUserResponseDto.getPicture()).isEqualTo(picture);
 		assertThat(testUserResponseDto.getTitle()).isEqualTo(title);
@@ -143,26 +138,28 @@ public class UserTest {
 	public void testPutUser() throws JsonMappingException, JsonProcessingException {
 		// given
 		Long id = createUser("testPutUser");
-		UserUpdateRequestDto userUpdateRequestDto = new UserUpdateRequestDto(name+2, picture+2, title+2, introduce+2);
+		UserUpdateRequestDto userUpdateRequestDto = new UserUpdateRequestDto(name + 2, picture + 2, title + 2,
+				introduce + 2);
 		// when
 		ResponseEntity<String> putResponseEntity = wc.put().uri(uri + id)
 				.header("Authorization", "Bearer " + accessTokenUser)
 				.body(Mono.just(userUpdateRequestDto), PostUpdateRequestDto.class)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 
-		//then-ready
+		// then-ready
 		HttpHeaders header = putResponseEntity.getHeaders();
 
 		// then
 		assertThat(putResponseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-		assertThat(header.getLocation().toString()).isEqualTo(uri+id);
+		assertThat(header.getLocation().toString()).isEqualTo(uri + id);
 	}
 
 	@Test
 	public void testPutUser_해당하는_User가_없을때() throws JsonMappingException, JsonProcessingException {
 		// given
 		Long id = createUser("testPutUser_해당하는_User가_없을때");
-		UserUpdateRequestDto userUpdateRequestDto = new UserUpdateRequestDto(name+2, picture+2, title+2, introduce+2);
+		UserUpdateRequestDto userUpdateRequestDto = new UserUpdateRequestDto(name + 2, picture + 2, title + 2,
+				introduce + 2);
 
 		// when
 		ResponseEntity<String> putResponseEntity = wc.put().uri(uri + 0L)
@@ -177,7 +174,8 @@ public class UserTest {
 	public void testPutUser_인증이_없을때() throws JsonMappingException, JsonProcessingException {
 		// given
 		Long id = createUser("testPutUser_인증이_없을때");
-		UserUpdateRequestDto userUpdateRequestDto = new UserUpdateRequestDto(name+2, picture+2, title+2, introduce+2);
+		UserUpdateRequestDto userUpdateRequestDto = new UserUpdateRequestDto(name + 2, picture + 2, title + 2,
+				introduce + 2);
 		// when
 		ResponseEntity<String> responseEntity = wc.put().uri(uri + id)
 				.body(Mono.just(userUpdateRequestDto), PostUpdateRequestDto.class)
@@ -189,8 +187,9 @@ public class UserTest {
 	@Test
 	public void testPutUser_본인소유가_아닐때() throws JsonMappingException, JsonProcessingException {
 		// given
-		Long id=createUser("testPutUser_본인소유가_아닐때");
-		UserUpdateRequestDto userUpdateRequestDto = new UserUpdateRequestDto(name+2, picture+2, title+2, introduce+2);
+		Long id = createUser("testPutUser_본인소유가_아닐때");
+		UserUpdateRequestDto userUpdateRequestDto = new UserUpdateRequestDto(name + 2, picture + 2, title + 2,
+				introduce + 2);
 		// when
 		ResponseEntity<String> responseEntity = wc.put().uri(uri + id)
 				.header("Authorization", "Bearer " + accessTokenSub)
@@ -202,20 +201,21 @@ public class UserTest {
 
 	@Test
 	public void testPutUser_ADMIN일때() throws JsonMappingException, JsonProcessingException {
-		//given
-		Long id=createUser("testPutUser_ADMIN일때");
-		UserUpdateRequestDto userUpdateRequestDto = new UserUpdateRequestDto(name+2, picture+2, title+2, introduce+2);
+		// given
+		Long id = createUser("testPutUser_ADMIN일때");
+		UserUpdateRequestDto userUpdateRequestDto = new UserUpdateRequestDto(name + 2, picture + 2, title + 2,
+				introduce + 2);
 		// when
 		ResponseEntity<String> responseEntity = wc.put().uri(uri + id)
 				.header("Authorization", "Bearer " + accessTokenAdmin)
 				.body(Mono.just(userUpdateRequestDto), PostUpdateRequestDto.class)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 
-		//then-ready
+		// then-ready
 		HttpHeaders header = responseEntity.getHeaders();
 
 		// then
-		assertThat(header.getLocation().toString()).isEqualTo(uri+id);
+		assertThat(header.getLocation().toString()).isEqualTo(uri + id);
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 	}
 

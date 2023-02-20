@@ -1,7 +1,9 @@
 package com.marklog.blog.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +21,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.marklog.blog.config.auth.dto.OAuthAttributes;
+import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
 import com.marklog.blog.controller.dto.UserResponseDto;
 import com.marklog.blog.controller.dto.UserUpdateRequestDto;
 import com.marklog.blog.domain.user.Role;
@@ -110,7 +114,43 @@ public class UserServiceTest {
 
 		//then
 		Mockito.verify(userRepository).deleteById(id);
-
 	}
 
+	@Test
+	public void testSaveOrUpdate() {
+		//given
+		UserService userService = new UserService(userRepository);
+		OAuthAttributes oAuthAttributes = new OAuthAttributes(null, "id", name, email, picture, title);
+		
+		User user = new User(name, email, picture, title, introduce, Role.USER);
+		Optional<User> optinal = Optional.of(user);
+		when(userRepository.findByEmail(anyString())).thenReturn(optinal);
+		when(userRepository.save(any())).thenReturn(user);
+
+		//when
+		User returnUser = userService.saveOrUpdate(oAuthAttributes);
+
+		//then
+		assertThat(returnUser.getName()).isEqualTo(name);
+		assertThat(returnUser.getEmail()).isEqualTo(email);
+		assertThat(returnUser.getPicture()).isEqualTo(picture);
+		assertThat(returnUser.getTitle()).isEqualTo(title);
+	}
+	
+
+	@Test
+	public void testFindAuthenticationDtoById() {
+		//given
+		UserService userService = new UserService(userRepository);
+		Optional<User> optinal = Optional.of(new User(name, email, picture, title, introduce, Role.USER));
+
+		when(userRepository.findById(anyLong())).thenReturn(optinal);
+
+		//when
+		UserAuthenticationDto user = userService.findAuthenticationDtoById(id);
+
+		//then
+		assertThat(user.getEmail()).isEqualTo(email);
+		assertThat(user.getRole()).isEqualTo(Role.USER);
+	}
 }

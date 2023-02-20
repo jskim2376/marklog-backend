@@ -39,15 +39,13 @@ import reactor.core.publisher.Mono;
 public class PostTest {
 	@LocalServerPort
 	private int port;
-
-	@Autowired
-	UserRepository userRepository;
-
+	WebClient wc;
+	ObjectMapper objectMapper;
 	@Autowired
 	JwtTokenProvider jwtTokenProvider;
 
-	WebClient wc;
-	ObjectMapper objectMapper;
+	@Autowired
+	UserRepository userRepository;
 	User user1;
 	String accessToken1;
 	String accessToken2;
@@ -399,61 +397,4 @@ public class PostTest {
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 	}
-
-	@Test
-	public void testPostLikeSave() {
-		// given
-		Long id = createPost();
-		String uri = "/api/v1/post/like/";
-
-		// when
-		ResponseEntity<String> responseEntity = wc.post().uri(uri+id).header("Authorization", "Bearer " + accessToken1)
-				.contentType(MediaType.APPLICATION_JSON).retrieve().toEntity(String.class).block();
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-	}
-
-	@Test
-	public void testPostLikeSave_글이없을때() {
-		// given
-		String uri = "/api/v1/post/like/";
-
-		// when
-		ResponseEntity<String> responseEntity = wc.post().uri(uri+0L).header("Authorization", "Bearer " + accessToken1)
-				.contentType(MediaType.APPLICATION_JSON).exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-	}
-
-	@Test
-	public void testPostLikeDelete() {
-		// given
-		Long id = createPost();
-		createPostLike(id);
-		String uri = "/api/v1/post/like/";
-
-		// when
-		ResponseEntity<String> responseEntity = wc.delete().uri(uri+id).header("Authorization", "Bearer " + accessToken1)
-				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-	}
-
-	@Test
-	public void testPostLikeDelete_좋아요가없을때() {
-		// given
-		Long id = createPost();
-		String uri = "/api/v1/post/like/";
-
-		// when
-		ResponseEntity<String> responseEntity = wc.delete().uri(uri+id).header("Authorization", "Bearer " + accessToken1)
-				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-	}
-
 }

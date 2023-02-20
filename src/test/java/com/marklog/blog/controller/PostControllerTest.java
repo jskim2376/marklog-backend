@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -18,6 +19,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -26,6 +28,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -54,7 +57,7 @@ import com.marklog.blog.service.PostService;
 public class PostControllerTest {
 	@Autowired
 	private MockMvc mvc;
-
+	
 	@MockBean
 	private PostService postService;
 
@@ -96,9 +99,8 @@ public class PostControllerTest {
 				.with(SecurityMockMvcRequestPostProcessors.csrf())
 				.with(SecurityMockMvcRequestPostProcessors.authentication(authentication))
 				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(postSaveRequestDto)));
-
 		// then
-		ra.andExpect(status().isCreated());
+		ra.andExpect(status().isCreated()).andExpect(header().exists(HttpHeaders.LOCATION));
 	}
 
 	@WithMockUser
@@ -179,7 +181,7 @@ public class PostControllerTest {
 				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(postUpdateRequestDto)));
 
 		// then
-		ra.andExpect(status().isNoContent());
+		ra.andExpect(status().isNoContent()).andExpect(header().exists(HttpHeaders.LOCATION));
 	}
 
 	@Test
