@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 
 import com.marklog.blog.domain.BaseTimeEntity;
 import com.marklog.blog.domain.post.Post;
+import com.marklog.blog.domain.user.User;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -30,8 +31,17 @@ public class PostComment extends BaseTimeEntity{
 	@JoinColumn(name = "POST_ID")
 	private Post post;
 
+	@ManyToOne
+	@JoinColumn(name = "USER_ID")
+	private User user;
+
 	@Builder
-	public PostComment(String content) {
+	public PostComment(Post post, User user, String content) {
 		this.content = content;
+		this.post = post;
+	}
+	
+	public void update(String content) {
+		this.content=content;
 	}
 }

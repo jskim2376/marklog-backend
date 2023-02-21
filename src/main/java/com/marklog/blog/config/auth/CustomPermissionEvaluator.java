@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
 import com.marklog.blog.controller.dto.PostResponseDto;
+import com.marklog.blog.domain.post.comment.PostComment;
+import com.marklog.blog.service.PostCommentService;
 import com.marklog.blog.service.PostService;
 
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @Component
 public class CustomPermissionEvaluator implements PermissionEvaluator {
 	private final PostService postService;
+	private final PostCommentService postCommentService;
 
 	@Override
 	public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
@@ -36,6 +39,16 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 				if (postUserId == authUserId) {
 					return true;
 				}
+			}
+			else if(targetType.equals("postComment")){
+				Long postCommentId = (Long) targetId;
+				PostComment postComment = postCommentService.findById(postCommentId);
+				Long postCommentUserId = postComment.getUser().getId();
+				Long authUserId = ((UserAuthenticationDto) authentication.getPrincipal()).getId();
+				if (postCommentUserId == authUserId) {
+					return true;
+				}
+				
 			}
 		}
 		return false;
