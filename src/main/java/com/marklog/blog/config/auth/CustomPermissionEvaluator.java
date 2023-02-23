@@ -1,12 +1,14 @@
 package com.marklog.blog.config.auth;
 
 import java.io.Serializable;
+import java.util.NoSuchElementException;
 
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
+import com.marklog.blog.controller.dto.PostCommentResponseDto;
 import com.marklog.blog.controller.dto.PostResponseDto;
 import com.marklog.blog.domain.post.comment.PostComment;
 import com.marklog.blog.service.PostCommentService;
@@ -33,20 +35,28 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 		if (authentication != null) {
 			if (targetType.equals("post")) {
 				Long postId = (Long) targetId;
-				PostResponseDto postResponseDto = postService.findById(postId);
-				Long postUserId = postResponseDto.getUserId();
-				Long authUserId = ((UserAuthenticationDto) authentication.getPrincipal()).getId();
-				if (postUserId == authUserId) {
-					return true;
+				try {
+					PostResponseDto postResponseDto = postService.findById(postId);
+					Long postUserId = postResponseDto.getUserId();
+					Long authUserId = ((UserAuthenticationDto) authentication.getPrincipal()).getId();
+					if (postUserId == authUserId) {
+						return true;
+					}
+				}catch(NoSuchElementException e) {
+					return false;
 				}
 			}
 			else if(targetType.equals("postComment")){
+				try {
 				Long postCommentId = (Long) targetId;
-				PostComment postComment = postCommentService.findById(postCommentId);
-				Long postCommentUserId = postComment.getUser().getId();
+				PostCommentResponseDto postComment = postCommentService.findById(postCommentId);
+				Long postCommentUserId = postComment.getUserId();
 				Long authUserId = ((UserAuthenticationDto) authentication.getPrincipal()).getId();
 				if (postCommentUserId == authUserId) {
 					return true;
+				}
+				}catch(NoSuchElementException e) {
+					return false;
 				}
 				
 			}

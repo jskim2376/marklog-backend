@@ -62,7 +62,7 @@ public class PostTest {
 		objectMapper.registerModule(new JavaTimeModule());
 
 		String name = "name";
-		String email = "postTbkjsest@gmail.com";
+		String email = "postTbkjaasest@gmail.com";
 		String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
 		String title = "title";
 		String introduce = "introduce";
@@ -223,7 +223,7 @@ public class PostTest {
 		// given
 		// when
 		ResponseEntity<String> responseEntity = wc.get().uri(uri + 0L)
-				.header("Authorization", "Bearer " + accessTokenAdmin)
+				.header("Authorization", "Bearer " + accessToken1)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -267,11 +267,11 @@ public class PostTest {
 
 		// when
 		ResponseEntity<String> responseEntity = wc.put().uri(uri + 0L)
-				.header("Authorization", "Bearer " + accessTokenAdmin).contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + accessToken1).contentType(MediaType.APPLICATION_JSON)
 				.bodyValue(objectMapper.writeValueAsString(postUpdateRequestDto))
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 	}
 
 	@Test

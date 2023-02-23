@@ -2,11 +2,10 @@ package com.marklog.blog.service;
 
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.marklog.blog.controller.dto.PostResponseDto;
 import com.marklog.blog.controller.dto.PostSaveRequestDto;
@@ -21,13 +20,13 @@ import com.marklog.blog.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+@Transactional
 @Service
 public class PostService {
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
 	private final TagRepository tagRepository;
 
-	@Transactional
 	public Long save(Long userId, PostSaveRequestDto requestDto) {
 		User user = userRepository.getReferenceById(userId);
 		List<String> tagNames = requestDto.getTagList();
@@ -44,7 +43,7 @@ public class PostService {
 	}
 
 	public PostResponseDto findById(Long id) {
-		Post entity = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
+		Post entity = postRepository.findById(id).orElseThrow();
 		return new PostResponseDto(entity);
 	}
 
@@ -53,9 +52,8 @@ public class PostService {
 		return pageUserResponseDto;
 	}
 
-	@Transactional
 	public void update(Long id, PostUpdateRequestDto requestDto) {
-		Post post = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
+		Post post = postRepository.findById(id).orElseThrow();
 		post.update(requestDto.getTitle(), requestDto.getContent());
 
 		List<Tag> tags = tagRepository.findByPost(post);

@@ -1,5 +1,7 @@
 package com.marklog.blog.controller;
 
+import java.util.NoSuchElementException;
+
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -61,7 +63,7 @@ public class PostController {
 			}
 
 			return new ResponseEntity<>(postResponseDto, HttpStatus.OK);
-		} catch (IllegalArgumentException e) {
+		} catch (NoSuchElementException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
@@ -74,13 +76,12 @@ public class PostController {
 			HttpHeaders header = new HttpHeaders();
 			header.add(HttpHeaders.LOCATION, "/api/v1/post/" + id);
 			return new ResponseEntity<>(header, HttpStatus.NO_CONTENT);
-		} catch (IllegalArgumentException e) {
+		} catch (NoSuchElementException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 
 	}
 
-	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or hasPermission(#id, 'post',null))")
 	@DeleteMapping("/post/{id}")
 	public ResponseEntity<?> delete(@PathVariable Long id) {
