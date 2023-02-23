@@ -36,6 +36,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.marklog.blog.config.auth.JwtTokenProvider;
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
 import com.marklog.blog.controller.dto.PostCommentRequestDto;
+import com.marklog.blog.controller.dto.PostCommentResponseDto;
+import com.marklog.blog.controller.dto.PostCommentUpdateRequestDto;
 import com.marklog.blog.domain.post.comment.PostComment;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.service.PostCommentService;
@@ -69,11 +71,39 @@ public class PostCommentControllerTest {
 				Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
 	}
 
+	@WithMockUser
+	@Test
+	public void testGetAllByPostCommentControllerUserConrtoller() throws Exception {
+		// given
+		String path = "/v1/post/1/comment";
+		PostCommentResponseDto postCommentResponseDtoSub =	new PostCommentResponseDto(id, "name", commentContent+"sub", null);
+		List<PostCommentResponseDto> child = new ArrayList<>();
+		child.add(postCommentResponseDtoSub);
+		
+		PostCommentResponseDto postCommentResponseDto =	new PostCommentResponseDto(id, "name", commentContent, child);
+		PostCommentResponseDto postCommentResponseDto2 =	new PostCommentResponseDto(id, "name", commentContent+2, null);
+
+		List<PostCommentResponseDto> commentResponseDtos = new ArrayList<>();
+		commentResponseDtos.add(postCommentResponseDto);
+		commentResponseDtos.add(postCommentResponseDto2);
+		
+		when(postCommentService.findAll(postId)).thenReturn(commentResponseDtos);
+
+		// when
+		ResultActions ra = mvc.perform(get(path).with(SecurityMockMvcRequestPostProcessors.csrf()));
+		// then
+		ra.andExpect(status().isOk()).andExpect(jsonPath("$[0].content").value(commentContent));
+		ra.andExpect(status().isOk()).andExpect(jsonPath("$[0].childList[0].content").value(commentContent+"sub"));
+		ra.andExpect(status().isOk()).andExpect(jsonPath("$[1].content").value(commentContent+2));
+		
+
+	}
+	
 	@Test
 	public void testPostPostCommentController() throws Exception {
 		// given
 		String path = "/v1/post/1/comment";
-		PostCommentRequestDto postCommentRequestDto = new PostCommentRequestDto(commentContent);
+		PostCommentRequestDto postCommentRequestDto = new PostCommentRequestDto(null, commentContent);
 		when(postCommentService.save(anyLong(), anyLong(), any(PostCommentRequestDto.class))).thenReturn(id);
 
 		// when
@@ -85,30 +115,17 @@ public class PostCommentControllerTest {
 		ra.andExpect(status().isCreated()).andExpect(header().exists(HttpHeaders.LOCATION));
 	}
 
-	@WithMockUser
-	@Test
-	public void testGetAllByPostCommentControllerUserConrtoller() throws Exception {
-		// given
-		String path = "/v1/post/1/comment";
-		List<PostComment> postComments = new ArrayList<>();
-		postComments.add(new PostComment(null, null, commentContent));
-		postComments.add(new PostComment(null, null, commentContent + 2));
-		when(postCommentService.findAll(postId)).thenReturn(postComments);
-
-		// when
-		ResultActions ra = mvc.perform(get(path).with(SecurityMockMvcRequestPostProcessors.csrf()));
-		// then
-		ra.andExpect(status().isOk()).andExpect(jsonPath("$[0].content").value(commentContent));
-
-	}
 
 	@WithMockUser
 	@Test
 	public void testGetPostConrtoller() throws Exception {
 		// given
 		String path = "/v1/post/1/comment/1";
-		PostComment postComment = new PostComment(null, null, commentContent);
-		when(postCommentService.findById(id)).thenReturn(postComment);
+		PostCommentResponseDto postCommentResponseDtoSub =	new PostCommentResponseDto(id, "name", commentContent+"sub", null);
+		List<PostCommentResponseDto> child = new ArrayList<>();
+		child.add(postCommentResponseDtoSub);
+		PostCommentResponseDto postCommentResponseDto =	new PostCommentResponseDto(id, "name", commentContent, child);
+		when(postCommentService.findById(id)).thenReturn(postCommentResponseDto);
 
 		// when
 		ResultActions ra = mvc.perform(get(path).with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -116,6 +133,8 @@ public class PostCommentControllerTest {
 
 		// then
 		ra.andExpect(status().isOk()).andExpect(jsonPath("$.content").value(commentContent));
+		ra.andExpect(status().isOk()).andExpect(jsonPath("$.childList[0].content").value(commentContent+"sub"));
+
 	}
 
 	public void testPutPostCommentController() throws Exception {
@@ -126,7 +145,7 @@ public class PostCommentControllerTest {
 				Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
 
 		String updatedComment = "updated comment";
-		PostCommentRequestDto postCommentRequestDto = new PostCommentRequestDto(updatedComment);
+		PostCommentUpdateRequestDto postCommentRequestDto = new PostCommentUpdateRequestDto(updatedComment);
 
 		// when
 		ResultActions ra = mvc.perform(put(path).with(SecurityMockMvcRequestPostProcessors.csrf())

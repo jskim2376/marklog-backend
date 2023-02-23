@@ -26,7 +26,7 @@ import com.marklog.blog.domain.user.UserRepository;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PostidTest {
 	@LocalServerPort
-	private int port;
+	private int port; 	
 	WebClient wc;
 	ObjectMapper objectMapper;
 	
@@ -51,7 +51,7 @@ public class PostidTest {
 		objectMapper.registerModule(new JavaTimeModule());
 
 		String name = "name";
-		String email = "postTbkjsest@gmail.com";
+		String email = "postTbkj111sest@gmail.com";
 		String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
 		String title = "title";
 		String introduce = "introduce";

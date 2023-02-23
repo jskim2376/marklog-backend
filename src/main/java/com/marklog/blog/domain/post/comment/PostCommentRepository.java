@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.marklog.blog.domain.post.Post;
 
 public interface PostCommentRepository extends JpaRepository<PostComment, Long>{
-	List<PostComment> findAllByPost(Post post);
+	List<PostComment> findAllByPostAndParentIsNull(Post post);
 }

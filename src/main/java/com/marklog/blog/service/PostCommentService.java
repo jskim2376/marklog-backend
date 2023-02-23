@@ -1,13 +1,15 @@
 package com.marklog.blog.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import javax.transaction.Transactional;
 
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.marklog.blog.controller.dto.PostCommentRequestDto;
+import com.marklog.blog.controller.dto.PostCommentResponseDto;
+import com.marklog.blog.controller.dto.PostCommentUpdateRequestDto;
 import com.marklog.blog.domain.post.Post;
 import com.marklog.blog.domain.post.PostRepository;
 import com.marklog.blog.domain.post.comment.PostComment;
@@ -17,46 +19,50 @@ import com.marklog.blog.domain.user.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
-@Service
 @RequiredArgsConstructor
+@Transactional
+@Service
 public class PostCommentService {
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
 	private final PostCommentRepository postCommentRepository;
 
-	@Transactional
 	public Long save(Long postId, Long userId, PostCommentRequestDto requestDto) {
 		Post post = postRepository.getReferenceById(postId);
 		User user = userRepository.getReferenceById(userId);
-		PostComment postComment = postCommentRepository.save(new PostComment(post, user, requestDto.getContent()));
+
+		PostComment postComment;
+		if (requestDto.getParentComment() == null) {
+			postComment = new PostComment(post, user, requestDto.getContent());
+		} else {
+			postComment = new PostComment(post, user, requestDto.getContent());
+			PostComment parentPostComment = postCommentRepository.getReferenceById(requestDto.getParentComment());
+			postComment.setParent(parentPostComment);
+		}
+		postComment = postCommentRepository.save(postComment);
 		return postComment.getId();
 	}
-	
-	public List<PostComment> findAll(Long postId){
+
+	public List<PostCommentResponseDto> findAll(Long postId) {
 		Post post = postRepository.getReferenceById(postId);
-		return postCommentRepository.findAllByPost(post);
+		List<PostComment> comments = postCommentRepository.findAllByPostAndParentIsNull(post);
+		List<PostCommentResponseDto> postCommentResponseDtos = comments.stream().map(PostCommentResponseDto::toDto)
+				.collect(Collectors.toList());
+		return postCommentResponseDtos;
 	}
 
-	@Transactional
-	public PostComment findById(Long id) {
-		PostComment postComment = postCommentRepository.findById(id)
-				.orElseThrow(() -> new IllegalArgumentException("존재하지않는 post comment id입니다=" + id));
-		return postComment;
+	public PostCommentResponseDto findById(Long id) {
+		PostComment postComment = postCommentRepository.findById(id).orElseThrow();
+		PostCommentResponseDto postCommentResponseDto = PostCommentResponseDto.toDto(postComment);
+		return postCommentResponseDto;
 	}
 
-	@Transactional
-	public void update(Long id, PostCommentRequestDto requestDto) {
-		PostComment postComment = postCommentRepository.findById(id)
-				.orElseThrow(() -> new IllegalArgumentException("존재하지않는 post comment id입니다=" + id));
-
+	public void update(Long id, PostCommentUpdateRequestDto requestDto) {
+		PostComment postComment = postCommentRepository.findById(id).orElseThrow();
 		postComment.update(requestDto.getContent());
 	}
 
-
-	@Transactional
 	public void delete(Long id) {
-		PostComment postComment = postCommentRepository.findById(id)
-				.orElseThrow(() -> new IllegalArgumentException("존재하지않는 post comment id입니다=" + id));
-		postCommentRepository.delete(postComment);
+		postCommentRepository.deleteById(id);
 	}
 }
