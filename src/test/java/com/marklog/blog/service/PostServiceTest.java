@@ -31,6 +31,7 @@ import com.marklog.blog.domain.tag.TagRepository;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
+import com.querydsl.core.types.Predicate;
 
 @ExtendWith(MockitoExtension.class)
 public class PostServiceTest {
@@ -102,13 +103,13 @@ public class PostServiceTest {
 		when(postRepository.findAll(pageable)).thenReturn(page);
 
 		// when
-		Page<PostResponseDto> pageUserResponseDto = postService.findAll(pageable);
+		Page<PostResponseDto> postResponsePage = postService.findAll(pageable);
 
 		// then
-		assertThat(pageUserResponseDto.getContent().get(0).getTitle()).isEqualTo(title);
-		assertThat(pageUserResponseDto.getContent().get(0).getContent()).isEqualTo(content);
-		assertThat(pageUserResponseDto.getSize()).isEqualTo(size);
-		assertThat(pageUserResponseDto.getTotalElements()).isEqualTo(1);
+		assertThat(postResponsePage.getContent().get(0).getTitle()).isEqualTo(title);
+		assertThat(postResponsePage.getContent().get(0).getContent()).isEqualTo(content);
+		assertThat(postResponsePage.getSize()).isEqualTo(size);
+		assertThat(postResponsePage.getTotalElements()).isEqualTo(1);
 	}
 
 	@Test
@@ -165,5 +166,30 @@ public class PostServiceTest {
 		// then
 		verify(postRepository).deleteById(postId);
 	}
+	
+	@Test
+	public void testSearchPostService() {
+		
+		// given
+		String[] keywords = {"content","hello"};
+		int pageCount = 0;
+		int size = 20;
+		Pageable pageable = PageRequest.of(pageCount, size);
+
+		List<Post> contents = new ArrayList<>();
+		contents.add(post);
+		Page<Post> page = new PageImpl<>(contents, pageable, 1);
+		when(postRepository.findAll(any(Predicate.class),any(Pageable.class))).thenReturn(page);
+		
+		// when
+		Page<PostResponseDto> postResponsePage = postService.search(pageable, keywords);
+
+		// then
+		assertThat(postResponsePage.getContent().get(0).getTitle()).isEqualTo(title);
+		assertThat(postResponsePage.getContent().get(0).getContent()).isEqualTo(content);
+		assertThat(postResponsePage.getSize()).isEqualTo(size);
+		assertThat(postResponsePage.getTotalElements()).isEqualTo(1);
+	}
+
 
 }

@@ -105,7 +105,7 @@ public class PostControllerTest {
 
 	@WithMockUser
 	@Test
-	public void testGetAllUserConrtoller() throws Exception {
+	public void testGetAllPostConrtoller() throws Exception {
 		// given
 		List<Tag> tags = new ArrayList<>();
 		tags.add(new Tag(null, "tag1"));
@@ -125,6 +125,34 @@ public class PostControllerTest {
 		ResultActions ra = mvc.perform(get("/v1/post").with(SecurityMockMvcRequestPostProcessors.csrf()));
 		// then
 		ra.andExpect(status().isOk()).andExpect(jsonPath("$.size").value(20))
+				.andExpect(jsonPath("$.totalElements").value(1)).andExpect(jsonPath("$.content[0].title").value(title));
+
+	}
+	
+	@WithMockUser
+	@Test
+	public void testSearchPostConrtoller() throws Exception {
+		// given
+		List<Tag> tags = new ArrayList<>();
+		tags.add(new Tag(null, "tag1"));
+		tags.add(new Tag(null, "tag2"));
+
+		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, id, TagResponseDto.toEntityDto(tags), null);
+		List<PostResponseDto> content = new ArrayList<>();
+		content.add(postResponseDto);
+
+		int pageCount = 0;
+		int size = 20;
+		Pageable pageable = PageRequest.of(pageCount, size);
+		Page<PostResponseDto> page = new PageImpl<>(content, pageable, 1);
+		String text="search keyword";
+		when(postService.search(pageable, text.split(" "))).thenReturn(page);
+
+		// when
+		ResultActions ra = mvc.perform(get("/v1/post/search").param("text", text).with(SecurityMockMvcRequestPostProcessors.csrf()));
+
+		// then
+		ra.andExpect(status().isNoContent()).andExpect(jsonPath("$.size").value(20))
 				.andExpect(jsonPath("$.totalElements").value(1)).andExpect(jsonPath("$.content[0].title").value(title));
 
 	}

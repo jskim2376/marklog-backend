@@ -12,10 +12,13 @@ import com.marklog.blog.controller.dto.PostSaveRequestDto;
 import com.marklog.blog.controller.dto.PostUpdateRequestDto;
 import com.marklog.blog.domain.post.Post;
 import com.marklog.blog.domain.post.PostRepository;
+import com.marklog.blog.domain.post.QPost;
 import com.marklog.blog.domain.tag.Tag;
 import com.marklog.blog.domain.tag.TagRepository;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 
 import lombok.RequiredArgsConstructor;
 
@@ -71,5 +74,23 @@ public class PostService {
 	public void delete(Long id) {
 		postRepository.deleteById(id);
 	}
-
+	
+	public Page<PostResponseDto> search(Pageable pageable, String[] keywords){
+		QPost qpost = QPost.post;
+		
+		BooleanExpression predicate = null;
+		for(String keyword:keywords) {
+			if(predicate==null) {
+				predicate = qpost.content.containsIgnoreCase(keyword).or(qpost.title.containsIgnoreCase(keyword));
+			}
+			else {
+				predicate = predicate.or(qpost.content.containsIgnoreCase(keyword)).or(qpost.title.containsIgnoreCase(keyword));
+			}
+		}
+		
+		
+		// when
+		Page<PostResponseDto> page = postRepository.findAll(predicate, pageable).map(PostResponseDto::toDto);
+		return page;
+	}
 }

@@ -46,6 +46,7 @@ public class PostTest {
 
 	@Autowired
 	UserRepository userRepository;
+
 	User user1;
 	String accessToken1;
 	String accessToken2;
@@ -93,13 +94,24 @@ public class PostTest {
 		return Long.valueOf(location.substring(uri.length()));
 	}
 
+	public Long createPost(String title, String content) {
+		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(title, content, null);
+		ResponseEntity<String> responseEntity = wc.post().uri(uri).header("Authorization", "Bearer " + accessToken1)
+				.body(Mono.just(postSaveRequestDto), PostSaveRequestDto.class).retrieve().toEntity(String.class)
+				.block();
+
+		HttpHeaders header = responseEntity.getHeaders();
+		// then
+		String location = header.getLocation().toString();
+		return Long.valueOf(location.substring(uri.length()));
+	}
+
 	public void createPostLike(Long id) {
 		String uri = "/api/v1/post/like/";
 		// when
-		wc.post().uri(uri+id).header("Authorization", "Bearer " + accessToken1)
+		wc.post().uri(uri + id).header("Authorization", "Bearer " + accessToken1)
 				.contentType(MediaType.APPLICATION_JSON).retrieve().toEntity(String.class).block();
 	}
-
 
 	@Test
 	public void testPostPost() throws JsonMappingException, JsonProcessingException {
@@ -163,24 +175,6 @@ public class PostTest {
 	}
 
 	@Test
-	public void testGetAllPost() throws JsonMappingException, JsonProcessingException, JSONException {
-		// given
-
-		// when
-		ResponseEntity<String> responseEntity = wc.get().uri(uri).retrieve().toEntity(String.class).block();
-
-		// then-ready
-		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
-		String getTitle = jsonObject.getJSONArray("content").getJSONObject(0).getString("title");
-		Long size = jsonObject.getLong("size");
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getTitle).isEqualTo(postTitle);
-		assertThat(size).isEqualTo(20);
-	}
-
-	@Test
 	public void testGetPost() throws JsonMappingException, JsonProcessingException {
 		// given
 		Long id = createPost();
@@ -205,7 +199,8 @@ public class PostTest {
 		createPostLike(id);
 
 		// when
-		ResponseEntity<String> responseEntity = wc.get().uri(uri + id).header("Authorization", "Bearer " + accessToken1).retrieve().toEntity(String.class).block();
+		ResponseEntity<String> responseEntity = wc.get().uri(uri + id).header("Authorization", "Bearer " + accessToken1)
+				.retrieve().toEntity(String.class).block();
 
 		// then-ready
 		PostResponseDto testPostResponseDto = objectMapper.readValue(responseEntity.getBody(), PostResponseDto.class);
@@ -222,11 +217,59 @@ public class PostTest {
 	public void testGetPost_게시글이_없을때() throws JsonMappingException, JsonProcessingException {
 		// given
 		// when
-		ResponseEntity<String> responseEntity = wc.get().uri(uri + 0L)
-				.header("Authorization", "Bearer " + accessToken1)
+		ResponseEntity<String> responseEntity = wc.get().uri(uri + 0L).header("Authorization", "Bearer " + accessToken1)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+	}
+
+	@Test
+	public void testGetAllPost() throws JsonMappingException, JsonProcessingException, JSONException {
+		// given
+		String searchText = "test";
+		String searchContent = "search";
+		createPost(searchText, searchContent);
+
+		// when
+		ResponseEntity<String> responseEntity = wc.get().uri(uri).attribute("text", searchContent).retrieve()
+				.toEntity(String.class).block();
+
+		// then-ready
+		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
+		String getTitle = jsonObject.getJSONArray("content").getJSONObject(0).getString("title");
+		Long size = jsonObject.getLong("size");
+
+		// then
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getTitle).isEqualTo(postTitle);
+		assertThat(size).isEqualTo(20);
+	}
+
+	@Test
+	public void testSearchPost() throws JsonMappingException, JsonProcessingException, JSONException {
+		// given
+		String searchTitle = "search title";
+		String  searchContent = "hhhhh";
+		String text = "search";
+		createPost(searchTitle,searchContent);
+		String uri = "/api/v1/post/search";
+		// when
+		ResponseEntity<String> responseEntity = wc.get()
+				.uri(uriBuilder -> uriBuilder.path(uri).queryParam("text", text).build()).retrieve()
+				.toEntity(String.class).block();
+
+		// then-ready
+		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
+		String getTitle = jsonObject.getJSONArray("content").getJSONObject(0).getString("title");
+		String getContent = jsonObject.getJSONArray("content").getJSONObject(0).getString("content");
+
+		Long size = jsonObject.getLong("size");
+
+		// then
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getTitle).isEqualTo(searchTitle);
+		assertThat(getContent).isEqualTo(searchContent);
+		assertThat(size).isEqualTo(20);
 	}
 
 	@Test
@@ -243,7 +286,7 @@ public class PostTest {
 				.bodyValue(objectMapper.writeValueAsString(postUpdateRequestDto))
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 
-		//then-ready
+		// then-ready
 		HttpHeaders header = putResponseEntity.getHeaders();
 
 		// then
@@ -266,8 +309,8 @@ public class PostTest {
 		PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(newPostTitle, newPostContent, null);
 
 		// when
-		ResponseEntity<String> responseEntity = wc.put().uri(uri + 0L)
-				.header("Authorization", "Bearer " + accessToken1).contentType(MediaType.APPLICATION_JSON)
+		ResponseEntity<String> responseEntity = wc.put().uri(uri + 0L).header("Authorization", "Bearer " + accessToken1)
+				.contentType(MediaType.APPLICATION_JSON)
 				.bodyValue(objectMapper.writeValueAsString(postUpdateRequestDto))
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 		// then
