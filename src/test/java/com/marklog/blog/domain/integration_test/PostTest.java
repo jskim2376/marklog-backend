@@ -271,6 +271,25 @@ public class PostTest {
 		assertThat(getContent).isEqualTo(searchContent);
 		assertThat(size).isEqualTo(20);
 	}
+	
+	@Test
+	public void testSearchPost_empty() throws JsonMappingException, JsonProcessingException, JSONException {
+		// given
+		String text = "adqsadqwfwq";
+		String uri = "/api/v1/post/search";
+		// when
+		ResponseEntity<String> responseEntity = wc.get()
+				.uri(uriBuilder -> uriBuilder.path(uri).queryParam("text", text).build()).retrieve()
+				.toEntity(String.class).block();
+
+		// then-ready
+		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
+		Boolean empty = jsonObject.getBoolean("empty");
+
+		// then
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(empty).isTrue();
+	}
 
 	@Test
 	public void testPutPost() throws JsonMappingException, JsonProcessingException {
