@@ -37,13 +37,6 @@ public class PostLikeService {
 	}
 	
 	@Transactional
-	public Long getPostLikeCountByPostId(Long postId) {
-		Long postCount = postLikeRepository.getPostLikeCountByPostId(postId);
-		return postCount;
-	}
-	
-
-	@Transactional
 	public void delete(Long postId, Long userId) {
 		PostLike postLike = postLikeRepository.findById(new PostLikeIdClass(postId, userId)).orElseThrow(()->new IllegalArgumentException("존재하지않는 post id입니다="+postId));
 		postLikeRepository.delete(postLike);

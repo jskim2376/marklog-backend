@@ -98,7 +98,8 @@ public class PostController {
 	
 	@GetMapping("/post/recent")
 	public Page<PostListResponseDto> recentPost(Pageable pageable) {
-		return postService.recentPost(pageable);
+		Page<PostListResponseDto> p = postService.recentPost(pageable);
+		return p;
 	}
 	
 	

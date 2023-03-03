@@ -19,6 +19,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.marklog.blog.controller.dto.PostResponseDto;
+import com.marklog.blog.domain.postlike.PostLike;
+import com.marklog.blog.domain.postlike.PostLikeRepository;
 import com.marklog.blog.domain.tag.Tag;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
@@ -30,6 +32,9 @@ public class PostRepostioryTest {
 	@Autowired
 	PostRepository postRepository;
 
+	@Autowired
+	PostLikeRepository postLikeRepository;
+	
 	@Autowired
 	UserRepository userRepository;
 
@@ -83,9 +88,34 @@ public class PostRepostioryTest {
 		// then
 		assertThat(savedPost).isSameAs(post);
 	}
-
+	
 	@Test
-	public void testSavePostRepository_Users_optional_테스트() {
+	public void testSavePostRepository_like_count_확인() {
+		// given
+		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
+		userRepository.save(user);
+
+		List<Tag> tags = new ArrayList<>();
+		tags.add(new Tag(null, "tag1"));
+		tags.add(new Tag(null, "tag2"));
+
+		Post post = new Post(null, null, title, content, user, tags);
+		postRepository.save(post);
+		
+		// when
+		PostLike postLike = new PostLike(post, user);
+		postLikeRepository.save(postLike);
+		post.getPostLikes().add(postLike);
+		
+		//then-ready
+		Post savedPost = postRepository.findById(post.getId()).get();
+		// then
+		assertThat(savedPost.getPostLikes().size()).isEqualTo(1);
+	}
+
+	
+	@Test
+	public void testSavePostRepository_Users_없을때_테스트() {
 		// given
 		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
 

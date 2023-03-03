@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
@@ -244,6 +245,39 @@ public class PostTest {
 		assertThat(getTitle).isEqualTo(postTitle);
 		assertThat(size).isEqualTo(20);
 	}
+	
+	@Test
+	public void testRecentPost() throws JsonMappingException, JsonProcessingException, JSONException {
+		// given
+		String recentTitle = "recentPost";
+		String recentContent = "search";
+		Long postId = createPost(recentTitle, recentContent);
+		createPostLike(postId);
+		
+		// when
+		ResponseEntity<String> responseEntity = wc.get().uri(uri+"/recent").attribute("text", recentContent).retrieve()
+				.toEntity(String.class).block();
+
+		// then-ready
+		JSONObject recentPostJsonObject = null;
+		
+		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
+		JSONArray contentobj= jsonObject.getJSONArray("content");
+		for(int i=0;i<contentobj.length();i++) {
+			String jsonObjectTitle = contentobj.getJSONObject(i).getString("title");
+			if(jsonObjectTitle.equals(recentTitle)) {
+				recentPostJsonObject = contentobj.getJSONObject(i);
+			}
+		}
+		
+		// then
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(recentPostJsonObject).isNotNull();
+		assertThat(recentPostJsonObject.get("title")).isEqualTo(recentTitle);
+		assertThat(recentPostJsonObject.get("summary")).isEqualTo(recentContent);
+		assertThat(recentPostJsonObject.get("likeCount")).isEqualTo(1);
+	}
+
 
 	@Test
 	public void testSearchPost() throws JsonMappingException, JsonProcessingException, JSONException {

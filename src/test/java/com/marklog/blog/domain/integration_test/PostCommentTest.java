@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import org.json.JSONException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -159,9 +160,7 @@ public class PostCommentTest {
 	}
 
 	@Test
-	public void testFindAllByPost()
-			throws org.springframework.boot.configurationprocessor.json.JSONException,
-			JsonMappingException, JsonProcessingException {
+	public void testFindAllByPost() throws JsonMappingException, JsonProcessingException {
 		// given
 		String newContent1 = "findAllByPost_1";
 		PostComment postComment1 = createPostComment(newContent1);
@@ -186,7 +185,7 @@ public class PostCommentTest {
 
 	@Test
 	public void testFindAllByPostWithChild()
-			throws org.springframework.boot.configurationprocessor.json.JSONException,
+			throws JSONException,
 			JsonMappingException, JsonProcessingException {
 		// given
 		String newContent1 = "findAllByPost_1";

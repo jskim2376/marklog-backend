@@ -38,7 +38,7 @@ public class PostService {
 	private final TagRepository tagRepository;
 	
     private String markdownToHtml(String markdown) {
-    	Parser parser = Parser.builder().build();
+        Parser parser = Parser.builder().build();
     	Node document = parser.parse(markdown);
     	HtmlRenderer renderer = HtmlRenderer.builder().build();
     	return renderer.render(document); 
@@ -147,7 +147,6 @@ public class PostService {
 				predicate = predicate.or(qpost.content.containsIgnoreCase(keyword)).or(qpost.title.containsIgnoreCase(keyword));
 			}
 		}
-		
 		
 		// when
 		Page<PostResponseDto> page = postRepository.findAll(predicate, pageable).map(PostResponseDto::toDto);

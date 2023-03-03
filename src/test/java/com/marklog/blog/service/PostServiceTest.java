@@ -20,7 +20,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
+import com.marklog.blog.controller.dto.PostListResponseDto;
 import com.marklog.blog.controller.dto.PostResponseDto;
 import com.marklog.blog.controller.dto.PostSaveRequestDto;
 import com.marklog.blog.controller.dto.PostUpdateRequestDto;
@@ -41,6 +43,9 @@ public class PostServiceTest {
 	@Mock
 	PostRepository postRepository;
 
+	@Mock
+	PostLikeService postLikeService;
+	
 	@Mock
 	TagRepository tagRepository;
 
@@ -101,28 +106,6 @@ public class PostServiceTest {
 	}
 
 	@Test
-	public void testFinAllUserService() {
-		// given
-		List<Post> contents = new ArrayList<>();
-		contents.add(post);
-		int pageCount = 0;
-		int size = 20;
-		Pageable pageable = PageRequest.of(pageCount, size);
-		Page<Post> page = new PageImpl<>(contents, pageable, 1);
-
-		when(postRepository.findAll(pageable)).thenReturn(page);
-
-		// when
-		Page<PostResponseDto> postResponsePage = postService.findAll(pageable);
-
-		// then
-		assertThat(postResponsePage.getContent().get(0).getTitle()).isEqualTo(title);
-		assertThat(postResponsePage.getContent().get(0).getContent()).isEqualTo(content);
-		assertThat(postResponsePage.getSize()).isEqualTo(size);
-		assertThat(postResponsePage.getTotalElements()).isEqualTo(1);
-	}
-
-	@Test
 	public void testFindByIdPostService() {
 		// given
 		PostResponseDto postResponseDto = new PostResponseDto(post);
@@ -176,6 +159,50 @@ public class PostServiceTest {
 		// then
 		verify(postRepository).deleteById(postId);
 	}
+	
+	@Test
+	public void testFinAllUserService() {
+		// given
+		List<Post> contents = new ArrayList<>();
+		contents.add(post);
+		int pageCount = 0;
+		int size = 20;
+		Pageable pageable = PageRequest.of(pageCount, size);
+		Page<Post> page = new PageImpl<>(contents, pageable, 1);
+
+		when(postRepository.findAll(pageable)).thenReturn(page);
+
+		// when
+		Page<PostResponseDto> postResponsePage = postService.findAll(pageable);
+
+		// then
+		assertThat(postResponsePage.getContent().get(0).getTitle()).isEqualTo(title);
+		assertThat(postResponsePage.getContent().get(0).getContent()).isEqualTo(content);
+		assertThat(postResponsePage.getSize()).isEqualTo(size);
+		assertThat(postResponsePage.getTotalElements()).isEqualTo(1);
+	}
+	
+	@Test
+	public void testRescentPost() {
+		// given
+		List<Post> contents = new ArrayList<>();
+		contents.add(post);
+		int pageCount = 0;
+		int size = 20;
+		Pageable pageable = PageRequest.of(pageCount, size, Sort.by("id").descending());
+		Page<Post> page = new PageImpl<>(contents, pageable, 1);
+
+		when(postRepository.findAll(pageable)).thenReturn(page);
+
+		// when
+		Page<PostListResponseDto> postResponsePage = postService.recentPost(pageable);
+
+		// then
+		assertThat(postResponsePage.getContent().get(0).getTitle()).isEqualTo(title);
+		assertThat(postResponsePage.getSize()).isEqualTo(size);
+		assertThat(postResponsePage.getTotalElements()).isEqualTo(1);
+	}
+
 	
 	@Test
 	public void testSearchPostService() {
