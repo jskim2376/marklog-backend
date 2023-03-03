@@ -52,6 +52,28 @@ public class PostLikeRepositoryTest {
 		//then
 		assertThat(returnPostLike).usingRecursiveComparison().isEqualTo(postLike);
 	}
+	
+	@Test
+	public void testGetPostCountByPostId() {
+		//given
+
+		User user = new User(name, email, picture, title, introduce, Role.USER);
+		userRepository.save(user);
+
+		Post post = new Post(null,null,title, content, user, null);
+		postRepository.save(post);
+
+
+		PostLike postLike = new PostLike(post, user);
+		postLikeRepository.save(postLike);
+
+		//when
+		Long postLikeCout = postLikeRepository.getPostLikeCountByPostId(post.getId());
+
+		//then
+		assertThat(postLikeCout).isEqualTo(1L);
+	}
+
 
 	@Test
 	public void testFindByIdPostLike() {

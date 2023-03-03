@@ -35,6 +35,13 @@ public class PostLikeService {
 		Optional<PostLike> optional = postLikeRepository.findById(new PostLikeIdClass(postId, userId));
 		return optional.isPresent();
 	}
+	
+	@Transactional
+	public Long getPostLikeCountByPostId(Long postId) {
+		Long postCount = postLikeRepository.getPostLikeCountByPostId(postId);
+		return postCount;
+	}
+	
 
 	@Transactional
 	public void delete(Long postId, Long userId) {

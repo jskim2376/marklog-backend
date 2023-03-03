@@ -23,7 +23,6 @@ import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
 import com.marklog.blog.controller.dto.PostCommentRequestDto;
 import com.marklog.blog.controller.dto.PostCommentResponseDto;
 import com.marklog.blog.controller.dto.PostCommentUpdateRequestDto;
-import com.marklog.blog.domain.post.comment.PostComment;
 import com.marklog.blog.service.PostCommentService;
 
 import lombok.RequiredArgsConstructor;

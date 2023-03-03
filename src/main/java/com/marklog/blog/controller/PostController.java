@@ -5,7 +5,6 @@ import java.util.NoSuchElementException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
+import com.marklog.blog.controller.dto.PostListResponseDto;
 import com.marklog.blog.controller.dto.PostResponseDto;
 import com.marklog.blog.controller.dto.PostSaveRequestDto;
 import com.marklog.blog.controller.dto.PostUpdateRequestDto;
@@ -49,16 +49,6 @@ public class PostController {
 		return new ResponseEntity<>(header, HttpStatus.CREATED);
 	}
 
-	@GetMapping("/post")
-	public Page<PostResponseDto> findAll(Pageable pageable) {
-		return postService.findAll(pageable);
-	}
-	
-	@GetMapping("/post/search")
-	public Page<PostResponseDto> search(Pageable pageable, @RequestParam(value="text") String text) {
-			Page<PostResponseDto> page = postService.search(pageable, text.split(" "));
-			return page;
-	}
 
 	@GetMapping("/post/{id}")
 	public ResponseEntity<PostResponseDto> findById(@PathVariable Long id,
@@ -99,6 +89,23 @@ public class PostController {
 		} catch (EmptyResultDataAccessException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
+	}
+	
+	@GetMapping("/post")
+	public Page<PostResponseDto> findAll(Pageable pageable) {
+		return postService.findAll(pageable);
+	}
+	
+	@GetMapping("/post/recent")
+	public Page<PostListResponseDto> recentPost(Pageable pageable) {
+		return postService.recentPost(pageable);
+	}
+	
+	
+	@GetMapping("/post/search")
+	public Page<PostResponseDto> search(Pageable pageable, @RequestParam(value="text") String text) {
+			Page<PostResponseDto> page = postService.search(pageable, text.split(" "));
+			return page;
 	}
 	
 }

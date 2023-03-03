@@ -17,7 +17,6 @@ import com.marklog.blog.domain.post.comment.PostComment;
 import com.marklog.blog.domain.tag.Tag;
 import com.marklog.blog.domain.user.User;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

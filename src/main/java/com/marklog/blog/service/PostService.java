@@ -124,6 +124,16 @@ public class PostService {
 	public void delete(Long id) {
 		postRepository.deleteById(id);
 	}
+
+	public Page<PostResponseDto> findAll(Pageable pageable) {
+		Page<PostResponseDto> pageUserResponseDto =  postRepository.findAll(pageable).map(PostResponseDto::toDto);
+		return pageUserResponseDto;
+	}
+
+	public Page<PostListResponseDto> recentPost(Pageable pageable) {
+		Page<PostListResponseDto> pagePostListResponseDto =  postRepository.findAll(pageable).map(PostListResponseDto::new);
+		return pagePostListResponseDto;
+	}
 	
 	public Page<PostResponseDto> search(Pageable pageable, String[] keywords){
 		QPost qpost = QPost.post;

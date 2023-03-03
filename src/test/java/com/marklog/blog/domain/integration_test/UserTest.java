@@ -86,7 +86,7 @@ public class UserTest {
 	@Test
 	public void testGetAllUser() throws JsonMappingException, JsonProcessingException, JSONException {
 		// given
-		Long id = createUser("testAllGetUser");
+		createUser("testAllGetUser");
 
 		// when
 		ResponseEntity<String> responseEntity = wc.get().uri(uri).header("Authorization", "Bearer " + accessTokenAdmin)
@@ -157,7 +157,6 @@ public class UserTest {
 	@Test
 	public void testPutUser_해당하는_User가_없을때() throws JsonMappingException, JsonProcessingException {
 		// given
-		Long id = createUser("testPutUser_해당하는_User가_없을때");
 		UserUpdateRequestDto userUpdateRequestDto = new UserUpdateRequestDto(name + 2, picture + 2, title + 2,
 				introduce + 2);
 

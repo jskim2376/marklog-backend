@@ -48,12 +48,12 @@ public class UserController {
 
 	@PutMapping("/user/{id}")
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or principal.id==#id)")
-	public ResponseEntity userPut(@PathVariable Long id, @RequestBody UserUpdateRequestDto userUpdateRequestDto) {
+	public ResponseEntity<?> userPut(@PathVariable Long id, @RequestBody UserUpdateRequestDto userUpdateRequestDto) {
 		HttpHeaders header = new HttpHeaders();
 		header.add(HttpHeaders.LOCATION, "/api/v1/user/"+id);
 		try {
 			userService.update(id, userUpdateRequestDto);
-			return new ResponseEntity(header, HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(header, HttpStatus.NO_CONTENT);
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.notFound().build();
 		}
@@ -61,7 +61,7 @@ public class UserController {
 
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or principal.id==#id)")
 	@DeleteMapping("/user/{id}")
-	public ResponseEntity userDelete(@PathVariable Long id) {
+	public ResponseEntity<?> userDelete(@PathVariable Long id) {
 		try {
 			SecurityContextHolder.clearContext();
 			userService.delete(id);

@@ -4,8 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -65,10 +63,6 @@ public class PostCommentTest {
 	@BeforeAll
 	public void setUp() {
 		wc = WebClient.create("http://localhost:" + port);
-
-//		wc = WebClient.builder().baseUrl("http://localhost:" + port)
-//                .clientConnector(new ReactorClientHttpConnector(httpClient))
-//				.codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024)).build();
 		objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new JavaTimeModule());
 

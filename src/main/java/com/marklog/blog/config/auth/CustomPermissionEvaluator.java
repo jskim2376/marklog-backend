@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
 import com.marklog.blog.controller.dto.PostCommentResponseDto;
 import com.marklog.blog.controller.dto.PostResponseDto;
-import com.marklog.blog.domain.post.comment.PostComment;
 import com.marklog.blog.service.PostCommentService;
 import com.marklog.blog.service.PostService;
 

@@ -20,7 +20,7 @@ public class JwtController {
 
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/token/check")
-	public ResponseEntity loginCheck() {
+	public ResponseEntity<?> loginCheck() {
         return  ResponseEntity.ok(null);
 	}
 
