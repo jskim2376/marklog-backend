@@ -39,7 +39,7 @@ public class TagRepositoryTest {
 		User user = new User(name, email, picture, title, introduce, Role.USER);
 		userRepository.save(user);
 
-		Post post = new Post(title, content, user, null);
+		Post post = new Post(null,null,title, content, user, null);
 		postRepository.save(post);
 
 		Tag tag = new Tag(post, "new tage");
@@ -57,7 +57,7 @@ public class TagRepositoryTest {
 		User user = new User(name, email, picture, title, introduce, Role.USER);
 		userRepository.save(user);
 
-		Post post = new Post(title, content, user, null);
+		Post post = new Post(null,null,title, content, user, null);
 		postRepository.save(post);
 
 		Tag tag = new Tag(post, "new tage");

@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
-import org.json.JSONException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -91,9 +90,11 @@ public class PostCommentTest {
 		userRepository.save(user3);
 		accessTokenAdmin = jwtTokenProvider.createAccessToken(user3.getId(), 3 + email);
 
+		String postThumbnail = "thumbnail";
+		String postSummary = "summary";
 		String postTitle = "post title";
 		String postContent = "post content";
-		post = new Post(postTitle, postContent, user1, null);
+		post = new Post(postThumbnail, postSummary, postTitle, postContent, user1, null);
 		postRepository.save(post);
 
 		uri = "/api/v1/post/" + post.getId() + "/comment/";
@@ -165,7 +166,7 @@ public class PostCommentTest {
 
 	@Test
 	public void testFindAllByPost()
-			throws JSONException, org.springframework.boot.configurationprocessor.json.JSONException,
+			throws org.springframework.boot.configurationprocessor.json.JSONException,
 			JsonMappingException, JsonProcessingException {
 		// given
 		String newContent1 = "findAllByPost_1";
@@ -191,7 +192,7 @@ public class PostCommentTest {
 
 	@Test
 	public void testFindAllByPostWithChild()
-			throws JSONException, org.springframework.boot.configurationprocessor.json.JSONException,
+			throws org.springframework.boot.configurationprocessor.json.JSONException,
 			JsonMappingException, JsonProcessingException {
 		// given
 		String newContent1 = "findAllByPost_1";

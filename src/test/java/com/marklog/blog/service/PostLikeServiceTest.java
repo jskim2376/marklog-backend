@@ -33,8 +33,6 @@ public class PostLikeServiceTest {
 	@Mock
 	PostLikeRepository postLikeRepository;
 
-
-
 	User user;
 	Long userId = 1L;
 	String name = "name";
@@ -46,14 +44,17 @@ public class PostLikeServiceTest {
 	Post post;
 	Long postId = 2L;
 	String title = "title";
-	String content = "title";
+	String content = "![](https://velog.velcdn.com/images/padomay1352/post/aa716ab1-e079-406b-ae82-c4489e7b95d1/image.png)\r\n"
+			+ "# adsadasd as sa dsa dad ada s dsa\r\n"
+			+ "hihihi thithithiad sad sa dasd sa dsad da a dsasasdsaa a sa sa saa sa  ad  ada\r\n"
+			+ "asdad asd sa dsa dsa sad a dad  a  s as dsa dd sa da sa dsa sa dsa asd sa dsa\r\n";
 
 	PostLikeService postLikeService;
 
 	@BeforeEach
 	public void setUp() {
 		user = new User(name, email, picture, title, introduce, Role.USER);
-		post = spy(new Post(title, content, user, null));
+		post = spy(new Post(null, null, title, content, user, null));
 		postLikeService = new PostLikeService(postRepository, userRepository, postLikeRepository);
 	}
 

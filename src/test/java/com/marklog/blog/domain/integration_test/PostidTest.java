@@ -60,9 +60,11 @@ public class PostidTest {
 		userRepository.save(user1);
 		accessToken1 = jwtTokenProvider.createAccessToken(user1.getId(), email);
 
+		String postThumbnail = "thumbnail";
+		String postSummary = "summary";
 		String postTitle = "post title";
 		String postContent = "post content";
-		post = new Post(postTitle, postContent, user1, null);
+		post = new Post(postThumbnail, postSummary, postTitle, postContent, user1, null);
 		postRepository.save(post);
 
 		uri = "/api/v1/post/" + post.getId() + "/comment";

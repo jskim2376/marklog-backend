@@ -40,7 +40,7 @@ public class PostLikeRepositoryTest {
 		User user = new User(name, email, picture, title, introduce, Role.USER);
 		userRepository.save(user);
 
-		Post post = new Post(title, content, user, null);
+		Post post = new Post(null,null,title, content, user, null);
 		postRepository.save(post);
 
 
@@ -60,7 +60,7 @@ public class PostLikeRepositoryTest {
 		User user = new User(name, email, picture, title, introduce, Role.USER);
 		userRepository.save(user);
 
-		Post post = new Post(title, content, user, null);
+		Post post = new Post(null,null,title, content, user, null);
 		postRepository.save(post);
 
 
@@ -82,7 +82,7 @@ public class PostLikeRepositoryTest {
 		User user = new User(name, email, picture, title, introduce, Role.USER);
 		userRepository.save(user);
 
-		Post post = new Post(title, content, user, null);
+		Post post = new Post(null,null,title, content, user, null);
 		postRepository.save(post);
 
 		PostLike postLike = new PostLike(post, user);

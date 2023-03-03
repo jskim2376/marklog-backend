@@ -26,6 +26,7 @@ import com.marklog.blog.controller.dto.PostSaveRequestDto;
 import com.marklog.blog.controller.dto.PostUpdateRequestDto;
 import com.marklog.blog.domain.post.Post;
 import com.marklog.blog.domain.post.PostRepository;
+import com.marklog.blog.domain.post.comment.PostComment;
 import com.marklog.blog.domain.tag.Tag;
 import com.marklog.blog.domain.tag.TagRepository;
 import com.marklog.blog.domain.user.Role;
@@ -55,7 +56,10 @@ public class PostServiceTest {
 	Post post;
 	Long postId = 2L;
 	String title = "title";
-	String content = "title";
+	String content = "![](https://velog.velcdn.com/images/padomay1352/post/aa716ab1-e079-406b-ae82-c4489e7b95d1/image.png)\r\n"
+			+ "# adsadasd as sa dsa dad ada s dsa\r\n"
+			+ "hihihi thithithiad sad sa dasd sa dsad da a dsasasdsaa a sa sa saa sa  ad  ada\r\n"
+			+ "asdad asd sa dsa dsa sad a dad  a  s as dsa dd sa da sa dsa sa dsa asd sa dsa\r\n";
 
 	PostService postService;
 
@@ -66,7 +70,7 @@ public class PostServiceTest {
 		List<Tag> tags = new ArrayList<>();
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
-		post = spy(new Post(title, content, user, tags));
+		post = spy(new Post(null,null,title, content, user, tags));
 
 		postService = new PostService(postRepository, userRepository, tagRepository);
 	}
@@ -75,8 +79,15 @@ public class PostServiceTest {
 	public void testSavePostService() {
 		//given
 		when(userRepository.getReferenceById(userId)).thenReturn(user);
-		when(post.getId()).thenReturn(postId);
-		when(postRepository.save(any())).thenReturn(post);
+		when(postRepository.save(any())).thenAnswer(invocation -> {
+			Post post = (Post)(invocation.getArguments()[0]);
+			post = spy(post);
+		    when(post.getId()).thenReturn(postId);
+		    //when
+		    assertThat(post.getThumbnail()).isEqualTo("https://velog.velcdn.com/images/padomay1352/post/aa716ab1-e079-406b-ae82-c4489e7b95d1/image.png");
+		    assertThat(post.getSummary()).isEqualTo("adsadasd as sa dsa dad ada s d");
+		    return post;
+		});
 
 		List<String> tagList = new ArrayList<>();
 		tagList.add("java");

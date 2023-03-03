@@ -64,11 +64,13 @@ public class PostControllerTest {
 	@MockBean
 	private PostLikeService postLikeService;
 
-	Long id = 1L;
+	static LocalDateTime time;
+	Long postId = 1L;
 	String title = "title";
 	String content = "content";
-	static LocalDateTime time;
-
+	Long userId = 1L;
+	String userName = "name";
+	
 	@BeforeAll
 	public static void setUp() {
 		time = LocalDateTime.now();
@@ -90,7 +92,7 @@ public class PostControllerTest {
 		tagList.add("java");
 		tagList.add("testTag");
 		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(path, path, tagList);
-		when(postService.save(anyLong(), any())).thenReturn(id);
+		when(postService.save(anyLong(), any())).thenReturn(postId);
 
 		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(1L, "test@test.com", Role.USER);
 		Authentication authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null, Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
@@ -111,7 +113,7 @@ public class PostControllerTest {
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
 
-		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, id, TagResponseDto.toEntityDto(tags), null);
+		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, userId, userName, TagResponseDto.toEntityDto(tags), null);
 		List<PostResponseDto> content = new ArrayList<>();
 		content.add(postResponseDto);
 
@@ -137,7 +139,7 @@ public class PostControllerTest {
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
 
-		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, id, TagResponseDto.toEntityDto(tags), null);
+		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, userId, userName, TagResponseDto.toEntityDto(tags), null);
 		List<PostResponseDto> content = new ArrayList<>();
 		content.add(postResponseDto);
 
@@ -152,7 +154,7 @@ public class PostControllerTest {
 		ResultActions ra = mvc.perform(get("/v1/post/search").param("text", text).with(SecurityMockMvcRequestPostProcessors.csrf()));
 
 		// then
-		ra.andExpect(status().isNoContent()).andExpect(jsonPath("$.size").value(20))
+		ra.andExpect(status().isOk()).andExpect(jsonPath("$.size").value(20))
 				.andExpect(jsonPath("$.totalElements").value(1)).andExpect(jsonPath("$.content[0].title").value(title));
 
 	}
@@ -161,15 +163,15 @@ public class PostControllerTest {
 	@Test
 	public void testGetPostConrtoller() throws Exception {
 		// given
-		String path = "/v1/post/" + id;
+		String path = "/v1/post/" + postId;
 		List<Tag> tags = new ArrayList<>();
 		tags.add(new Tag(null, "tag2"));
 
-		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, id, TagResponseDto.toEntityDto(tags), false);
+		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, userId, userName, TagResponseDto.toEntityDto(tags), null);
 		when(postService.findById(anyLong())).thenReturn(postResponseDto);
-		when(postLikeService.findById(id, id)).thenReturn(true);
+		when(postLikeService.findById(postId, userId)).thenReturn(true);
 
-		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(id, "test@test.com", Role.USER);
+		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(userId, "test@test.com", Role.USER);
 		Authentication authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null, Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
 		// when
 		ResultActions ra = mvc.perform(get(path).with(SecurityMockMvcRequestPostProcessors.csrf()).with(SecurityMockMvcRequestPostProcessors.authentication(authentication)));
@@ -185,7 +187,7 @@ public class PostControllerTest {
 	@Test
 	public void testPutPostConrtoller() throws Exception {
 		// given
-		String path = "/v1/post/" + id;
+		String path = "/v1/post/" + postId;
 		String title2 = "title2";
 		String content2 = "content2";
 
@@ -198,8 +200,8 @@ public class PostControllerTest {
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
 
-		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, id, TagResponseDto.toEntityDto(tags), null);
-		when(postService.findById(id)).thenReturn(postResponseDto);
+		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, userId, userName, TagResponseDto.toEntityDto(tags), null);
+		when(postService.findById(postId)).thenReturn(postResponseDto);
 
 		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(1L, "test@test.com", Role.USER);
 		Authentication authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null, Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));

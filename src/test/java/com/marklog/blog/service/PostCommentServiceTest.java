@@ -59,7 +59,7 @@ public class PostCommentServiceTest {
 	@BeforeEach
 	public void setUp() {
 		user = new User(name, email, picture, title, introduce, Role.USER);
-		post = new Post(title, content, user, null);
+		post = new Post(null,null, title, content, user, null);
 		postCommentService = new PostCommentService(postRepository, userRepository, postCommentRepository);
 	}
 
@@ -172,14 +172,10 @@ public class PostCommentServiceTest {
 	@Test
 	public void testPostCommentServiceDelete() {
 		// given
-		PostComment postComment = new PostComment(post, user, commentContent);
-		Optional<PostComment> optinalPostComment = Optional.of(postComment);
-		when(postCommentRepository.findById(any())).thenReturn(optinalPostComment);
-
 		// when
 		postCommentService.delete(postCommentId);
 		// then
-		verify(postCommentRepository).delete(postComment);
+		verify(postCommentRepository).deleteById(postCommentId);
 
 	}
 

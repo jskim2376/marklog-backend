@@ -34,8 +34,10 @@ public class PostRepostioryTest {
 	@Autowired
 	UserRepository userRepository;
 
+	String thumbnail = "hi";
+	String sumary = "content";
 	String title = "title";
-	String content = "title";
+	String content = "content";
 
 	String name = "name";
 	String email = "test@gmail.com";
@@ -54,7 +56,7 @@ public class PostRepostioryTest {
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
 
-		Post post = new Post(title, content, user, tags);
+		Post post = new Post(null, null, title, content, user, tags);
 
 		// when
 		Post savedPost = postRepository.save(post);
@@ -74,7 +76,7 @@ public class PostRepostioryTest {
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
 
-		Post post = new Post(title, content, user, tags);
+		Post post = new Post(null, null, title, content, user, tags);
 
 		// when
 		Post savedPost = postRepository.save(post);
@@ -92,7 +94,7 @@ public class PostRepostioryTest {
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
 
-		Post post = new Post(title, content, user, tags);
+		Post post = new Post(null, null, title, content, user, tags);
 
 		// when
 		// then
@@ -109,7 +111,7 @@ public class PostRepostioryTest {
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
 
-		Post post = new Post(title, content, user, tags);
+		Post post = new Post(thumbnail,sumary, title, content, user, tags);
 		postRepository.save(post);
 
 		// when
@@ -118,6 +120,8 @@ public class PostRepostioryTest {
 		List<Post> postList = page.getContent();
 
 		// then
+		assertThat(postList.get(0).getThumbnail()).isEqualTo(thumbnail);
+		assertThat(postList.get(0).getSummary()).isEqualTo(sumary);
 		assertThat(postList.get(0).getTitle()).isEqualTo(title);
 		assertThat(postList.get(0).getContent()).isEqualTo(content);
 		assertThat(page.getTotalElements()).isEqualTo(1);
@@ -135,7 +139,7 @@ public class PostRepostioryTest {
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
 
-		Post post = new Post(title, content, user, tags);
+		Post post = new Post(null, null, title, content, user, tags);
 		Post savedPost = postRepository.save(post);
 
 		// when
@@ -156,7 +160,7 @@ public class PostRepostioryTest {
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
 
-		Post post = new Post(title, content, user, tags);
+		Post post = new Post(null, null, title, content, user, tags);
 		Post savedPost = postRepository.save(post);
 
 		// when
@@ -178,11 +182,11 @@ public class PostRepostioryTest {
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
 		String content1 = "the content";
-		Post post = new Post(title, content1, user, tags);
+		Post post = new Post(null, null, title, content1, user, tags);
 		postRepository.save(post);
 
 		String content2 = "the qwer";
-		Post post2 = new Post(title, content2, user, tags);
+		Post post2 = new Post(null, null, title, content2, user, tags);
 		postRepository.save(post2);
 
 		PageRequest pageRequest = PageRequest.of(0, 4);
@@ -214,12 +218,12 @@ public class PostRepostioryTest {
 		tags.add(new Tag(null, "tag2"));
 		
 		String content1 = "the content";
-		Post post = new Post(title, content1, user, tags);
+		Post post = new Post(null, null, title, content1, user, tags);
 		postRepository.save(post);
 
 		String content2 = "the qwer";
 		String title2 = "asdqwe";
-		Post post2 = new Post(title2, content2, user, tags);
+		Post post2 = new Post(null, null, title2, content2, user, tags);
 		postRepository.save(post2);
 
 		PageRequest pageRequest = PageRequest.of(0, 4);
@@ -251,15 +255,15 @@ public class PostRepostioryTest {
 		tags.add(new Tag(null, "tag2"));
 		
 		String content1 = "the content";
-		Post post = new Post(title, content1, user, tags);
+		Post post = new Post(null, null, title, content1, user, tags);
 		postRepository.save(post);
 
 		String content2 = "the qwer";
-		Post post2 = new Post(title+2, content2, user, tags);
+		Post post2 = new Post(null, null, title+2, content2, user, tags);
 		postRepository.save(post2);
 
 		String content3 = "the asdf";
-		Post post3 = new Post(title+3, content3, user, tags);
+		Post post3 = new Post(null, null, title+3, content3, user, tags);
 		postRepository.save(post3);
 
 		PageRequest pageRequest = PageRequest.of(0, 4);

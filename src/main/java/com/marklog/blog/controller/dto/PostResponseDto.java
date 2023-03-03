@@ -21,6 +21,7 @@ public class PostResponseDto {
 	private String title;
 	private String content;
 	private Long userId;
+	private String userName;
 	private List<TagResponseDto> tagList;
 	private Boolean like;
 
@@ -30,6 +31,7 @@ public class PostResponseDto {
 		this.title = entity.getTitle();
 		this.content = entity.getContent();
 		this.userId = entity.getUser().getId();
+		this.userName = entity.getUser().getName();
 		this.tagList = TagResponseDto.toEntityDto(entity.getTags());
 		this.like=false;
 	}

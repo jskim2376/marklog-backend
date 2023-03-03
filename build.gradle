@@ -25,7 +25,8 @@ dependencies {
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	
+	implementation 'org.jsoup:jsoup:1.7.2'
+
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
     implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
@@ -40,7 +41,9 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
 	testImplementation 'org.mockito:mockito-inline:2.13.0'
-	
+
+    implementation 'com.github.openjson:openjson:1.0.12'
+	implementation 'org.commonmark:commonmark:0.20.0'	
 }
 
 //querydsl 추가 시작

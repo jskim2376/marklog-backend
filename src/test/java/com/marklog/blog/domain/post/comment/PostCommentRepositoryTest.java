@@ -47,7 +47,7 @@ public class PostCommentRepositoryTest {
 		// given
 		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
 		userRepository.save(user);
-		Post post = new Post(title, content, user, null);
+		Post post = new Post(null,null,title, content, user, null);
 		postRepository.save(post);
 
 		PostComment postComment = new PostComment(post, user, content);
@@ -64,7 +64,7 @@ public class PostCommentRepositoryTest {
 		// given
 		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
 		userRepository.save(user);
-		Post post = new Post(title, content, user, null);
+		Post post = new Post(null,null,title, content, user, null);
 		postRepository.save(post);
 
 		PostComment postComment = new PostComment(post, user, content);
@@ -83,7 +83,7 @@ public class PostCommentRepositoryTest {
 		// given
 		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
 		userRepository.save(user);
-		Post post = new Post(title, content, user, null);
+		Post post = new Post(null, null, title, content, user, null);
 		postRepository.save(post);
 
 		PostComment postComment = new PostComment(post, user, content);
@@ -110,7 +110,7 @@ public class PostCommentRepositoryTest {
 		// given
 		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
 		userRepository.save(user);
-		Post post = new Post(title, content, user, null);
+		Post post = new Post(null, null, title, content, user, null);
 		postRepository.save(post);
 
 		PostComment postComment = new PostComment(post, user, content);
@@ -133,7 +133,7 @@ public class PostCommentRepositoryTest {
 		// given
 		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
 		userRepository.save(user);
-		Post post = new Post(title, content, user, null);
+		Post post = new Post(null, null, title, content, user, null);
 		postRepository.save(post);
 		PostComment postComment = new PostComment(post, user, content);
 		PostComment savedPostComment = postCommentRepository.save(postComment);
@@ -153,7 +153,7 @@ public class PostCommentRepositoryTest {
 		// given
 		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
 		userRepository.save(user);
-		Post post = new Post(title, content, user, null);
+		Post post = new Post(null, null, title, content, user, null);
 		postRepository.save(post);
 
 		PostComment postComment = new PostComment(post,user, content);

@@ -29,9 +29,16 @@ public class Post extends BaseTimeEntity{
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(length=100)
+	private String thumbnail;
+	
+	@Column(length=30)
+	private String summary;
+
 	@Column(length=50, nullable = false)
 	private String title;
 
+	
 	@Column(columnDefinition="TEXT", nullable = false)
 	private String content;
 
@@ -44,8 +51,9 @@ public class Post extends BaseTimeEntity{
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	private List<PostComment> postComments = new ArrayList<>();
 
-	@Builder
-	public Post(String title, String content, User user, List<Tag> tags) {
+	public Post(String thubnail, String summary, String title, String content, User user, List<Tag> tags) {
+		this.thumbnail = thubnail;
+		this.summary = summary;
 		this.title = title;
 		this.content = content;
 		this.user = user;
