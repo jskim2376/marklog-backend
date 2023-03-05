@@ -5,8 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import com.marklog.blog.domain.post.Post;
@@ -15,145 +20,140 @@ import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
 
+@Transactional
+@AutoConfigureTestDatabase(replace = Replace.NONE)
 @DataJpaTest
 public class PostCommentRepositoryTest {
 	@Autowired
 	UserRepository userRepository;
-
 	@Autowired
 	PostRepository postRepository;
+	Post post;
+	User user;
 
 	@Autowired
 	PostCommentRepository postCommentRepository;
+	String commentContent = "comment content";
 
-	String title = "title";
-	String content = "title";
-
-	String name = "name";
-	String email = "test@gmail.com";
-	String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
-	String userTitle = "myblog";
-	String introduce = "introduce";
-
-	@Test
-	public void testPostCommentSave() {
-		// given
-		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
+	@BeforeEach
+	public void setupEach() {
+		String name = "name";
+		String email = "test@gmail.com";
+		String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
+		String userTitle = "myblog";
+		String introduce = "introduce";
+		user = new User(name, email, picture, userTitle, introduce, Role.USER);
 		userRepository.save(user);
-		Post post = new Post(null,null,title, content, user, null);
+
+		String thumbnail = "thumbnail";
+		String summary = "summary";
+		String title = "title";
+		String content = "title";
+		post = new Post(thumbnail, summary, title, content, user, null);
 		postRepository.save(post);
-
-		PostComment postComment = new PostComment(post, user, content);
-
-		// when
-		PostComment savedPostComment = postCommentRepository.save(postComment);
-
-		// then
-		assertThat(savedPostComment).isSameAs(postComment);
 	}
 
-	@Test
-	public void testPostCommentChildSave() {
-		// given
-		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
-		userRepository.save(user);
-		Post post = new Post(null,null,title, content, user, null);
-		postRepository.save(post);
-
-		PostComment postComment = new PostComment(post, user, content);
-		PostComment child = new PostComment(post, user, content + 2);
-		postComment.addChildComment(child);
-		// when
-		PostComment savedPostComment = postCommentRepository.save(postComment);
-
-		// then
-		assertThat(savedPostComment).isSameAs(postComment);
-		assertThat(savedPostComment.getChildList().get(0).getContent()).isEqualTo(child.getContent());
+	public PostComment createPostComment() {
+		PostComment postComment = new PostComment(post, user, commentContent);
+		postCommentRepository.save(postComment);
+		return postComment;
 	}
 
 	@Test
 	public void testPostCommentFindAllByPost() {
 		// given
-		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
-		userRepository.save(user);
-		Post post = new Post(null, null, title, content, user, null);
-		postRepository.save(post);
-
-		PostComment postComment = new PostComment(post, user, content);
-		PostComment savedPostComment = postCommentRepository.save(postComment);
-		PostComment postCommentSub = new PostComment(post, user, content);
-		postCommentSub.setParent(postComment);
-		PostComment savedPostCommentSub = postCommentRepository.save(postCommentSub);
-
-		PostComment postComment2 = new PostComment(post, user, content);
-		PostComment savedPostComment2 = postCommentRepository.save(postComment2);
+		PostComment savedPostComment1 = createPostComment();
+		PostComment savedPostComment2 = createPostComment();
 
 		// when
-		List<PostComment> returnCommentList = postCommentRepository.findAllByPostAndParentIsNull(post);
+		List<PostComment> findCommentList = postCommentRepository.findAllByPostAndParentIsNull(post);
+
+		// then-ready
+		PostComment findPostComment1 = findCommentList.get(0);
+		PostComment findPostComment2 = findCommentList.get(1);
 
 		// then
-		assertThat(returnCommentList.get(0)).isSameAs(savedPostComment);
-		assertThat(returnCommentList.get(0).getChildList().get(0)).isSameAs(savedPostCommentSub);
-		assertThat(returnCommentList.get(1)).isSameAs(savedPostComment2);
+		assertThat(findPostComment1).isEqualTo(savedPostComment1);
+		assertThat(findPostComment2).isEqualTo(savedPostComment2);
+	}
 
+	@Test
+	public void testPostCommentSave() {
+		// given
+		PostComment postComment = new PostComment(post, user, commentContent);
+
+		// when
+		PostComment savedPostComment = postCommentRepository.save(postComment);
+
+		// then
+		assertThat(savedPostComment.getId()).isNotNull();
+	}
+
+	@Test
+	public void testPostCommentSave_child() {
+		// given
+		PostComment postComment = createPostComment();
+		String childContent = "childContent";
+		PostComment childPostComment = new PostComment(post, user, childContent);
+
+		// when
+		postCommentRepository.save(childPostComment);
+		childPostComment.setParent(postComment);
+
+		// then
+		assertThat(postComment.getChildList().get(0)).isSameAs(childPostComment);
 	}
 
 	@Test
 	public void testPostCommentFindById() {
 		// given
-		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
-		userRepository.save(user);
-		Post post = new Post(null, null, title, content, user, null);
-		postRepository.save(post);
-
-		PostComment postComment = new PostComment(post, user, content);
-		PostComment savedPostComment = postCommentRepository.save(postComment);
-		PostComment postCommentSub = new PostComment(post, user, content);
-		postCommentSub.setParent(postComment);
-		PostComment savedPostCommentSub = postCommentRepository.save(postCommentSub);
+		PostComment postComment = createPostComment();
 
 		// when
-		PostComment returnComment = postCommentRepository.findById(savedPostComment.getId()).get();
+		PostComment findComment = postCommentRepository.findById(postComment.getId()).get();
 
 		// then
-		assertThat(savedPostComment).isSameAs(returnComment);
-		assertThat(savedPostComment.getChildList().get(0)).isSameAs(savedPostCommentSub);
-		
+		assertThat(postComment).isSameAs(findComment);
+	}
+
+	@Test
+	public void testPostCommentFindById_with_child() {
+		// given
+		PostComment postComment = createPostComment();
+		String childContent = "childContent";
+		PostComment childPostComment = new PostComment(post, user, childContent);
+		postCommentRepository.save(childPostComment);
+		childPostComment.setParent(postComment);
+
+		// when
+		PostComment findComment = postCommentRepository.findById(postComment.getId()).get();
+
+		// then
+		assertThat(postComment).isSameAs(findComment);
+		assertThat(findComment.getChildList().get(0)).isSameAs(childPostComment);
 	}
 
 	@Test
 	public void testPostCommentUpdate() {
 		// given
-		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
-		userRepository.save(user);
-		Post post = new Post(null, null, title, content, user, null);
-		postRepository.save(post);
-		PostComment postComment = new PostComment(post, user, content);
-		PostComment savedPostComment = postCommentRepository.save(postComment);
-
-		PostComment returnComment = postCommentRepository.findById(savedPostComment.getId()).get();
+		PostComment postComment = createPostComment();
 		String newContent = "new content";
+
 		// when
-		returnComment.update(newContent);
+		postComment.update(newContent);
+
+		// then-ready
+		PostComment updateComment = postCommentRepository.findById(postComment.getId()).get();
 
 		// then
-		PostComment updatedComment = postCommentRepository.findById(savedPostComment.getId()).get();
-		assertThat(updatedComment).isSameAs(returnComment);
+		assertThat(updateComment).isSameAs(postComment);
+		assertThat(updateComment.getContent()).isEqualTo(newContent);
 	}
 
 	@Test
 	public void testPostCommentDelete() {
 		// given
-		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
-		userRepository.save(user);
-		Post post = new Post(null, null, title, content, user, null);
-		postRepository.save(post);
-
-		PostComment postComment = new PostComment(post,user, content);
-		PostComment savedPostComment = postCommentRepository.save(postComment);
-		PostComment postCommentSub = new PostComment(post,user, content);
-		postCommentSub.setParent(postComment);
-		PostComment savedPostCommentSub = postCommentRepository.save(postCommentSub);
+		PostComment savedPostComment = createPostComment();
 
 		// when
 		postCommentRepository.delete(savedPostComment);
@@ -161,7 +161,25 @@ public class PostCommentRepositoryTest {
 		// then
 		assertThrows(IllegalArgumentException.class, () -> postCommentRepository.findById(savedPostComment.getId())
 				.orElseThrow(() -> new IllegalArgumentException()));
-		assertThrows(IllegalArgumentException.class, () -> postCommentRepository.findById(savedPostCommentSub.getId())
+	}
+
+	@Test
+	public void testPostCommentDelete_with_child() {
+		// given
+		PostComment postComment = createPostComment();
+		String childContent = "childContent";
+		PostComment childPostComment = new PostComment(post, user, childContent);
+		childPostComment.addChildComment(childPostComment);
+		postCommentRepository.save(childPostComment);
+
+		// when
+		postComment.addChildComment(childPostComment);
+		postCommentRepository.delete(postComment);
+
+		// then
+		assertThrows(IllegalArgumentException.class, () -> postCommentRepository.findById(postComment.getId())
+				.orElseThrow(() -> new IllegalArgumentException()));
+		assertThrows(IllegalArgumentException.class, () -> postCommentRepository.findById(childPostComment.getId())
 				.orElseThrow(() -> new IllegalArgumentException()));
 	}
 }

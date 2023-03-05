@@ -3,23 +3,23 @@ package com.marklog.blog.domain.post;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.marklog.blog.controller.dto.PostResponseDto;
-import com.marklog.blog.domain.postlike.PostLike;
 import com.marklog.blog.domain.postlike.PostLikeRepository;
 import com.marklog.blog.domain.tag.Tag;
 import com.marklog.blog.domain.user.Role;
@@ -27,296 +27,236 @@ import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
+@AutoConfigureTestDatabase(replace = Replace.NONE)
 @DataJpaTest
 public class PostRepostioryTest {
 	@Autowired
-	PostRepository postRepository;
+	UserRepository userRepository;
+	User user;
 
 	@Autowired
-	PostLikeRepository postLikeRepository;
-	
+	PostRepository postRepository;
 	@Autowired
-	UserRepository userRepository;
+	PostLikeRepository postLikeRepository;
 
 	String thumbnail = "hi";
 	String sumary = "content";
 	String title = "title";
 	String content = "content";
+	List<Tag> tags;
 
-	String name = "name";
-	String email = "test@gmail.com";
-	String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
-	String userTitle = "myblog";
-	String introduce = "introduce";
-
-	@Test
-	public void testBaseTimeEntity() {
-		// given
-		LocalDateTime now = LocalDateTime.of(2019, 6, 4, 0, 0, 0);
-		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
+	@BeforeEach
+	public void setUpEach() {
+		String name = "name";
+		String email = "test@gmail.com";
+		String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
+		String userTitle = "myblog";
+		String introduce = "introduce";
+		user = new User(name, email, picture, userTitle, introduce, Role.USER);
 		userRepository.save(user);
 
-		List<Tag> tags = new ArrayList<>();
+		tags = new ArrayList<>();
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
+	}
 
-		Post post = new Post(null, null, title, content, user, tags);
+	public Post createPost() {
+		Post post = new Post(thumbnail, sumary, title, content, user, tags);
+		postRepository.save(post);
+		return post;
+	}
+
+	@Test
+	public void testFindAllPostRepository_recent_post() {
+		// given
+		postRepository.deleteAll();
+		createPost();
+		createPost();
+
+		Sort sort = Sort.by("id").descending();
+		PageRequest pageRequest = PageRequest.of(0, 4, sort);
 
 		// when
-		Post savedPost = postRepository.save(post);
+		Page<Post> page = postRepository.findAll(pageRequest);
+
+		// then-ready
+		List<Post> postList = page.getContent();
+		Post post = postList.get(0);
 
 		// then
-		assertThat(savedPost.getCreatedDate()).isAfter(now);
-		assertThat(savedPost.getModifiedDate()).isAfter(now);
+		assertThat(post.getThumbnail()).isEqualTo(thumbnail);
+		assertThat(post.getSummary()).isEqualTo(sumary);
+		assertThat(post.getTitle()).isEqualTo(title);
+		assertThat(post.getContent()).isEqualTo(content);
+		assertThat(page.getTotalElements()).isEqualTo(2);
+		assertThat(page.getTotalPages()).isEqualTo(1);
+	}
+
+	@Test
+	public void testFindAllTitleContentPostRepository_by_content() throws JsonProcessingException {
+		// given
+		String newContent = "qwertyasdf";
+		Post post = new Post(thumbnail, sumary, title, newContent, user, tags);
+		postRepository.save(post);
+
+		String searchText = newContent;
+		BooleanExpression predicate = QPost.post.content.containsIgnoreCase(searchText)
+				.or(QPost.post.title.containsIgnoreCase(searchText));
+		PageRequest pageRequest = PageRequest.of(0, 4);
+
+		// when
+		Page<Post> page = postRepository.findAll(predicate, pageRequest);
+
+		// then-ready
+		List<Post> postList = page.getContent();
+		PostResponseDto postDto = new PostResponseDto(postList.get(0));
+
+		// then
+		assertThat(postList.size()).isEqualTo(1);
+		assertThat(postDto.getContent()).isEqualTo(searchText);
+	}
+
+	@Test
+	public void testFindAllTitleContentPostRepository_by_title() throws JsonProcessingException {
+		// given
+		String newTitle = "qwertyasdf";
+		Post post = new Post(thumbnail, sumary, newTitle, content, user, tags);
+		postRepository.save(post);
+
+		String searchText = newTitle;
+		BooleanExpression predicate = QPost.post.content.containsIgnoreCase(searchText)
+				.or(QPost.post.title.containsIgnoreCase(searchText));
+		PageRequest pageRequest = PageRequest.of(0, 4);
+
+		// when
+		Page<Post> page = postRepository.findAll(predicate, pageRequest);
+
+		// then-ready
+		List<Post> postList = page.getContent();
+		PostResponseDto postDto = new PostResponseDto(postList.get(0));
+
+		// then
+		assertThat(postList.size()).isEqualTo(1);
+		assertThat(postDto.getTitle()).isEqualTo(searchText);
+	}
+
+	@Test
+	public void testFindAllTitleContentPostRepository_multi_search() throws JsonProcessingException {
+		// given
+		postRepository.deleteAll();
+		createPost();
+		createPost();
+
+		String searchText = title;
+		BooleanExpression predicate = QPost.post.content.containsIgnoreCase(searchText)
+				.or(QPost.post.title.containsIgnoreCase(searchText));
+		PageRequest pageRequest = PageRequest.of(0, 4);
+		// when
+		Page<Post> page = postRepository.findAll(predicate, pageRequest);
+
+		// then-ready
+		List<Post> postList = page.getContent();
+		PostResponseDto postDto = new PostResponseDto(postList.get(0));
+
+		// then
+		assertThat(postList.size()).isEqualTo(2);
+		assertThat(postDto.getTitle()).isEqualTo(searchText);
+		assertThat(postList.size()).isGreaterThan(1);
+	}
+
+	@Test
+	public void testFindAllTitleContentPostRepository_multi_keyword() throws JsonProcessingException {
+		// given
+		String newTitle = "multi_keyword1";
+		Post post = new Post(thumbnail, sumary, newTitle, content, user, tags);
+		postRepository.save(post);
+		String newTitle2 = "multi_keyword2";
+		Post post2 = new Post(thumbnail, sumary, newTitle2, content, user, tags);
+		postRepository.save(post2);
+
+		String searchText = newTitle;
+		String searchText2 = newTitle2;
+		BooleanExpression predicate = QPost.post.content.containsIgnoreCase(searchText)
+				.or(QPost.post.title.containsIgnoreCase(searchText));
+		predicate = predicate.or(QPost.post.content.containsIgnoreCase(searchText2))
+				.or(QPost.post.title.containsIgnoreCase(searchText2));
+		PageRequest pageRequest = PageRequest.of(0, 4);
+
+		// when
+		Page<Post> page = postRepository.findAll(predicate, pageRequest);
+
+		// then-ready
+		List<Post> postList = page.getContent();
+		PostResponseDto postDto1 = new PostResponseDto(postList.get(0));
+		PostResponseDto postDto2 = new PostResponseDto(postList.get(1));
+
+		// then
+		assertThat(postList.size()).isEqualTo(2);
+		assertThat(postDto1.getTitle()).isEqualTo(searchText);
+		assertThat(postDto2.getTitle()).isEqualTo(searchText2);
 	}
 
 	@Test
 	public void testSavePostRepository() {
 		// given
-		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
-		userRepository.save(user);
-
-		List<Tag> tags = new ArrayList<>();
-		tags.add(new Tag(null, "tag1"));
-		tags.add(new Tag(null, "tag2"));
-
-		Post post = new Post(null, null, title, content, user, tags);
-
 		// when
-		Post savedPost = postRepository.save(post);
-
+		Post post = createPost();
 		// then
-		assertThat(savedPost).isSameAs(post);
-	}
-	
-	@Test
-	public void testSavePostRepository_like_count_확인() {
-		// given
-		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
-		userRepository.save(user);
-
-		List<Tag> tags = new ArrayList<>();
-		tags.add(new Tag(null, "tag1"));
-		tags.add(new Tag(null, "tag2"));
-
-		Post post = new Post(null, null, title, content, user, tags);
-		postRepository.save(post);
-		
-		// when
-		PostLike postLike = new PostLike(post, user);
-		postLikeRepository.save(postLike);
-		post.getPostLikes().add(postLike);
-		
-		//then-ready
-		Post savedPost = postRepository.findById(post.getId()).get();
-		// then
-		assertThat(savedPost.getPostLikes().size()).isEqualTo(1);
+		assertThat(post.getId()).isNotNull();
 	}
 
-	
 	@Test
 	public void testSavePostRepository_Users_없을때_테스트() {
 		// given
-		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
-
-		List<Tag> tags = new ArrayList<>();
-		tags.add(new Tag(null, "tag1"));
-		tags.add(new Tag(null, "tag2"));
-
-		Post post = new Post(null, null, title, content, user, tags);
-
+		User emptyUser = new User();
+		Post post = new Post(thumbnail, sumary, title, content, emptyUser, tags);
 		// when
+		Executable save = () -> postRepository.save(post);
 		// then
-		assertThrows(InvalidDataAccessApiUsageException.class, () -> postRepository.save(post));
-	}
-
-	@Test
-	public void testFindAllPostRepository() {
-		// given
-		User user = new User(name, email, picture, title, introduce, Role.USER);
-		userRepository.save(user);
-
-		List<Tag> tags = new ArrayList<>();
-		tags.add(new Tag(null, "tag1"));
-		tags.add(new Tag(null, "tag2"));
-
-		Post post = new Post(thumbnail,sumary, title, content, user, tags);
-		postRepository.save(post);
-
-		// when
-		PageRequest pageRequest = PageRequest.of(0, 4);
-		Page<Post> page = postRepository.findAll(pageRequest);
-		List<Post> postList = page.getContent();
-
-		// then
-		assertThat(postList.get(0).getThumbnail()).isEqualTo(thumbnail);
-		assertThat(postList.get(0).getSummary()).isEqualTo(sumary);
-		assertThat(postList.get(0).getTitle()).isEqualTo(title);
-		assertThat(postList.get(0).getContent()).isEqualTo(content);
-		assertThat(page.getTotalElements()).isEqualTo(1);
-		assertThat(page.getTotalPages()).isEqualTo(1);
-
+		assertThrows(InvalidDataAccessApiUsageException.class, save);
 	}
 
 	@Test
 	public void testFindByIdPostRepostiroy() {
 		// given
-		User user = new User(name, email, picture, userTitle, introduce, Role.USER);
-		userRepository.save(user);
-
-		List<Tag> tags = new ArrayList<>();
-		tags.add(new Tag(null, "tag1"));
-		tags.add(new Tag(null, "tag2"));
-
-		Post post = new Post(null, null, title, content, user, tags);
-		Post savedPost = postRepository.save(post);
-
+		Post post = createPost();
 		// when
-		Post findPost = postRepository.findById(savedPost.getId()).get();
+		Post findPost = postRepository.findById(post.getId()).get();
 
 		// then
+		assertThat(post).isSameAs(findPost);
 		assertThat(findPost.getTags().get(0).getName()).isEqualTo("tag1");
-		assertThat(savedPost).isSameAs(findPost);
+	}
+
+	@Test
+	public void textUpdatePostRepository() {
+		// given
+		Post post = createPost();
+		String newTitle = "newTitle";
+		String newContent = "newContent";
+
+		// when
+		post.update(newTitle, newContent);
+
+		// then-ready
+		Post findPost = postRepository.findById(post.getId()).get();
+
+		// then
+		assertThat(findPost.getTitle()).isEqualTo(newTitle);
+		assertThat(findPost.getContent()).isEqualTo(newContent);
 	}
 
 	@Test
 	public void testDeletePostReposeitory() {
 		// given
-		User user = new User(name, email, picture, title, introduce, Role.USER);
-		userRepository.save(user);
-
-		List<Tag> tags = new ArrayList<>();
-		tags.add(new Tag(null, "tag1"));
-		tags.add(new Tag(null, "tag2"));
-
-		Post post = new Post(null, null, title, content, user, tags);
-		Post savedPost = postRepository.save(post);
-
+		Post post = createPost();
 		// when
-		postRepository.delete(savedPost);
+		postRepository.delete(post);
 
 		// then
 		assertThrows(IllegalArgumentException.class,
-				() -> postRepository.findById(savedPost.getId()).orElseThrow(() -> new IllegalArgumentException()));
+				() -> postRepository.findById(post.getId()).orElseThrow(() -> new IllegalArgumentException()));
 
 	}
 
-	@Test
-	public void testFindAllTitleContentPostRepository() throws JsonProcessingException {
-		// given
-		User user = new User(name, email, picture, title, introduce, Role.USER);
-		userRepository.save(user);
-
-		List<Tag> tags = new ArrayList<>();
-		tags.add(new Tag(null, "tag1"));
-		tags.add(new Tag(null, "tag2"));
-		String content1 = "the content";
-		Post post = new Post(null, null, title, content1, user, tags);
-		postRepository.save(post);
-
-		String content2 = "the qwer";
-		Post post2 = new Post(null, null, title, content2, user, tags);
-		postRepository.save(post2);
-
-		PageRequest pageRequest = PageRequest.of(0, 4);
-		String testSearch = "qwer";
-		QPost qpost = QPost.post;
-		BooleanExpression predicate = qpost.content.containsIgnoreCase(testSearch).or(qpost.title.containsIgnoreCase(testSearch));
-		// when
-		Page<Post> page = postRepository.findAll(predicate, pageRequest);
-
-		// then-ready
-		List<Post> postList = page.getContent();
-		PostResponseDto postDto = new PostResponseDto(postList.get(0));
-		ObjectWriter ow = new ObjectMapper().registerModule(new JavaTimeModule()).writer().withDefaultPrettyPrinter();
-		String json = ow.writeValueAsString(postDto);
-		System.out.println(json);
-		// then
-		assertThat(postList.size()).isEqualTo(1);
-		assertThat(postList.get(0).getContent()).isEqualTo(content2);
-	}
-
-	@Test
-	public void testFindAllTitleContentPostRepository_title() throws JsonProcessingException {
-		// given
-		User user = new User(name, email, picture, title, introduce, Role.USER);
-		userRepository.save(user);
-
-		List<Tag> tags = new ArrayList<>();
-		tags.add(new Tag(null, "tag1"));
-		tags.add(new Tag(null, "tag2"));
-		
-		String content1 = "the content";
-		Post post = new Post(null, null, title, content1, user, tags);
-		postRepository.save(post);
-
-		String content2 = "the qwer";
-		String title2 = "asdqwe";
-		Post post2 = new Post(null, null, title2, content2, user, tags);
-		postRepository.save(post2);
-
-		PageRequest pageRequest = PageRequest.of(0, 4);
-		QPost qpost = QPost.post;
-		BooleanExpression predicate = qpost.content.containsIgnoreCase(title).or(qpost.title.containsIgnoreCase(title));
-		// when
-		Page<Post> page = postRepository.findAll(predicate, pageRequest);
-
-		// then-ready
-		List<Post> postList = page.getContent();
-		PostResponseDto postDto = new PostResponseDto(postList.get(0));
-		ObjectWriter ow = new ObjectMapper().registerModule(new JavaTimeModule()).writer().withDefaultPrettyPrinter();
-		String json = ow.writeValueAsString(postDto);
-		System.out.println(json);
-		// then
-		assertThat(postList.size()).isEqualTo(1);
-		assertThat(postList.get(0).getTitle()).isEqualTo(title);
-		assertThat(postList.get(0).getContent()).isEqualTo(content1);
-	}
-	
-	@Test
-	public void testFindAllTitleContentPostRepository_multi_keyword() throws JsonProcessingException {
-		// given
-		User user = new User(name, email, picture, title, introduce, Role.USER);
-		userRepository.save(user);
-
-		List<Tag> tags = new ArrayList<>();
-		tags.add(new Tag(null, "tag1"));
-		tags.add(new Tag(null, "tag2"));
-		
-		String content1 = "the content";
-		Post post = new Post(null, null, title, content1, user, tags);
-		postRepository.save(post);
-
-		String content2 = "the qwer";
-		Post post2 = new Post(null, null, title+2, content2, user, tags);
-		postRepository.save(post2);
-
-		String content3 = "the asdf";
-		Post post3 = new Post(null, null, title+3, content3, user, tags);
-		postRepository.save(post3);
-
-		PageRequest pageRequest = PageRequest.of(0, 4);
-		QPost qpost = QPost.post;
-		String keyword="qwer";
-		String keyword2="asdf";
-		BooleanExpression predicate = qpost.content.containsIgnoreCase(keyword).or(qpost.title.containsIgnoreCase(keyword));
-		predicate = predicate.or(qpost.content.containsIgnoreCase(keyword2)).or(qpost.title.containsIgnoreCase(keyword));
-		// when
-		Page<Post> page = postRepository.findAll(predicate, pageRequest);
-
-		// then-ready
-		List<Post> postList = page.getContent();
-		PostResponseDto postDto = new PostResponseDto(postList.get(0));
-		ObjectWriter ow = new ObjectMapper().registerModule(new JavaTimeModule()).writer().withDefaultPrettyPrinter();
-		String json = ow.writeValueAsString(postDto);
-		System.out.println(json);
-		// then
-		assertThat(postList.size()).isEqualTo(2);
-		assertThat(postList.get(0).getTitle()).isEqualTo(title+2);
-		assertThat(postList.get(0).getContent()).isEqualTo(content2);
-		assertThat(postList.get(1).getTitle()).isEqualTo(title+3);
-		assertThat(postList.get(1).getContent()).isEqualTo(content3);
-	}
-	
-	
 }

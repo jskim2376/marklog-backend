@@ -19,11 +19,13 @@ public class PostCommentResponseDto {
 	private String userName;
 	private String content;
 	private List<PostCommentResponseDto> childList;
-	
+
 	public static PostCommentResponseDto toDto(PostComment postComment) {
-		List<PostCommentResponseDto> postChildCommentResponseDtos = postComment.getChildList().stream().map(PostCommentResponseDto::toDto).collect(Collectors.toList());
-		PostCommentResponseDto postCommentResponseDto = new PostCommentResponseDto(postComment.getUser().getId(), postComment.getUser().getName(), postComment.getContent(), postChildCommentResponseDtos);
+		List<PostCommentResponseDto> postChildCommentResponseDtos = postComment.getChildList().stream()
+				.map(PostCommentResponseDto::toDto).collect(Collectors.toList());
+		PostCommentResponseDto postCommentResponseDto = new PostCommentResponseDto(postComment.getUser().getId(),
+				postComment.getUser().getName(), postComment.getContent(), postChildCommentResponseDtos);
 		return postCommentResponseDto;
-		
+
 	}
 }

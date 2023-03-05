@@ -40,26 +40,26 @@ public class UserServiceTest {
 	public static String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
 	public static String title = "title";
 	public static String introduce = "introduce";
+
 	@Test
 	public void testFinAllUserService() {
-		//given
-		List<User> content = new ArrayList<>();
+		// given
 		User user = new User(name, email, picture, title, introduce, Role.USER);
+
+		List<User> content = new ArrayList<>();
 		content.add(user);
-
 		int pageCount = 0;
-		int size=20;
+		int size = 20;
 		Pageable pageable = PageRequest.of(pageCount, size);
-
 		Page<User> page = new PageImpl<>(content, pageable, 1);
 		when(userRepository.findAll(pageable)).thenReturn(page);
 
 		UserService userService = new UserService(userRepository);
 
-		//when
-		Page<UserResponseDto> pageUserResponseDto =  userService.findAll(pageable);
+		// when
+		Page<UserResponseDto> pageUserResponseDto = userService.findAll(pageable);
 
-		//then
+		// then
 		assertThat(pageUserResponseDto.getContent().get(0).getName()).isEqualTo(name);
 		assertThat(pageUserResponseDto.getContent().get(0).getEmail()).isEqualTo(email);
 		assertThat(pageUserResponseDto.getContent().get(0).getPicture()).isEqualTo(picture);
@@ -69,25 +69,62 @@ public class UserServiceTest {
 		assertThat(pageUserResponseDto.getTotalElements()).isEqualTo(1);
 
 	}
+
+	@Test
+	public void testSaveOrUpdate() {
+		// given
+		UserService userService = new UserService(userRepository);
+		OAuthAttributes oAuthAttributes = new OAuthAttributes(null, "id", name, email, picture, title);
+
+		User user = new User(name, email, picture, title, introduce, Role.USER);
+		Optional<User> optinal = Optional.of(user);
+		when(userRepository.findByEmail(anyString())).thenReturn(optinal);
+		when(userRepository.save(any())).thenReturn(user);
+
+		// when
+		User returnUser = userService.saveOrUpdate(oAuthAttributes);
+
+		// then
+		assertThat(returnUser.getName()).isEqualTo(name);
+		assertThat(returnUser.getEmail()).isEqualTo(email);
+		assertThat(returnUser.getPicture()).isEqualTo(picture);
+		assertThat(returnUser.getTitle()).isEqualTo(title);
+	}
+
 	@Test
 	public void testFindByIdUserService() {
-		//given
+		// given
 		Optional<User> user = Optional.of(new User(name, email, picture, title, introduce, Role.USER));
 		when(userRepository.findById(id)).thenReturn(user);
 		UserService userService = new UserService(userRepository);
 
-		//when
+		// when
 		UserResponseDto userServiceResponseDto = userService.findById(id);
 		UserResponseDto userServiceTestDto = new UserResponseDto(user.get());
 
-		//then
+		// then
 		assertThat(userServiceResponseDto).usingRecursiveComparison().isEqualTo(userServiceTestDto);
 	}
 
+	@Test
+	public void testFindAuthenticationDtoById() {
+		// given
+		UserService userService = new UserService(userRepository);
+		Optional<User> optinal = Optional.of(new User(name, email, picture, title, introduce, Role.USER));
+
+		when(userRepository.findById(anyLong())).thenReturn(optinal);
+
+		// when
+		UserAuthenticationDto user = userService.findAuthenticationDtoById(id);
+
+		// then
+		assertThat(user.getEmail()).isEqualTo(email);
+		assertThat(user.getRole()).isEqualTo(Role.USER);
+	}
 
 	@Test
 	public void testUpdateUserService() {
-		//given
+		// given
 		UserService userService = new UserService(userRepository);
 
 		Optional<User> user = Optional.of(new User(name, email, picture, title, introduce, Role.USER));
@@ -98,59 +135,22 @@ public class UserServiceTest {
 		String newTitle = "newTitle";
 		String newIntroduce = "newIntroduce";
 
-		//when
+		// when
 		userService.update(id, new UserUpdateRequestDto(newName, newPicture, newTitle, newIntroduce));
-		//then
+		// then
 		verify(userRepository).findById(anyLong());
 	}
 
 	@Test
 	public void testDeleteUserService() {
-		//given
+		// given
 		UserService userService = new UserService(userRepository);
 
-		//when
+		// when
 		userService.delete(id);
 
-		//then
+		// then
 		Mockito.verify(userRepository).deleteById(id);
 	}
 
-	@Test
-	public void testSaveOrUpdate() {
-		//given
-		UserService userService = new UserService(userRepository);
-		OAuthAttributes oAuthAttributes = new OAuthAttributes(null, "id", name, email, picture, title);
-		
-		User user = new User(name, email, picture, title, introduce, Role.USER);
-		Optional<User> optinal = Optional.of(user);
-		when(userRepository.findByEmail(anyString())).thenReturn(optinal);
-		when(userRepository.save(any())).thenReturn(user);
-
-		//when
-		User returnUser = userService.saveOrUpdate(oAuthAttributes);
-
-		//then
-		assertThat(returnUser.getName()).isEqualTo(name);
-		assertThat(returnUser.getEmail()).isEqualTo(email);
-		assertThat(returnUser.getPicture()).isEqualTo(picture);
-		assertThat(returnUser.getTitle()).isEqualTo(title);
-	}
-	
-
-	@Test
-	public void testFindAuthenticationDtoById() {
-		//given
-		UserService userService = new UserService(userRepository);
-		Optional<User> optinal = Optional.of(new User(name, email, picture, title, introduce, Role.USER));
-
-		when(userRepository.findById(anyLong())).thenReturn(optinal);
-
-		//when
-		UserAuthenticationDto user = userService.findAuthenticationDtoById(id);
-
-		//then
-		assertThat(user.getEmail()).isEqualTo(email);
-		assertThat(user.getRole()).isEqualTo(Role.USER);
-	}
 }

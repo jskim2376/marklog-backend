@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
@@ -32,26 +31,36 @@ import com.marklog.blog.service.PostService;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@RequestMapping("/v1")
+@RequestMapping("/v1/post")
 @RestController
 public class PostController {
 	private final PostService postService;
 	private final PostLikeService postLikeService;
 
-	@ResponseStatus(value = HttpStatus.CREATED)
+	@GetMapping("/recent")
+	public Page<PostListResponseDto> recentPost(Pageable pageable) {
+		Page<PostListResponseDto> p = postService.recentPost(pageable);
+		return p;
+	}
+
+	@GetMapping("/search")
+	public Page<PostListResponseDto> search(Pageable pageable, @RequestParam(value = "text") String text) {
+		Page<PostListResponseDto> page = postService.search(pageable, text.split(" "));
+		return page;
+	}
+
 	@PreAuthorize("isAuthenticated()")
-	@PostMapping("/post")
-	public ResponseEntity<Object> save(@RequestBody PostSaveRequestDto requestDto,
+	@PostMapping
+	public ResponseEntity<?> postPostById(@RequestBody PostSaveRequestDto requestDto,
 			@AuthenticationPrincipal UserAuthenticationDto userAuthenticationDto) {
 		Long id = postService.save(userAuthenticationDto.getId(), requestDto);
 		HttpHeaders header = new HttpHeaders();
 		header.add(HttpHeaders.LOCATION, "/api/v1/post/" + id);
-		return new ResponseEntity<>(header, HttpStatus.CREATED);
+		return ResponseEntity.status(HttpStatus.CREATED).headers(header).build();
 	}
 
-
-	@GetMapping("/post/{id}")
-	public ResponseEntity<PostResponseDto> findById(@PathVariable Long id,
+	@GetMapping("/{id}")
+	public ResponseEntity<PostResponseDto> getPostById(@PathVariable Long id,
 			@AuthenticationPrincipal UserAuthenticationDto userAuthenticationDto) {
 		try {
 			PostResponseDto postResponseDto = postService.findById(id);
@@ -60,53 +69,35 @@ public class PostController {
 				postResponseDto.setLike(like);
 			}
 
-			return new ResponseEntity<>(postResponseDto, HttpStatus.OK);
+			return ResponseEntity.ok(postResponseDto);
 		} catch (NoSuchElementException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return ResponseEntity.notFound().build();
 		}
 	}
 
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or hasPermission(#id, 'post',null))")
-	@PutMapping("/post/{id}")
-	public ResponseEntity<?> update(@PathVariable Long id, @RequestBody PostUpdateRequestDto requestDto) {
+	@PutMapping("/{id}")
+	public ResponseEntity<?> putPostById(@PathVariable Long id, @RequestBody PostUpdateRequestDto requestDto) {
 		try {
 			postService.update(id, requestDto);
 			HttpHeaders header = new HttpHeaders();
 			header.add(HttpHeaders.LOCATION, "/api/v1/post/" + id);
-			return new ResponseEntity<>(header, HttpStatus.NO_CONTENT);
+			return ResponseEntity.noContent().headers(header).build();
 		} catch (NoSuchElementException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return ResponseEntity.notFound().build();
 		}
 
 	}
 
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or hasPermission(#id, 'post',null))")
-	@DeleteMapping("/post/{id}")
-	public ResponseEntity<?> delete(@PathVariable Long id) {
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deletePostById(@PathVariable Long id) {
 		try {
 			postService.delete(id);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			return ResponseEntity.noContent().build();
 		} catch (EmptyResultDataAccessException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return ResponseEntity.notFound().build();
 		}
 	}
-	
-	@GetMapping("/post")
-	public Page<PostResponseDto> findAll(Pageable pageable) {
-		return postService.findAll(pageable);
-	}
-	
-	@GetMapping("/post/recent")
-	public Page<PostListResponseDto> recentPost(Pageable pageable) {
-		Page<PostListResponseDto> p = postService.recentPost(pageable);
-		return p;
-	}
-	
-	
-	@GetMapping("/post/search")
-	public Page<PostResponseDto> search(Pageable pageable, @RequestParam(value="text") String text) {
-			Page<PostResponseDto> page = postService.search(pageable, text.split(" "));
-			return page;
-	}
-	
+
 }

@@ -21,19 +21,20 @@ public class UserService {
 	private final UserRepository userRepository;
 
 	public Page<UserResponseDto> findAll(Pageable pageable) {
-		Page<UserResponseDto> pageUserResponseDto =  userRepository.findAll(pageable).map(UserResponseDto::toDto);
+		Page<UserResponseDto> pageUserResponseDto = userRepository.findAll(pageable).map(UserResponseDto::new);
 		return pageUserResponseDto;
 	}
 
 	public UserResponseDto findById(Long id) {
-		User entity = userRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
+		User entity = userRepository.findById(id).orElseThrow();
 		return new UserResponseDto(entity);
 	}
 
 	@Transactional
 	public void update(Long id, UserUpdateRequestDto userUpdateRequestDto) {
-		User user = userRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
-		user.update(userUpdateRequestDto.getName(), userUpdateRequestDto.getPicture(),  userUpdateRequestDto.getTitle(), userUpdateRequestDto.getIntroduce());
+		User user = userRepository.findById(id).orElseThrow();
+		user.update(userUpdateRequestDto.getName(), userUpdateRequestDto.getPicture(), userUpdateRequestDto.getTitle(),
+				userUpdateRequestDto.getIntroduce());
 	}
 
 	@Transactional
@@ -42,16 +43,16 @@ public class UserService {
 	}
 
 	@Transactional
-    public User saveOrUpdate(OAuthAttributes attributes){
-        User user = userRepository.findByEmail(attributes.getEmail())
-                .map(entity -> entity.update(attributes.getName(), attributes.getPicture(), attributes.getTitle(), null))
-                .orElse(attributes.toEntity());
+	public User saveOrUpdate(OAuthAttributes attributes) {
+		User user = userRepository.findByEmail(attributes.getEmail()).map(
+				entity -> entity.update(attributes.getName(), attributes.getPicture(), attributes.getTitle(), null))
+				.orElse(attributes.toEntity());
 
-        return userRepository.save(user);
-    }
+		return userRepository.save(user);
+	}
 
 	public UserAuthenticationDto findAuthenticationDtoById(Long id) {
-		User entity = userRepository.findById(id).orElseThrow(()->new IllegalArgumentException("존재하지않는 id입니다="+id));
+		User entity = userRepository.findById(id).orElseThrow();
 		return new UserAuthenticationDto(entity);
 	}
 }

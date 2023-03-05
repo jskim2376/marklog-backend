@@ -3,6 +3,7 @@ package com.marklog.blog.config.auth;
 import java.security.Key;
 import java.util.Collections;
 import java.util.Date;
+import java.util.NoSuchElementException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,17 +24,14 @@ import lombok.Getter;
 
 @Getter
 @Component
-public class JwtTokenProvider{
+public class JwtTokenProvider {
 	private Key key;
 	private Long accesstoken_expired;
 	private Long refreshtoken_expired;
 
 	public JwtTokenProvider(
-			@Value("#{T(java.lang.Long).parseLong('${jwt.accesstoken_expired}')}")
-			Long accesstoken_expired,
-			@Value("#{T(java.lang.Long).parseLong('${jwt.refreshtoken_expired}')}")
-			Long refreshtoken_expired
-			){
+			@Value("#{T(java.lang.Long).parseLong('${jwt.accesstoken_expired}')}") Long accesstoken_expired,
+			@Value("#{T(java.lang.Long).parseLong('${jwt.refreshtoken_expired}')}") Long refreshtoken_expired) {
 		this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 		this.accesstoken_expired = accesstoken_expired;
 		this.refreshtoken_expired = refreshtoken_expired;
@@ -66,9 +64,9 @@ public class JwtTokenProvider{
 		Long id = getId(token);
 		try {
 			UserAuthenticationDto userAuthenticationDto = userService.findAuthenticationDtoById(id);
-			return new UsernamePasswordAuthenticationToken(userAuthenticationDto, null
-					,Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
-		}catch(IllegalArgumentException e){
+			return new UsernamePasswordAuthenticationToken(userAuthenticationDto, null,
+					Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
+		} catch (NoSuchElementException e) {
 			return null;
 		}
 

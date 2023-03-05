@@ -18,7 +18,7 @@ public class TagResponseDto {
 	public static List<TagResponseDto> toEntityDto(List<Tag> tags) {
 		List<TagResponseDto> tagList = new ArrayList<>();
 
-		for(Tag tag: tags) {
+		for (Tag tag : tags) {
 			tagList.add(new TagResponseDto(tag.getName()));
 		}
 

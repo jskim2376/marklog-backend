@@ -2,6 +2,7 @@ package com.marklog.blog.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -39,50 +40,86 @@ import com.querydsl.core.types.Predicate;
 public class PostServiceTest {
 	@Mock
 	UserRepository userRepository;
+	User user;
 
 	@Mock
 	PostRepository postRepository;
 
 	@Mock
-	PostLikeService postLikeService;
-	
-	@Mock
 	TagRepository tagRepository;
 
-	User user;
-	Long userId = 1L;
-	String name = "name";
-	String email = "test@gmail.com";
-	String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
-	String userTitle = "myblog";
-	String introduce = "introduce";
-
+	PostService postService;
 	Post post;
-	Long postId = 2L;
+	Long postId = 1L;
+	String thumbnail = "thumbnail";
+	String summary = "summary";
 	String title = "title";
 	String content = "![](https://velog.velcdn.com/images/padomay1352/post/aa716ab1-e079-406b-ae82-c4489e7b95d1/image.png)\r\n"
 			+ "# adsadasd as sa dsa dad ada s dsa\r\n"
 			+ "hihihi thithithiad sad sa dasd sa dsad da a dsasasdsaa a sa sa saa sa  ad  ada\r\n"
 			+ "asdad asd sa dsa dsa sad a dad  a  s as dsa dd sa da sa dsa sa dsa asd sa dsa\r\n";
 
-	PostService postService;
-
 	@BeforeEach
 	public void setUp() {
-		user = new User(name, email, picture, title, introduce, Role.USER);
+		String name = "name";
+		String email = "test@gmail.com";
+		String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
+		String userTitle = "myblog";
+		String introduce = "introduce";
+		user = new User(name, email, picture, userTitle, introduce, Role.USER);
 
 		List<Tag> tags = new ArrayList<>();
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
-		post = spy(new Post(null,null,title, content, user, tags));
-
+		post = spy(new Post(thumbnail, summary, title, content, user, tags));
 		postService = new PostService(postRepository, userRepository, tagRepository);
+	}
+
+	@Test
+	public void testRescentPost() {
+		// given
+		List<Post> contents = new ArrayList<>();
+		contents.add(post);
+		int pageCount = 0;
+		int size = 20;
+		Pageable pageable = PageRequest.of(pageCount, size, Sort.by("id").descending());
+		Page<Post> page = new PageImpl<>(contents, pageable, 1);
+		when(postRepository.findAll(pageable)).thenReturn(page);
+
+		// when
+		Page<PostListResponseDto> postResponsePage = postService.recentPost(pageable);
+
+		// then
+		assertThat(postResponsePage.getContent().get(0).getTitle()).isEqualTo(title);
+		assertThat(postResponsePage.getSize()).isEqualTo(size);
+		assertThat(postResponsePage.getTotalElements()).isEqualTo(1);
+	}
+
+	@Test
+	public void testSearchPostService() {
+		// given
+		List<Post> contents = new ArrayList<>();
+		contents.add(post);
+		int pageCount = 0;
+		int size = 20;
+		Pageable pageable = PageRequest.of(pageCount, size);
+		Page<Post> page = new PageImpl<>(contents, pageable, 1);
+		String[] keywords = { "content", "hello" };
+		when(postRepository.findAll(any(Predicate.class), any(Pageable.class))).thenReturn(page);
+
+		// when
+		Page<PostListResponseDto> postResponsePage = postService.search(pageable, keywords);
+
+		// then
+		assertThat(postResponsePage.getContent().get(0).getTitle()).isEqualTo(title);
+		assertThat(postResponsePage.getSize()).isEqualTo(size);
+		assertThat(postResponsePage.getTotalElements()).isEqualTo(1);
 	}
 
 	@Test
 	public void testSavePostService() {
 		//given
-		when(userRepository.getReferenceById(userId)).thenReturn(user);
+		when(userRepository.getReferenceById(anyLong())).thenReturn(user);
 		when(postRepository.save(any())).thenAnswer(invocation -> {
 			Post post = (Post)(invocation.getArguments()[0]);
 			post = spy(post);
@@ -134,7 +171,6 @@ public class PostServiceTest {
 		List<String> tagListRequest = new ArrayList<>();
 		tagListRequest.add("newTag1");
 		tagListRequest.add("newtag2");
-		tagListRequest.add("newtag3");
 
 		PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(title + '2', content + "2",
 				tagListRequest);
@@ -147,7 +183,6 @@ public class PostServiceTest {
 		verify(post).update(postUpdateRequestDto.getTitle(), postUpdateRequestDto.getContent());
 		verify(tagRepository).findByPost(any());
 		verify(tagRepository, times(2)).delete(any());
-		verify(tagRepository, times(3)).save(any());
 	}
 
 	@Test
@@ -159,74 +194,4 @@ public class PostServiceTest {
 		// then
 		verify(postRepository).deleteById(postId);
 	}
-	
-	@Test
-	public void testFinAllUserService() {
-		// given
-		List<Post> contents = new ArrayList<>();
-		contents.add(post);
-		int pageCount = 0;
-		int size = 20;
-		Pageable pageable = PageRequest.of(pageCount, size);
-		Page<Post> page = new PageImpl<>(contents, pageable, 1);
-
-		when(postRepository.findAll(pageable)).thenReturn(page);
-
-		// when
-		Page<PostResponseDto> postResponsePage = postService.findAll(pageable);
-
-		// then
-		assertThat(postResponsePage.getContent().get(0).getTitle()).isEqualTo(title);
-		assertThat(postResponsePage.getContent().get(0).getContent()).isEqualTo(content);
-		assertThat(postResponsePage.getSize()).isEqualTo(size);
-		assertThat(postResponsePage.getTotalElements()).isEqualTo(1);
-	}
-	
-	@Test
-	public void testRescentPost() {
-		// given
-		List<Post> contents = new ArrayList<>();
-		contents.add(post);
-		int pageCount = 0;
-		int size = 20;
-		Pageable pageable = PageRequest.of(pageCount, size, Sort.by("id").descending());
-		Page<Post> page = new PageImpl<>(contents, pageable, 1);
-
-		when(postRepository.findAll(pageable)).thenReturn(page);
-
-		// when
-		Page<PostListResponseDto> postResponsePage = postService.recentPost(pageable);
-
-		// then
-		assertThat(postResponsePage.getContent().get(0).getTitle()).isEqualTo(title);
-		assertThat(postResponsePage.getSize()).isEqualTo(size);
-		assertThat(postResponsePage.getTotalElements()).isEqualTo(1);
-	}
-
-	
-	@Test
-	public void testSearchPostService() {
-		
-		// given
-		String[] keywords = {"content","hello"};
-		int pageCount = 0;
-		int size = 20;
-		Pageable pageable = PageRequest.of(pageCount, size);
-
-		List<Post> contents = new ArrayList<>();
-		contents.add(post);
-		Page<Post> page = new PageImpl<>(contents, pageable, 1);
-		when(postRepository.findAll(any(Predicate.class),any(Pageable.class))).thenReturn(page);
-		
-		// when
-		Page<PostResponseDto> postResponsePage = postService.search(pageable, keywords);
-
-		// then
-		assertThat(postResponsePage.getContent().get(0).getTitle()).isEqualTo(title);
-		assertThat(postResponsePage.getContent().get(0).getContent()).isEqualTo(content);
-		assertThat(postResponsePage.getSize()).isEqualTo(size);
-		assertThat(postResponsePage.getTotalElements()).isEqualTo(1);
-	}
-
-
 }

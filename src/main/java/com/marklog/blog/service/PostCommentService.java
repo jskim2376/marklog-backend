@@ -3,7 +3,6 @@ package com.marklog.blog.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +42,7 @@ public class PostCommentService {
 		return postComment.getId();
 	}
 
-	public List<PostCommentResponseDto> findAll(Long postId) {
+	public List<PostCommentResponseDto> findAllByPostId(Long postId) {
 		Post post = postRepository.getReferenceById(postId);
 		List<PostComment> comments = postCommentRepository.findAllByPostAndParentIsNull(post);
 		List<PostCommentResponseDto> postCommentResponseDtos = comments.stream().map(PostCommentResponseDto::toDto)

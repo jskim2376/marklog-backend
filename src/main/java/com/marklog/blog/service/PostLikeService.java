@@ -35,10 +35,10 @@ public class PostLikeService {
 		Optional<PostLike> optional = postLikeRepository.findById(new PostLikeIdClass(postId, userId));
 		return optional.isPresent();
 	}
-	
+
 	@Transactional
 	public void delete(Long postId, Long userId) {
-		PostLike postLike = postLikeRepository.findById(new PostLikeIdClass(postId, userId)).orElseThrow(()->new IllegalArgumentException("존재하지않는 post id입니다="+postId));
+		PostLike postLike = postLikeRepository.findById(new PostLikeIdClass(postId, userId)).orElseThrow();
 		postLikeRepository.delete(postLike);
 	}
 }

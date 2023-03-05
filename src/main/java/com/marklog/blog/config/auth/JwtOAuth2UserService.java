@@ -20,8 +20,7 @@ import lombok.Setter;
 
 @Setter
 @Service
-public class JwtOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User>{
-
+public class JwtOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
 	private final UserService userService;
 	private OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate;
@@ -35,17 +34,15 @@ public class JwtOAuth2UserService implements OAuth2UserService<OAuth2UserRequest
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 		String registratrionId = userRequest.getClientRegistration().getRegistrationId();
-		String userNameAttributeKey = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
+		String userNameAttributeKey = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint()
+				.getUserNameAttributeName();
 		Map<String, Object> attributes = delegate.loadUser(userRequest).getAttributes();
 		OAuthAttributes oAuthAttributes = OAuthAttributes.of(registratrionId, userNameAttributeKey, attributes);
 
-        User user = userService.saveOrUpdate(oAuthAttributes);
+		User user = userService.saveOrUpdate(oAuthAttributes);
 
-        return new DefaultOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority(user.getRoleKey())),
-                user.toAttributes(),
-                "id"
-        );
-    }
+		return new DefaultOAuth2User(Collections.singleton(new SimpleGrantedAuthority(user.getRoleKey())),
+				user.toAttributes(), "id");
+	}
 
 }

@@ -24,22 +24,21 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Entity
-public class Post extends BaseTimeEntity{
+public class Post extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(length=100)
+	@Column(length = 100)
 	private String thumbnail;
-	
-	@Column(length=30)
+
+	@Column(length = 30)
 	private String summary;
 
-	@Column(length=50, nullable = false)
+	@Column(length = 50, nullable = false)
 	private String title;
 
-	
-	@Column(columnDefinition="TEXT", nullable = false)
+	@Column(columnDefinition = "TEXT", nullable = false)
 	private String content;
 
 	@ManyToOne(optional = false)
@@ -65,7 +64,7 @@ public class Post extends BaseTimeEntity{
 	}
 
 	public void update(String title, String content) {
-		this.title=title;
-		this.content=content;
+		this.title = title;
+		this.content = content;
 	}
 }

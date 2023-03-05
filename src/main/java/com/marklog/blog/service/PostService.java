@@ -36,61 +36,61 @@ public class PostService {
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
 	private final TagRepository tagRepository;
-	
-    private String markdownToHtml(String markdown) {
-        Parser parser = Parser.builder().build();
-    	Node document = parser.parse(markdown);
-    	HtmlRenderer renderer = HtmlRenderer.builder().build();
-    	return renderer.render(document); 
-    }
-    
-    private String htmlToText(String html) {
-        HtmlToPlainText formatter = new HtmlToPlainText();
-        String converted = formatter.getPlainText(Jsoup.parse(html));
-        return converted;
-    }
-    
-    
-    private String ejectThumbnail(String html) {
-    	Document doc = Jsoup.parse(html);
-    	Elements elements =  doc.getElementsByTag("img");
-    	if(elements.size()<1) {
-    		return null;
-    	}else {
-    		return elements.first().attr("src");
-    	}
-    }
-    private String ejectSummary(String html) {
-    	String summary = null;
-    	String text = htmlToText(html);
 
-    	String[] splitTexts = text.split("\n");
-		for(String splitText:splitTexts) {
-			if(splitText != "") {
+	private String markdownToHtml(String markdown) {
+		Parser parser = Parser.builder().build();
+		Node document = parser.parse(markdown);
+		HtmlRenderer renderer = HtmlRenderer.builder().build();
+		return renderer.render(document);
+	}
+
+	private String htmlToText(String html) {
+		HtmlToPlainText formatter = new HtmlToPlainText();
+		String converted = formatter.getPlainText(Jsoup.parse(html));
+		return converted;
+	}
+
+	private String ejectThumbnail(String html) {
+		Document doc = Jsoup.parse(html);
+		Elements elements = doc.getElementsByTag("img");
+		if (elements.size() < 1) {
+			return null;
+		} else {
+			return elements.first().attr("src");
+		}
+	}
+
+	private String ejectSummary(String html) {
+		String summary = null;
+		String text = htmlToText(html);
+
+		String[] splitTexts = text.split("\n");
+		for (String splitText : splitTexts) {
+			if (splitText != "") {
 				summary = splitText;
-				if(summary.length() > 30) {
-					summary = summary.substring(0,30);
+				if (summary.length() > 30) {
+					summary = summary.substring(0, 30);
 				}
 				break;
 			}
 		}
 
 		return summary;
-    }
-    
+	}
+
 	public Long save(Long userId, PostSaveRequestDto requestDto) {
 		User user = userRepository.getReferenceById(userId);
-		
+
 		String html = markdownToHtml(requestDto.getContent());
 		String thumbnail = ejectThumbnail(html);
 		String summary = ejectSummary(html);
-		
-		Post post = new Post(thumbnail, summary, requestDto.getTitle(),requestDto.getContent(), user, null);
+
+		Post post = new Post(thumbnail, summary, requestDto.getTitle(), requestDto.getContent(), user, null);
 		post = postRepository.save(post);
 
 		List<String> tagNames = requestDto.getTagList();
-		if(tagNames != null) {
-			for(String tagName: tagNames) {
+		if (tagNames != null) {
+			for (String tagName : tagNames) {
 				Tag tag = Tag.builder().name(tagName).post(post).build();
 				tagRepository.save(tag);
 			}
@@ -98,19 +98,17 @@ public class PostService {
 		return post.getId();
 	}
 
-
-
 	public void update(Long id, PostUpdateRequestDto requestDto) {
 		Post post = postRepository.findById(id).orElseThrow();
 		post.update(requestDto.getTitle(), requestDto.getContent());
 
 		List<Tag> tags = tagRepository.findByPost(post);
-		for(Tag tag : tags) {
+		for (Tag tag : tags) {
 			tagRepository.delete(tag);
 		}
 		List<String> tagNames = requestDto.getTagList();
-		if(tagNames != null) {
-			for(String tagName: tagNames) {
+		if (tagNames != null) {
+			for (String tagName : tagNames) {
 				tagRepository.save(Tag.builder().name(tagName).post(post).build());
 			}
 		}
@@ -125,31 +123,27 @@ public class PostService {
 		postRepository.deleteById(id);
 	}
 
-	public Page<PostResponseDto> findAll(Pageable pageable) {
-		Page<PostResponseDto> pageUserResponseDto =  postRepository.findAll(pageable).map(PostResponseDto::toDto);
-		return pageUserResponseDto;
-	}
-
 	public Page<PostListResponseDto> recentPost(Pageable pageable) {
-		Page<PostListResponseDto> pagePostListResponseDto =  postRepository.findAll(pageable).map(PostListResponseDto::new);
+		Page<PostListResponseDto> pagePostListResponseDto = postRepository.findAll(pageable)
+				.map(PostListResponseDto::new);
 		return pagePostListResponseDto;
 	}
-	
-	public Page<PostResponseDto> search(Pageable pageable, String[] keywords){
+
+	public Page<PostListResponseDto> search(Pageable pageable, String[] keywords) {
 		QPost qpost = QPost.post;
-		
+
 		BooleanExpression predicate = null;
-		for(String keyword:keywords) {
-			if(predicate==null) {
+		for (String keyword : keywords) {
+			if (predicate == null) {
 				predicate = qpost.content.containsIgnoreCase(keyword).or(qpost.title.containsIgnoreCase(keyword));
-			}
-			else {
-				predicate = predicate.or(qpost.content.containsIgnoreCase(keyword)).or(qpost.title.containsIgnoreCase(keyword));
+			} else {
+				predicate = predicate.or(qpost.content.containsIgnoreCase(keyword))
+						.or(qpost.title.containsIgnoreCase(keyword));
 			}
 		}
-		
+
 		// when
-		Page<PostResponseDto> page = postRepository.findAll(predicate, pageable).map(PostResponseDto::toDto);
+		Page<PostListResponseDto> page = postRepository.findAll(predicate, pageable).map(PostListResponseDto::new);
 		return page;
 	}
 

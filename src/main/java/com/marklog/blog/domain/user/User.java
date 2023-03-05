@@ -25,68 +25,65 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@Table(name="users")
+@Table(name = "users")
 @Entity
 public class User extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(length=50, nullable = false, unique=true)
-    private String email;
+	@Column(length = 50, nullable = false, unique = true)
+	private String email;
 
+	@Column(length = 20, nullable = false)
+	private String name;
 
-    @Column(length=20, nullable = false)
-    private String name;
+	@Column(length = 200, nullable = false)
+	private String picture;
 
+	@Column(length = 100)
+	private String introduce;
 
-    @Column(length=200, nullable = false)
-    private String picture;
+	@Column(length = 20, nullable = false)
+	private String title;
 
-    @Column(length=100)
-    private String introduce;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private Role role;
 
-    @Column(length=20, nullable = false)
-    private String title;
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	List<Post> posts = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
+	@Builder
+	public User(String name, String email, String picture, String title, String introduce, Role role) {
+		this.name = name;
+		this.email = email;
+		this.picture = picture;
+		this.title = title;
+		this.introduce = introduce;
+		this.role = role;
+	}
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    List<Post> posts = new ArrayList<>();
+	public User update(String name, String picture, String title, String introduce) {
+		this.name = name;
+		this.picture = picture;
+		this.title = title;
+		this.introduce = introduce;
 
+		return this;
+	}
 
-    @Builder
-    public User(String name, String email, String picture, String title, String introduce, Role role){
-        this.name = name;
-        this.email = email;
-        this.picture = picture;
-        this.title = title;
-        this.introduce = introduce;
-        this.role = role;
-    }
+	public Map<String, Object> toAttributes() {
+		Map<String, Object> map = new HashMap<>();
+		map.put("id", this.id);
+		map.put("email", this.email);
+		return map;
 
-    public User update(String name, String picture, String title, String introduce){
-        this.name = name;
-        this.picture = picture;
-        this.title = title;
-        this.introduce = introduce;
+	}
 
-        return this;
-    }
-
-    public Map<String, Object> toAttributes(){
-    	Map <String, Object> map = new HashMap<>();
-    	map.put("id", this.id);
-    	map.put("email", this.email);
-    	return map;
-
-    }
-
-    public String getRoleKey(){
-        return this.role.getKey();
-    }
+	public String getRoleKey() {
+		return this.role.getKey();
+	}
 
 }

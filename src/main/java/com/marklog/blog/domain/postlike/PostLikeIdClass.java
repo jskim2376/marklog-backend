@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostLikeIdClass implements Serializable{
+public class PostLikeIdClass implements Serializable {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	private Long post;
@@ -30,6 +30,5 @@ public class PostLikeIdClass implements Serializable{
 		PostLikeIdClass other = (PostLikeIdClass) obj;
 		return Objects.equals(post, other.post) && Objects.equals(user, other.user);
 	}
-
 
 }

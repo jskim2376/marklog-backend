@@ -10,14 +10,14 @@ import lombok.Getter;
 
 @Getter
 public class OAuthAttributes {
-    private Map<String, Object> attributes;
-    private String nameAttributeKey;
-    private String name;
-    private String email;
-    private String picture;
-    private String title;
+	private Map<String, Object> attributes;
+	private String nameAttributeKey;
+	private String name;
+	private String email;
+	private String picture;
+	private String title;
 
-    @Builder
+	@Builder
 	public OAuthAttributes(Map<String, Object> attributes, String nameAttributeKey, String name, String email,
 			String picture, String title) {
 		super();
@@ -29,29 +29,19 @@ public class OAuthAttributes {
 		this.title = title;
 	}
 
-    public User toEntity(){
-        return User.builder()
-                .name(name)
-                .email(email)
-                .picture(picture)
-                .title(title)
-                .role(Role.USER)
-                .build();
-    }
+	public User toEntity() {
+		return User.builder().name(name).email(email).picture(picture).title(title).role(Role.USER).build();
+	}
 
-    public static OAuthAttributes of(String registrationId, String userNameAttributeKey, Map<String, Object> attributes){
-        return ofGoogle(userNameAttributeKey, attributes);
-    }
+	public static OAuthAttributes of(String registrationId, String userNameAttributeKey,
+			Map<String, Object> attributes) {
+		return ofGoogle(userNameAttributeKey, attributes);
+	}
 
-    private static OAuthAttributes ofGoogle(String userNameAttributeKey, Map<String, Object> attributes){
-        return OAuthAttributes.builder()
-                .name((String) attributes.get("name"))
-                .email((String) attributes.get("email"))
-                .picture((String) attributes.get("picture"))
-                .title(((String) attributes.get("email")).split("@")[0])
-                .attributes(attributes)
-                .nameAttributeKey(userNameAttributeKey)
-                .build();
-    }
+	private static OAuthAttributes ofGoogle(String userNameAttributeKey, Map<String, Object> attributes) {
+		return OAuthAttributes.builder().name((String) attributes.get("name")).email((String) attributes.get("email"))
+				.picture((String) attributes.get("picture")).title(((String) attributes.get("email")).split("@")[0])
+				.attributes(attributes).nameAttributeKey(userNameAttributeKey).build();
+	}
 
 }

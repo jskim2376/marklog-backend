@@ -31,34 +31,35 @@ import com.marklog.blog.domain.user.UserRepository;
 public class PostCommentServiceTest {
 	@Mock
 	UserRepository userRepository;
-
 	@Mock
 	PostRepository postRepository;
-
 	@Mock
 	PostCommentRepository postCommentRepository;
 
-	User user;
-	Long userId = 1L;
-	String name = "name";
-	String email = "test@gmail.com";
-	String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
-	String userTitle = "myblog";
-	String introduce = "introduce";
-
-	Post post;
-	Long postId = 2L;
-	String title = "title";
-	String content = "title";
 	PostCommentService postCommentService;
-
 	Long postCommentId = 1L;
 	String commentContent = "string";
 
+	User user;
+	Post post;
+	Long userId = 1L;
+	Long postId = 2L;
+
 	@BeforeEach
 	public void setUp() {
-		user = new User(name, email, picture, title, introduce, Role.USER);
-		post = new Post(null,null, title, content, user, null);
+
+		String name = "name";
+		String email = "test@gmail.com";
+		String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
+		String userTitle = "myblog";
+		String introduce = "introduce";
+		user = new User(name, email, picture, userTitle, introduce, Role.USER);
+
+		String thumbnail = "thumbnail";
+		String summary = "summary";
+		String title = "title";
+		String content = "title";
+		post = new Post(thumbnail, summary, title, content, user, null);
 		postCommentService = new PostCommentService(postRepository, userRepository, postCommentRepository);
 	}
 
@@ -70,10 +71,10 @@ public class PostCommentServiceTest {
 		when(postRepository.getReferenceById(postId)).thenReturn(post);
 		when(userRepository.getReferenceById(userId)).thenReturn(user);
 		when(postCommentRepository.save(any())).thenAnswer(invocation -> {
-		    PostComment postcomment = (PostComment)(invocation.getArguments()[0]);
-		    postcomment = spy(postcomment);
-		    when(postcomment.getId()).thenReturn(postCommentId);
-		    return postcomment;
+			PostComment postcomment = (PostComment) (invocation.getArguments()[0]);
+			postcomment = spy(postcomment);
+			when(postcomment.getId()).thenReturn(postCommentId);
+			return postcomment;
 		});
 		// when
 		Long savedId = postCommentService.save(postId, userId, requestDto);
@@ -88,21 +89,21 @@ public class PostCommentServiceTest {
 		PostCommentRequestDto requestDto = new PostCommentRequestDto(postCommentId, commentContent);
 		when(postRepository.getReferenceById(postId)).thenReturn(post);
 		when(userRepository.getReferenceById(userId)).thenReturn(user);
-		PostComment postComment = spy(new PostComment(post, user, commentContent+2));
+		PostComment postComment = spy(new PostComment(post, user, commentContent + 2));
 		when(postCommentRepository.getReferenceById(postCommentId)).thenReturn(postComment);
 		when(postCommentRepository.save(any())).thenAnswer(invocation -> {
-		    PostComment postcomment = (PostComment)(invocation.getArguments()[0]);
-		    postcomment = spy(postcomment);
-		    when(postcomment.getId()).thenReturn(postCommentId);
-		    return postcomment;
-		});		
+			PostComment postcomment = (PostComment) (invocation.getArguments()[0]);
+			postcomment = spy(postcomment);
+			when(postcomment.getId()).thenReturn(postCommentId);
+			return postcomment;
+		});
 		// when
 		Long savedId = postCommentService.save(postId, userId, requestDto);
 
 		// then
 		assertThat(savedId).isEqualByComparingTo(postCommentId);
 		assertThat(postComment.getChildList().get(0).getContent()).isEqualTo(commentContent);
-		assertThat(postComment.getChildList().get(0).getParent().getContent()).isEqualTo(commentContent+2);
+		assertThat(postComment.getChildList().get(0).getParent().getContent()).isEqualTo(commentContent + 2);
 	}
 
 	@Test
@@ -121,21 +122,21 @@ public class PostCommentServiceTest {
 		postComments.add(postComment2);
 		when(postCommentRepository.findAllByPostAndParentIsNull(any())).thenReturn(postComments);
 		// when
-		List<PostCommentResponseDto> findPostCommentResponseDtos = postCommentService.findAll(postId);
+		List<PostCommentResponseDto> findPostCommentResponseDtos = postCommentService.findAllByPostId(postId);
 
 		// then
 		assertThat(findPostCommentResponseDtos.get(0).getContent()).isEqualTo(commentContent);
 		assertThat(findPostCommentResponseDtos.get(0).getChildList().get(0).getContent()).isEqualTo(commentContent+2);
 		assertThat(findPostCommentResponseDtos.get(0).getChildList().get(0).getChildList().get(0).getContent()).isEqualTo(commentContent+3);
 		assertThat(findPostCommentResponseDtos.get(1).getContent()).isEqualTo(commentContent);
-	}		
-	
+	}
+
 	@Test
 	public void testPostCommentServiceFindById() {
 		// given
 		PostComment postComment = new PostComment(post, user, commentContent);
-		PostComment postComment2 = new PostComment(post, user, commentContent+2);
-		PostComment postComment3 = new PostComment(post, user, commentContent+3);
+		PostComment postComment2 = new PostComment(post, user, commentContent + 2);
+		PostComment postComment3 = new PostComment(post, user, commentContent + 3);
 		postComment2.addChildComment(postComment3);
 		postComment.addChildComment(postComment2);
 
@@ -148,8 +149,9 @@ public class PostCommentServiceTest {
 
 		// then
 		assertThat(findPostCommentResponseDto.getContent()).isEqualTo(commentContent);
-		assertThat(findPostCommentResponseDto.getChildList().get(0).getContent()).isEqualTo(commentContent+2);
-		assertThat(findPostCommentResponseDto.getChildList().get(0).getChildList().get(0).getContent()).isEqualTo(commentContent+3);
+		assertThat(findPostCommentResponseDto.getChildList().get(0).getContent()).isEqualTo(commentContent + 2);
+		assertThat(findPostCommentResponseDto.getChildList().get(0).getChildList().get(0).getContent())
+				.isEqualTo(commentContent + 3);
 	}
 
 	@Test

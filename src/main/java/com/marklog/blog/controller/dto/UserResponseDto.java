@@ -30,7 +30,4 @@ public class UserResponseDto {
 		this.introduce = entity.getIntroduce();
 	}
 
-	public static UserResponseDto toDto(final User user) {
-		return new UserResponseDto(user);
-	}
 }

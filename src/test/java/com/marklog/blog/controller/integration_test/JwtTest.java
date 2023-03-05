@@ -1,4 +1,4 @@
-package com.marklog.blog.domain.integration_test;
+package com.marklog.blog.controller.integration_test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,7 +55,7 @@ public class JwtTest {
 	@Test
 	public void testJwtCheck() throws JsonMappingException, JsonProcessingException {
 		// given
-		String uri ="/api/v1/token/check";
+		String uri = "/api/v1/token/check";
 		String accessToken1 = jwtTokenProvider.createAccessToken(user1.getId(), email);
 
 		// when
@@ -65,11 +65,10 @@ public class JwtTest {
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
-
 	@Test
 	public void testJwtRefresh() throws JsonMappingException, JsonProcessingException {
 		// given
-		String uri ="/api/v1/token/refresh";
+		String uri = "/api/v1/token/refresh";
 		String refreshToken = jwtTokenProvider.createRefreshToken(user1.getId(), email);
 
 		// when

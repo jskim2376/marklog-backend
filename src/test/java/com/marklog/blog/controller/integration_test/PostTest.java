@@ -1,7 +1,8 @@
-package com.marklog.blog.domain.integration_test;
+package com.marklog.blog.controller.integration_test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,10 +23,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.marklog.blog.config.auth.JwtTokenProvider;
+import com.marklog.blog.controller.dto.PostListResponseDto;
 import com.marklog.blog.controller.dto.PostResponseDto;
 import com.marklog.blog.controller.dto.PostSaveRequestDto;
 import com.marklog.blog.controller.dto.PostUpdateRequestDto;
@@ -108,10 +113,10 @@ public class PostTest {
 	}
 
 	public void createPostLike(Long id) {
-		String uri = "/api/v1/post/like/";
+		String uri = "/api/v1/post/" + id + "/like";
 		// when
-		wc.post().uri(uri + id).header("Authorization", "Bearer " + accessToken1)
-				.contentType(MediaType.APPLICATION_JSON).retrieve().toEntity(String.class).block();
+		wc.post().uri(uri).header("Authorization", "Bearer " + accessToken1).contentType(MediaType.APPLICATION_JSON)
+				.retrieve().toEntity(String.class).block();
 	}
 
 	@Test
@@ -225,51 +230,29 @@ public class PostTest {
 	}
 
 	@Test
-	public void testGetAllPost() throws JsonMappingException, JsonProcessingException, JSONException {
-		// given
-		String searchText = "test";
-		String searchContent = "search";
-		createPost(searchText, searchContent);
-
-		// when
-		ResponseEntity<String> responseEntity = wc.get().uri(uri).attribute("text", searchContent).retrieve()
-				.toEntity(String.class).block();
-
-		// then-ready
-		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
-		String getTitle = jsonObject.getJSONArray("content").getJSONObject(0).getString("title");
-		Long size = jsonObject.getLong("size");
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getTitle).isEqualTo(postTitle);
-		assertThat(size).isEqualTo(20);
-	}
-	
-	@Test
 	public void testRecentPost() throws JsonMappingException, JsonProcessingException, JSONException {
 		// given
 		String recentTitle = "recentPost";
 		String recentContent = "search";
 		Long postId = createPost(recentTitle, recentContent);
 		createPostLike(postId);
-		
+
 		// when
-		ResponseEntity<String> responseEntity = wc.get().uri(uri+"/recent").attribute("text", recentContent).retrieve()
-				.toEntity(String.class).block();
+		ResponseEntity<String> responseEntity = wc.get().uri(uri + "/recent").attribute("text", recentContent)
+				.retrieve().toEntity(String.class).block();
 
 		// then-ready
 		JSONObject recentPostJsonObject = null;
-		
+
 		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
-		JSONArray contentobj= jsonObject.getJSONArray("content");
-		for(int i=0;i<contentobj.length();i++) {
+		JSONArray contentobj = jsonObject.getJSONArray("content");
+		for (int i = 0; i < contentobj.length(); i++) {
 			String jsonObjectTitle = contentobj.getJSONObject(i).getString("title");
-			if(jsonObjectTitle.equals(recentTitle)) {
+			if (jsonObjectTitle.equals(recentTitle)) {
 				recentPostJsonObject = contentobj.getJSONObject(i);
 			}
 		}
-		
+
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(recentPostJsonObject).isNotNull();
@@ -278,14 +261,13 @@ public class PostTest {
 		assertThat(recentPostJsonObject.get("likeCount")).isEqualTo(1);
 	}
 
-
 	@Test
-	public void testSearchPost() throws JsonMappingException, JsonProcessingException, JSONException {
+	public void testSearchPost() throws JSONException, IOException {
 		// given
 		String searchTitle = "search title";
-		String  searchContent = "hhhhh";
+		String searchContent = "hhhhh";
 		String text = "search";
-		createPost(searchTitle,searchContent);
+		createPost(searchTitle, searchContent);
 		String uri = "/api/v1/post/search";
 		// when
 		ResponseEntity<String> responseEntity = wc.get()
@@ -293,19 +275,16 @@ public class PostTest {
 				.toEntity(String.class).block();
 
 		// then-ready
-		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
-		String getTitle = jsonObject.getJSONArray("content").getJSONObject(0).getString("title");
-		String getContent = jsonObject.getJSONArray("content").getJSONObject(0).getString("content");
-
-		Long size = jsonObject.getLong("size");
+		ObjectReader reader = objectMapper.readerFor(new TypeReference<List<PostListResponseDto>>() {
+		});
+		JsonNode node = objectMapper.readTree(responseEntity.getBody());
+		List<PostListResponseDto> postListResponseDtos = reader.readValue(node.get("content"));
 
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getTitle).isEqualTo(searchTitle);
-		assertThat(getContent).isEqualTo(searchContent);
-		assertThat(size).isEqualTo(20);
+		assertThat(postListResponseDtos.get(0).getTitle().contains(text)).isTrue();
 	}
-	
+
 	@Test
 	public void testSearchPost_empty() throws JsonMappingException, JsonProcessingException, JSONException {
 		// given

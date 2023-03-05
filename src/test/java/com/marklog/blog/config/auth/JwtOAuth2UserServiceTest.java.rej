@@ -1,0 +1,10 @@
+diff a/src/test/java/com/marklog/blog/config/auth/JwtOAuth2UserServiceTest.java b/src/test/java/com/marklog/blog/config/auth/JwtOAuth2UserServiceTest.java	(rejected hunks)
+@@ -46,7 +46,7 @@
+ 		HashMap<String, Object> attributes = new HashMap<>();
+ 		attributes.put("email", "test@gmail.com");
+ 		attributes.put(myUserNameAttributeKey, id);
+-
++		
+ 		when(oAuth2UserRequest.getClientRegistration().getRegistrationId()).thenReturn("google");
+ 		when(oAuth2UserRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName()).thenReturn(myUserNameAttributeKey);
+ 		when(delegate.loadUser(any()).getAttributes()).thenReturn(attributes);

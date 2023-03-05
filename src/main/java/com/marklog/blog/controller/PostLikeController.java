@@ -1,6 +1,7 @@
 package com.marklog.blog.controller;
 
-import org.springframework.http.HttpStatus;
+import java.util.NoSuchElementException;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,26 +24,26 @@ public class PostLikeController {
 	private final PostLikeService postLikeService;
 
 	@PreAuthorize("isAuthenticated()")
-	@PostMapping("/like/{id}")
-	public ResponseEntity<?> postLikeSave(@PathVariable Long id,
+	@PostMapping("/{id}/like")
+	public ResponseEntity<?> postPostLike(@PathVariable Long id,
 			@AuthenticationPrincipal UserAuthenticationDto userAuthenticationDto) {
 		try {
 			postLikeService.save(id, userAuthenticationDto.getId());
-			return new ResponseEntity<>(HttpStatus.CREATED);
+			return ResponseEntity.created(null).build();
 		} catch (JpaObjectRetrievalFailureException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return ResponseEntity.notFound().build();
 		}
 	}
 
 	@PreAuthorize("isAuthenticated()")
-	@DeleteMapping("/like/{id}")
-	public ResponseEntity<?> postLikeDelete(@PathVariable Long id,
+	@DeleteMapping("/{id}/like")
+	public ResponseEntity<?> deletePostLike(@PathVariable Long id,
 			@AuthenticationPrincipal UserAuthenticationDto userAuthenticationDto) {
 		try {
 			postLikeService.delete(id, userAuthenticationDto.getId());
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (IllegalArgumentException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return ResponseEntity.noContent().build();
+		} catch (NoSuchElementException e) {
+			return ResponseEntity.notFound().build();
 		}
 	}
 

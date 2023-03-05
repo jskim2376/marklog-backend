@@ -41,23 +41,22 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 					if (postUserId == authUserId) {
 						return true;
 					}
-				}catch(NoSuchElementException e) {
+				} catch (NoSuchElementException e) {
 					return false;
 				}
-			}
-			else if(targetType.equals("postComment")){
+			} else if (targetType.equals("postComment")) {
 				try {
-				Long postCommentId = (Long) targetId;
-				PostCommentResponseDto postComment = postCommentService.findById(postCommentId);
-				Long postCommentUserId = postComment.getUserId();
-				Long authUserId = ((UserAuthenticationDto) authentication.getPrincipal()).getId();
-				if (postCommentUserId == authUserId) {
-					return true;
-				}
-				}catch(NoSuchElementException e) {
+					Long postCommentId = (Long) targetId;
+					PostCommentResponseDto postComment = postCommentService.findById(postCommentId);
+					Long postCommentUserId = postComment.getUserId();
+					Long authUserId = ((UserAuthenticationDto) authentication.getPrincipal()).getId();
+					if (postCommentUserId == authUserId) {
+						return true;
+					}
+				} catch (NoSuchElementException e) {
 					return false;
 				}
-				
+
 			}
 		}
 		return false;

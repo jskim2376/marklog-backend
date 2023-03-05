@@ -27,11 +27,11 @@ public class JwtAuthentificationFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
 		String token = jwtTokenProvider.parseBearerToken(request);
-	    if (token != null && jwtTokenProvider.validateToken(token)) {
-	    	Authentication authentication = jwtTokenProvider.getAuthentication(token, userService);
-	    	if(authentication != null) {
-		    	SecurityContextHolder.getContext().setAuthentication(authentication);
-	    	}
+		if (token != null && jwtTokenProvider.validateToken(token)) {
+			Authentication authentication = jwtTokenProvider.getAuthentication(token, userService);
+			if (authentication != null) {
+				SecurityContextHolder.getContext().setAuthentication(authentication);
+			}
 		}
 		filterChain.doFilter(request, response);
 	}

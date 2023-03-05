@@ -10,6 +10,7 @@ import com.marklog.blog.domain.post.Post;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -33,7 +34,7 @@ public class PostResponseDto {
 		this.userId = entity.getUser().getId();
 		this.userName = entity.getUser().getName();
 		this.tagList = TagResponseDto.toEntityDto(entity.getTags());
-		this.like=false;
+		this.like = false;
 	}
 
 	public static PostResponseDto toDto(Post entity) {
@@ -41,6 +42,6 @@ public class PostResponseDto {
 	}
 
 	public void setLike(Boolean like) {
-		this.like=like;
+		this.like = like;
 	}
 }

@@ -11,5 +11,5 @@ public class UserUpdateRequestDto {
 	private String name;
 	private String picture;
 	private String title;
-	private  String introduce;
+	private String introduce;
 }

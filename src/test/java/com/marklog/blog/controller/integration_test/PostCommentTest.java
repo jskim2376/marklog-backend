@@ -1,4 +1,4 @@
-package com.marklog.blog.domain.integration_test;
+package com.marklog.blog.controller.integration_test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -184,9 +184,7 @@ public class PostCommentTest {
 	}
 
 	@Test
-	public void testFindAllByPostWithChild()
-			throws JSONException,
-			JsonMappingException, JsonProcessingException {
+	public void testFindAllByPostWithChild() throws JSONException, JsonMappingException, JsonProcessingException {
 		// given
 		String newContent1 = "findAllByPost_1";
 		PostComment postComment1 = createPostComment(newContent1);
