@@ -3,6 +3,8 @@ package com.marklog.blog.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -27,7 +29,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -75,29 +76,30 @@ public class PostCommentControllerTest {
 	public void testGetAllByPostCommentControllerUserConrtoller() throws Exception {
 		// given
 		String path = "/v1/post/1/comment";
-		PostCommentResponseDto postCommentResponseDtoSub =	new PostCommentResponseDto(id, "name", commentContent+"sub", null);
+		PostCommentResponseDto postCommentResponseDtoSub = new PostCommentResponseDto(id, "name",
+				commentContent + "sub", null);
 		List<PostCommentResponseDto> child = new ArrayList<>();
 		child.add(postCommentResponseDtoSub);
-		
-		PostCommentResponseDto postCommentResponseDto =	new PostCommentResponseDto(id, "name", commentContent, child);
-		PostCommentResponseDto postCommentResponseDto2 =	new PostCommentResponseDto(id, "name", commentContent+2, null);
+
+		PostCommentResponseDto postCommentResponseDto = new PostCommentResponseDto(id, "name", commentContent, child);
+		PostCommentResponseDto postCommentResponseDto2 = new PostCommentResponseDto(id, "name", commentContent + 2,
+				null);
 
 		List<PostCommentResponseDto> commentResponseDtos = new ArrayList<>();
 		commentResponseDtos.add(postCommentResponseDto);
 		commentResponseDtos.add(postCommentResponseDto2);
-		
+
 		when(postCommentService.findAll(postId)).thenReturn(commentResponseDtos);
 
 		// when
-		ResultActions ra = mvc.perform(get(path).with(SecurityMockMvcRequestPostProcessors.csrf()));
+		ResultActions ra = mvc.perform(get(path).with(csrf()));
 		// then
 		ra.andExpect(status().isOk()).andExpect(jsonPath("$[0].content").value(commentContent));
-		ra.andExpect(status().isOk()).andExpect(jsonPath("$[0].childList[0].content").value(commentContent+"sub"));
-		ra.andExpect(status().isOk()).andExpect(jsonPath("$[1].content").value(commentContent+2));
-		
+		ra.andExpect(status().isOk()).andExpect(jsonPath("$[0].childList[0].content").value(commentContent + "sub"));
+		ra.andExpect(status().isOk()).andExpect(jsonPath("$[1].content").value(commentContent + 2));
 
 	}
-	
+
 	@Test
 	public void testPostPostCommentController() throws Exception {
 		// given
@@ -106,33 +108,31 @@ public class PostCommentControllerTest {
 		when(postCommentService.save(anyLong(), anyLong(), any(PostCommentRequestDto.class))).thenReturn(id);
 
 		// when
-		ResultActions ra = mvc.perform(post(path).with(SecurityMockMvcRequestPostProcessors.csrf())
-				.with(SecurityMockMvcRequestPostProcessors.authentication(authentication))
+		ResultActions ra = mvc.perform(post(path).with(csrf()).with(authentication(authentication))
 				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(postCommentRequestDto)));
 
 		// then
 		ra.andExpect(status().isCreated()).andExpect(header().exists(HttpHeaders.LOCATION));
 	}
 
-
 	@WithMockUser
 	@Test
 	public void testGetPostConrtoller() throws Exception {
 		// given
 		String path = "/v1/post/1/comment/1";
-		PostCommentResponseDto postCommentResponseDtoSub =	new PostCommentResponseDto(id, "name", commentContent+"sub", null);
+		PostCommentResponseDto postCommentResponseDtoSub = new PostCommentResponseDto(id, "name",
+				commentContent + "sub", null);
 		List<PostCommentResponseDto> child = new ArrayList<>();
 		child.add(postCommentResponseDtoSub);
-		PostCommentResponseDto postCommentResponseDto =	new PostCommentResponseDto(id, "name", commentContent, child);
+		PostCommentResponseDto postCommentResponseDto = new PostCommentResponseDto(id, "name", commentContent, child);
 		when(postCommentService.findById(id)).thenReturn(postCommentResponseDto);
 
 		// when
-		ResultActions ra = mvc.perform(get(path).with(SecurityMockMvcRequestPostProcessors.csrf())
-				.with(SecurityMockMvcRequestPostProcessors.authentication(authentication)));
+		ResultActions ra = mvc.perform(get(path).with(csrf()).with(authentication(authentication)));
 
 		// then
 		ra.andExpect(status().isOk()).andExpect(jsonPath("$.content").value(commentContent));
-		ra.andExpect(status().isOk()).andExpect(jsonPath("$.childList[0].content").value(commentContent+"sub"));
+		ra.andExpect(status().isOk()).andExpect(jsonPath("$.childList[0].content").value(commentContent + "sub"));
 
 	}
 
@@ -147,8 +147,7 @@ public class PostCommentControllerTest {
 		PostCommentUpdateRequestDto postCommentRequestDto = new PostCommentUpdateRequestDto(updatedComment);
 
 		// when
-		ResultActions ra = mvc.perform(put(path).with(SecurityMockMvcRequestPostProcessors.csrf())
-				.with(SecurityMockMvcRequestPostProcessors.authentication(authentication))
+		ResultActions ra = mvc.perform(put(path).with(csrf()).with(authentication(authentication))
 				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(postCommentRequestDto)));
 
 		// then
@@ -165,11 +164,9 @@ public class PostCommentControllerTest {
 				Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
 
 		// when
-		ResultActions ra = mvc.perform(delete(path)
-				.with(SecurityMockMvcRequestPostProcessors.csrf())
-				.with(SecurityMockMvcRequestPostProcessors.authentication(authentication)));
-		
-		//then
+		ResultActions ra = mvc.perform(delete(path).with(csrf()).with(authentication(authentication)));
+
+		// then
 		ra.andExpect(status().isNoContent());
 
 	}

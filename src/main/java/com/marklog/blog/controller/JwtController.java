@@ -13,19 +13,19 @@ import com.marklog.blog.controller.dto.AccessTokenDto;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@RequestMapping("/v1")
+@RequestMapping("/v1/token")
 @RestController
 public class JwtController {
 	private	final JwtTokenProvider jwtTokenProvider;
 
 	@PreAuthorize("isAuthenticated()")
-	@GetMapping("/token/check")
-	public ResponseEntity<?> loginCheck() {
+	@GetMapping("/check")
+	public ResponseEntity<?> tokenCheck() {
         return  ResponseEntity.ok(null);
 	}
 
-	@GetMapping("/token/refresh")
-	public ResponseEntity<AccessTokenDto> refresh(@CookieValue(value="refresh_token") String refresh_token) {
+	@GetMapping("/refresh")
+	public ResponseEntity<AccessTokenDto> tokenRefresh(@CookieValue(value="refresh_token") String refresh_token) {
 		if(refresh_token != null && jwtTokenProvider.validateToken(refresh_token)) {
 			Long id = jwtTokenProvider.getId(refresh_token);
 			String email = jwtTokenProvider.getEmail(refresh_token);

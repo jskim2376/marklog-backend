@@ -9,8 +9,7 @@ public class UnicodeSQLServer2012Dialect extends SQLServer2012Dialect {
 	        super();
 
 	        // Use Unicode Characters
-	        registerColumnType(Types.VARCHAR, 255, "nvarchar($l)");
-	        registerColumnType(Types.VARCHAR, 50, "nvarchar($l)");
+	        registerColumnType(Types.VARCHAR, "nvarchar($l)");
 	        registerColumnType(Types.CHAR, "nchar(1)");
 	        registerColumnType(Types.CLOB, "nvarchar(max)");
 

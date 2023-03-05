@@ -23,8 +23,8 @@ public class PostLikeController {
 	private final PostLikeService postLikeService;
 
 	@PreAuthorize("isAuthenticated()")
-	@PostMapping("/like/{id}")
-	public ResponseEntity<?> postLikeSave(@PathVariable Long id,
+	@PostMapping("/{id}/like")
+	public ResponseEntity<?> postPostLike(@PathVariable Long id,
 			@AuthenticationPrincipal UserAuthenticationDto userAuthenticationDto) {
 		try {
 			postLikeService.save(id, userAuthenticationDto.getId());
@@ -35,8 +35,8 @@ public class PostLikeController {
 	}
 
 	@PreAuthorize("isAuthenticated()")
-	@DeleteMapping("/like/{id}")
-	public ResponseEntity<?> postLikeDelete(@PathVariable Long id,
+	@DeleteMapping("/{id}/like")
+	public ResponseEntity<?> deletePostLike	(@PathVariable Long id,
 			@AuthenticationPrincipal UserAuthenticationDto userAuthenticationDto) {
 		try {
 			postLikeService.delete(id, userAuthenticationDto.getId());

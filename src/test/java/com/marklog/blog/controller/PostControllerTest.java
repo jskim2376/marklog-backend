@@ -3,6 +3,8 @@ package com.marklog.blog.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -17,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -34,7 +36,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -65,15 +66,18 @@ public class PostControllerTest {
 	@MockBean
 	private PostLikeService postLikeService;
 
-	static LocalDateTime time;
-	Long postId = 1L;
-	String title = "title";
-	String content = "content";
 	Long userId = 1L;
 	String userName = "name";
 
-	@BeforeAll
-	public static void setUp() {
+	LocalDateTime time;
+	Long postId = 1L;
+	String title = "title";
+	String content = "content";
+
+	List<String> tagList = new ArrayList<>();
+
+	@BeforeEach
+	public void setUp() {
 		time = LocalDateTime.now();
 	}
 
@@ -91,7 +95,6 @@ public class PostControllerTest {
 		String path = "/v1/post";
 		List<String> tagList = new ArrayList<>();
 		tagList.add("java");
-		tagList.add("testTag");
 		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(path, path, tagList);
 		when(postService.save(anyLong(), any())).thenReturn(postId);
 
@@ -99,8 +102,7 @@ public class PostControllerTest {
 		Authentication authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null,
 				Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
 		// when
-		ResultActions ra = mvc.perform(post(path).with(SecurityMockMvcRequestPostProcessors.csrf())
-				.with(SecurityMockMvcRequestPostProcessors.authentication(authentication))
+		ResultActions ra = mvc.perform(post(path).with(csrf()).with(authentication(authentication))
 				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(postSaveRequestDto)));
 		// then
 		ra.andExpect(status().isCreated()).andExpect(header().exists(HttpHeaders.LOCATION));
@@ -123,8 +125,7 @@ public class PostControllerTest {
 		Authentication authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null,
 				Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
 		// when
-		ResultActions ra = mvc.perform(get(path).with(SecurityMockMvcRequestPostProcessors.csrf())
-				.with(SecurityMockMvcRequestPostProcessors.authentication(authentication)));
+		ResultActions ra = mvc.perform(get(path).with(csrf()).with(authentication(authentication)));
 
 		// then
 		ra.andExpect(status().isOk())
@@ -143,7 +144,6 @@ public class PostControllerTest {
 
 		List<String> tagList = new ArrayList<>();
 		tagList.add("java");
-		tagList.add("testTag");
 		PostUpdateRequestDto postUpdateRequestDto = new PostUpdateRequestDto(title2, content2, tagList);
 
 		List<Tag> tags = new ArrayList<>();
@@ -159,8 +159,7 @@ public class PostControllerTest {
 				Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
 
 		// when
-		ResultActions ra = mvc.perform(put(path).with(SecurityMockMvcRequestPostProcessors.csrf())
-				.with(SecurityMockMvcRequestPostProcessors.authentication(authentication))
+		ResultActions ra = mvc.perform(put(path).with(csrf()).with(authentication(authentication))
 				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(postUpdateRequestDto)));
 
 		// then
@@ -176,37 +175,10 @@ public class PostControllerTest {
 				Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
 
 		// when
-		ResultActions ra = mvc.perform(delete(path).with(SecurityMockMvcRequestPostProcessors.csrf())
-				.with(SecurityMockMvcRequestPostProcessors.authentication(authentication)));
+		ResultActions ra = mvc.perform(delete(path).with(csrf()).with(authentication(authentication)));
 
 		// then
 		ra.andExpect(status().isNoContent());
-	}
-
-	@WithMockUser
-	@Test
-	public void testGetAllPostConrtoller() throws Exception {
-		// given
-		List<Tag> tags = new ArrayList<>();
-		tags.add(new Tag(null, "tag1"));
-		tags.add(new Tag(null, "tag2"));
-
-		PostResponseDto postResponseDto = new PostResponseDto(time, time, title, content, userId, userName,
-				TagResponseDto.toEntityDto(tags), null);
-		List<PostResponseDto> content = new ArrayList<>();
-		content.add(postResponseDto);
-
-		int pageCount = 0;
-		int size = 20;
-		Pageable pageable = PageRequest.of(pageCount, size);
-		Page<PostResponseDto> page = new PageImpl<>(content, pageable, 1);
-		when(postService.findAll(pageable)).thenReturn(page);
-
-		// when
-		ResultActions ra = mvc.perform(get("/v1/post").with(SecurityMockMvcRequestPostProcessors.csrf()));
-		// then
-		ra.andExpect(status().isOk()).andExpect(jsonPath("$.size").value(20))
-				.andExpect(jsonPath("$.totalElements").value(1)).andExpect(jsonPath("$.content[0].title").value(title));
 	}
 
 	@WithMockUser
@@ -217,7 +189,8 @@ public class PostControllerTest {
 		tags.add(new Tag(null, "tag1"));
 		tags.add(new Tag(null, "tag2"));
 
-		PostListResponseDto postListResponseDto = new PostListResponseDto("thumbnail", title, content,time, 1,1,"picture", userId, userName);
+		PostListResponseDto postListResponseDto = new PostListResponseDto(postId, "thumbnail", title, "summary", time,
+				0, 0, "picture", userName, userId);
 		List<PostListResponseDto> content = new ArrayList<>();
 		content.add(postListResponseDto);
 
@@ -228,13 +201,20 @@ public class PostControllerTest {
 		when(postService.recentPost(any())).thenReturn(page);
 
 		// when
-		ResultActions ra = mvc.perform(get("/v1/post/recent").with(SecurityMockMvcRequestPostProcessors.csrf()));
+		ResultActions ra = mvc.perform(get("/v1/post/recent").with(csrf()));
 		// then
 		ra.andExpect(status().isOk()).andExpect(jsonPath("$.size").value(20))
 				.andExpect(jsonPath("$.totalElements").value(1))
+				.andExpect(jsonPath("$.content[0].postId").value(postId))
+				.andExpect(jsonPath("$.content[0].thumbnail").value("thumbnail"))
 				.andExpect(jsonPath("$.content[0].title").value(title))
-				.andExpect(jsonPath("$.content[0].summary").value(this.content))
-				.andExpect(jsonPath("$.content[0].likeCount").value(1));
+				.andExpect(jsonPath("$.content[0].summary").value("summary"))
+				.andExpect(jsonPath("$.content[0].commentCount").value(0))
+				.andExpect(jsonPath("$.content[0].likeCount").value(0))
+				.andExpect(jsonPath("$.content[0].picture").value("picture"))
+				.andExpect(jsonPath("$.content[0].userName").value(userName))
+				.andExpect(jsonPath("$.content[0].userId").value(userId));
+
 	}
 
 	@WithMockUser
@@ -258,8 +238,7 @@ public class PostControllerTest {
 		when(postService.search(pageable, text.split(" "))).thenReturn(page);
 
 		// when
-		ResultActions ra = mvc
-				.perform(get("/v1/post/search").param("text", text).with(SecurityMockMvcRequestPostProcessors.csrf()));
+		ResultActions ra = mvc.perform(get("/v1/post/search").param("text", text).with(csrf()));
 
 		// then
 		ra.andExpect(status().isOk()).andExpect(jsonPath("$.size").value(20))

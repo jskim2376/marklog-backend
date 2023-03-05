@@ -31,34 +31,35 @@ import com.marklog.blog.domain.user.UserRepository;
 public class PostCommentServiceTest {
 	@Mock
 	UserRepository userRepository;
-
 	@Mock
 	PostRepository postRepository;
-
 	@Mock
 	PostCommentRepository postCommentRepository;
 
-	User user;
-	Long userId = 1L;
-	String name = "name";
-	String email = "test@gmail.com";
-	String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
-	String userTitle = "myblog";
-	String introduce = "introduce";
-
-	Post post;
-	Long postId = 2L;
-	String title = "title";
-	String content = "title";
 	PostCommentService postCommentService;
-
 	Long postCommentId = 1L;
 	String commentContent = "string";
 
+	User user;
+	Post post;
+	Long userId = 1L;
+	Long postId = 2L;
+
 	@BeforeEach
 	public void setUp() {
-		user = new User(name, email, picture, title, introduce, Role.USER);
-		post = new Post(null,null, title, content, user, null);
+
+		String name = "name";
+		String email = "test@gmail.com";
+		String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
+		String userTitle = "myblog";
+		String introduce = "introduce";
+		user = new User(name, email, picture, userTitle, introduce, Role.USER);
+		
+		String thumbnail = "thumbnail";
+		String summary = "summary";
+		String title = "title";
+		String content = "title";
+		post = new Post(thumbnail,summary, title, content, user, null);
 		postCommentService = new PostCommentService(postRepository, userRepository, postCommentRepository);
 	}
 

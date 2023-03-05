@@ -32,16 +32,29 @@ import com.marklog.blog.service.PostService;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@RequestMapping("/v1")
+@RequestMapping("/v1/post")
 @RestController
 public class PostController {
 	private final PostService postService;
 	private final PostLikeService postLikeService;
 
+	
+	@GetMapping("/recent")
+	public Page<PostListResponseDto> recentPost(Pageable pageable) {
+		Page<PostListResponseDto> p = postService.recentPost(pageable);
+		return p;
+	}
+	
+	@GetMapping("/search")
+	public Page<PostResponseDto> search(Pageable pageable, @RequestParam(value="text") String text) {
+			Page<PostResponseDto> page = postService.search(pageable, text.split(" "));
+			return page;
+	}
+	
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@PreAuthorize("isAuthenticated()")
-	@PostMapping("/post")
-	public ResponseEntity<Object> save(@RequestBody PostSaveRequestDto requestDto,
+	@PostMapping
+	public ResponseEntity<Object> postPostById(@RequestBody PostSaveRequestDto requestDto,
 			@AuthenticationPrincipal UserAuthenticationDto userAuthenticationDto) {
 		Long id = postService.save(userAuthenticationDto.getId(), requestDto);
 		HttpHeaders header = new HttpHeaders();
@@ -50,8 +63,8 @@ public class PostController {
 	}
 
 
-	@GetMapping("/post/{id}")
-	public ResponseEntity<PostResponseDto> findById(@PathVariable Long id,
+	@GetMapping("/{id}")
+	public ResponseEntity<PostResponseDto> getPostById(@PathVariable Long id,
 			@AuthenticationPrincipal UserAuthenticationDto userAuthenticationDto) {
 		try {
 			PostResponseDto postResponseDto = postService.findById(id);
@@ -67,8 +80,8 @@ public class PostController {
 	}
 
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or hasPermission(#id, 'post',null))")
-	@PutMapping("/post/{id}")
-	public ResponseEntity<?> update(@PathVariable Long id, @RequestBody PostUpdateRequestDto requestDto) {
+	@PutMapping("/{id}")
+	public ResponseEntity<?> putPostById(@PathVariable Long id, @RequestBody PostUpdateRequestDto requestDto) {
 		try {
 			postService.update(id, requestDto);
 			HttpHeaders header = new HttpHeaders();
@@ -81,8 +94,8 @@ public class PostController {
 	}
 
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or hasPermission(#id, 'post',null))")
-	@DeleteMapping("/post/{id}")
-	public ResponseEntity<?> delete(@PathVariable Long id) {
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deletePostById(@PathVariable Long id) {
 		try {
 			postService.delete(id);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -90,23 +103,5 @@ public class PostController {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
-	
-	@GetMapping("/post")
-	public Page<PostResponseDto> findAll(Pageable pageable) {
-		return postService.findAll(pageable);
-	}
-	
-	@GetMapping("/post/recent")
-	public Page<PostListResponseDto> recentPost(Pageable pageable) {
-		Page<PostListResponseDto> p = postService.recentPost(pageable);
-		return p;
-	}
-	
-	
-	@GetMapping("/post/search")
-	public Page<PostResponseDto> search(Pageable pageable, @RequestParam(value="text") String text) {
-			Page<PostResponseDto> page = postService.search(pageable, text.split(" "));
-			return page;
-	}
-	
+		
 }

@@ -25,19 +25,19 @@ import com.marklog.blog.service.UserService;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@RequestMapping("/v1")
+@RequestMapping("/v1/user")
 @RestController
 public class UserController {
 	private final UserService userService;
 
 	@PreAuthorize("isAuthenticated() and hasRole('ADMIN')")
-	@GetMapping("/user")
+	@GetMapping
 	public Page<UserResponseDto> getAllUsers(Pageable pageable) {
 	    return userService.findAll(pageable);
 	}
 
-	@GetMapping("/user/{id}")
-	public ResponseEntity<UserResponseDto> userGet(@PathVariable Long id) {
+	@GetMapping("/{id}")
+	public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
 		try {
 			return ResponseEntity.ok(userService.findById(id));
 		} catch (IllegalArgumentException e) {
@@ -46,9 +46,9 @@ public class UserController {
 
 	}
 
-	@PutMapping("/user/{id}")
+	@PutMapping("/{id}")
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or principal.id==#id)")
-	public ResponseEntity<?> userPut(@PathVariable Long id, @RequestBody UserUpdateRequestDto userUpdateRequestDto) {
+	public ResponseEntity<?> putUserById(@PathVariable Long id, @RequestBody UserUpdateRequestDto userUpdateRequestDto) {
 		HttpHeaders header = new HttpHeaders();
 		header.add(HttpHeaders.LOCATION, "/api/v1/user/"+id);
 		try {
@@ -60,8 +60,8 @@ public class UserController {
 	}
 
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or principal.id==#id)")
-	@DeleteMapping("/user/{id}")
-	public ResponseEntity<?> userDelete(@PathVariable Long id) {
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deleteUserById(@PathVariable Long id) {
 		try {
 			SecurityContextHolder.clearContext();
 			userService.delete(id);

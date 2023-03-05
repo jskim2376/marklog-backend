@@ -28,21 +28,21 @@ import com.marklog.blog.service.PostCommentService;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@RequestMapping("/v1")
+@RequestMapping("/v1/post")
 @RestController
 public class PostCommentController {
 	private final PostCommentService postCommentService;
 
-	@GetMapping("/post/{postId}/comment")
-	public List<PostCommentResponseDto> getFindAllByPost(@PathVariable Long postId) {
+	@GetMapping("/{postId}/comment")
+	public List<PostCommentResponseDto> getAllPostCommentByPostId(@PathVariable Long postId) {
 		List<PostCommentResponseDto> result = postCommentService.findAll(postId);
 		 return result;
 	}
 
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@PreAuthorize("isAuthenticated()")
-	@PostMapping("/post/{postId}/comment")
-	public ResponseEntity<?> save(@PathVariable Long postId, @RequestBody PostCommentRequestDto requestDto,
+	@PostMapping("/{postId}/comment")
+	public ResponseEntity<?> postPostComment(@PathVariable Long postId, @RequestBody PostCommentRequestDto requestDto,
 			@AuthenticationPrincipal UserAuthenticationDto userAuthenticationDto) {
 		Long userId = userAuthenticationDto.getId();
 		Long commentId = postCommentService.save(postId, userId, requestDto);
@@ -53,8 +53,8 @@ public class PostCommentController {
 		return new ResponseEntity<>(header, HttpStatus.CREATED);
 	}
 
-	@GetMapping("/post/{postId}/comment/{commentId}")
-	public ResponseEntity<PostCommentResponseDto> findById(@PathVariable("postId") Long postId,
+	@GetMapping("/{postId}/comment/{commentId}")
+	public ResponseEntity<PostCommentResponseDto> getPostComment(@PathVariable("postId") Long postId,
 			@PathVariable("commentId") Long commentId,
 			@AuthenticationPrincipal UserAuthenticationDto userAuthenticationDto) {
 		try {
@@ -65,8 +65,8 @@ public class PostCommentController {
 		}
 	}
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or hasPermission(#commentId, 'postComment',null))")
-	@PutMapping("/post/{postId}/comment/{commentId}")
-	public ResponseEntity<?> update(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId,
+	@PutMapping("/{postId}/comment/{commentId}")
+	public ResponseEntity<?> putPostComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId,
 			@RequestBody PostCommentUpdateRequestDto postCommentRequestDto) {
 		try {
 			postCommentService.update(commentId, postCommentRequestDto);
@@ -79,8 +79,8 @@ public class PostCommentController {
 	}
 	
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or hasPermission(#commentId, 'postComment',null))")
-	@DeleteMapping("/post/{postId}/comment/{commentId}")
-	public ResponseEntity<?> delete(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId) {
+	@DeleteMapping("/{postId}/comment/{commentId}")
+	public ResponseEntity<?> deletePostComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId) {
 		try {
 			postCommentService.delete(commentId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

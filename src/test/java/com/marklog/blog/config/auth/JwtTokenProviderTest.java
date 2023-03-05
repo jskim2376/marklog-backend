@@ -40,103 +40,93 @@ public class JwtTokenProviderTest {
 
 	@Test
 	public void testCreateAccessToken() {
-		//given
-
-		//when
+		// given
+		// when
 		String accessToken = jwtTokenProvider.createAccessToken(id, email);
-		//then
-		assertThat(
-				Long.parseLong(
-						Jwts.parserBuilder().setSigningKey(jwtTokenProvider.getKey()).build().parseClaimsJws(accessToken).getBody().getId())
-				)
-		.isSameAs(id);
-		assertThat(
-				Jwts.parserBuilder().setSigningKey(jwtTokenProvider.getKey()).build().parseClaimsJws(accessToken).getBody().getSubject()
-				)
-		.isEqualTo(email);
+		// then
+		assertThat(Long.parseLong(Jwts.parserBuilder().setSigningKey(jwtTokenProvider.getKey()).build()
+				.parseClaimsJws(accessToken).getBody().getId())).isSameAs(id);
+		assertThat(Jwts.parserBuilder().setSigningKey(jwtTokenProvider.getKey()).build().parseClaimsJws(accessToken)
+				.getBody().getSubject()).isEqualTo(email);
 	}
 
 	@Test
 	public void testCreateRefreshToken() {
-		//given
-		//when
+		// given
+		// when
 		String refreshToken = jwtTokenProvider.createRefreshToken(id, email);
-		//then
-		assertThat(
-				Long.parseLong(
-						Jwts.parserBuilder().setSigningKey(jwtTokenProvider.getKey()).build().parseClaimsJws(refreshToken).getBody().getId())
-				)
-		.isSameAs(id);
-		assertThat(
-				Jwts.parserBuilder().setSigningKey(jwtTokenProvider.getKey()).build().parseClaimsJws(refreshToken).getBody().getSubject()
-				)
-		.isEqualTo(email);
+		// then
+		assertThat(Long.parseLong(Jwts.parserBuilder().setSigningKey(jwtTokenProvider.getKey()).build()
+				.parseClaimsJws(refreshToken).getBody().getId())).isSameAs(id);
+		assertThat(Jwts.parserBuilder().setSigningKey(jwtTokenProvider.getKey()).build().parseClaimsJws(refreshToken)
+				.getBody().getSubject()).isEqualTo(email);
 	}
 
 	@Test
 	public void testValidToken() {
-		//given
+		// given
 		String accessToken = jwtTokenProvider.createAccessToken(id, email);
-		//when
+		// when
 		Boolean validTokenTrue = jwtTokenProvider.validateToken(accessToken);
-		Boolean validTokenFalse= jwtTokenProvider.validateToken(accessToken+"error");
+		Boolean validTokenFalse = jwtTokenProvider.validateToken(accessToken + "error");
 
-		//then
+		// then
 		assertThat(validTokenTrue).isEqualTo(true);
 		assertThat(validTokenFalse).isEqualTo(false);
 	}
 
 	@Test
 	public void testGetAuthentication() {
-		//given
+		// given
 		String accessToken = jwtTokenProvider.createAccessToken(id, email);
 		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(id, accessToken, Role.USER);
 		when(userService.findAuthenticationDtoById(id)).thenReturn(userAuthenticationDto);
 
-		//when
-		Authentication authentication =  jwtTokenProvider.getAuthentication(accessToken, userService);
+		// when
+		Authentication authentication = jwtTokenProvider.getAuthentication(accessToken, userService);
 
-		//then
+		// then
 
 		UserAuthenticationDto principal = (UserAuthenticationDto) authentication.getPrincipal();
 		assertThat(principal).isEqualTo(userAuthenticationDto);
 
 		assertThat(authentication.getCredentials()).isNull();
 
-		boolean hasRole = authentication.getAuthorities().contains(new SimpleGrantedAuthority(principal.getRole().getKey()));
+		boolean hasRole = authentication.getAuthorities()
+				.contains(new SimpleGrantedAuthority(principal.getRole().getKey()));
 		assertThat(hasRole).isEqualTo(true);
 	}
 
 	@Test
 	public void testParseBearerToken() {
-		//given
+		// given
 		String token = "token";
-		String bearerToken = "Bearer "+token;
+		String bearerToken = "Bearer " + token;
 		when(request.getHeader("Authorization")).thenReturn(bearerToken);
-		//when
+		// when
 		String parseBearerToken = jwtTokenProvider.parseBearerToken(request);
-		//then
+		// then
 		assertThat(parseBearerToken).isEqualTo(token);
 
 	}
 
 	@Test
 	public void testGetId() {
-		//given
+		// given
 		String accessToken = jwtTokenProvider.createAccessToken(id, email);
-		//then
+		// then
 		Long getId = jwtTokenProvider.getId(accessToken);
-		//when
+		// when
 		assertThat(getId).isEqualTo(id);
 	}
 
 	@Test
 	public void testGetEmail() {
-		//given
+		// given
 		String accessToken = jwtTokenProvider.createAccessToken(id, email);
-		//then
+		// then
 		String getEmail = jwtTokenProvider.getEmail(accessToken);
-		//when
+		// when
 		assertThat(getEmail).isEqualTo(email);
 	}
 }

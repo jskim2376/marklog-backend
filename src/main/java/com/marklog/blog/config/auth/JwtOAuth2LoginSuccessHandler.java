@@ -29,11 +29,6 @@ public class JwtOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccess
 	        String email = oauth2User.getAttribute("email");
 	        Long id = oauth2User.getAttribute("id");
 
-	        String access_token = jwt.createAccessToken(id,email);
-	        AccessTokenDto accessTokenDto = new AccessTokenDto(access_token);
-	        ObjectMapper mapper = new ObjectMapper();
-	        response.getWriter().write(mapper.writeValueAsString(accessTokenDto));
-	        response.setContentType("application/json");
 
 	        String refresh_token = jwt.createRefreshToken(id,email);
 	        ResponseCookie responseCookie = ResponseCookie.from("refresh_token", refresh_token)
@@ -44,5 +39,13 @@ public class JwtOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccess
 	        		.maxAge((int) (jwt.getRefreshtoken_expired() / 1000))
 	        		.build();
 	        response.addHeader("Set-Cookie", responseCookie.toString());
+
+	        String access_token = jwt.createAccessToken(id,email);
+	        AccessTokenDto accessTokenDto = new AccessTokenDto(access_token);
+	        ObjectMapper mapper = new ObjectMapper();
+	        response.getWriter().write(mapper.writeValueAsString(accessTokenDto));
+	        response.setContentType("application/json");
+	        response.setHeader("Location", "/");
+	        response.setStatus(302);
 	}
 }

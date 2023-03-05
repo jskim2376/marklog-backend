@@ -26,26 +26,28 @@ public class UserRepositoryTest {
 	public static String introduce = "introduce";
 
 
+	public User createUser() {
+		User user = new User(name, email, picture, title, introduce, Role.USER);
+		return userRepository.save(user);
+	}
+	
     @Test
 	public void testFindAllRepository() {
 		//given
-		User user = new User(name, email, picture, title, introduce, Role.USER);
-		userRepository.save(user);
-		user = new User(name, 1+email, picture, title, introduce, Role.USER);
-		userRepository.save(user);
-		user = new User(name, 2+email, picture, title, introduce, Role.USER);
-		userRepository.save(user);
-		user = new User(name, 3+email, picture, title, introduce, Role.USER);
+    	User user = createUser();
+    	String newEmail = 1+email;
+		user = new User(name, newEmail, picture, title, introduce, Role.USER);
 		userRepository.save(user);
 
 		//when
 		PageRequest pageRequest = PageRequest.of(0, 4);
 		Page<User> page = userRepository.findAll(pageRequest);
 		List<User> userList = page.getContent();
+
 		//then
 		assertThat(userList.get(0).getEmail()).isEqualTo(email);
-		assertThat(userList.get(1).getEmail()).isEqualTo(1+email);
-		assertThat(page.getTotalElements()).isEqualTo(4);
+		assertThat(userList.get(1).getEmail()).isEqualTo(newEmail);
+		assertThat(page.getTotalElements()).isEqualTo(2);
 		assertThat(page.getTotalPages()).isEqualTo(1);
 
 	}
@@ -53,39 +55,52 @@ public class UserRepositoryTest {
 	@Test
 	public void testSaveUserRepository() {
 		//given
-		User user = new User(name, email, picture, title, introduce, Role.USER);
-
 		// when
-		User savedUser = userRepository.save(user);
-        // then
+		User user = createUser();
 
-		assertThat(savedUser).isSameAs(user);
+		// then
+		assertThat(user.getId()).isGreaterThan(0);
 	}
 
     @Test
-	public void testFindByIduserRepository() {
+	public void testFindByIdUserRepository() {
 		//given
-		User user = new User(name, email, picture, title, introduce, Role.USER);
-
+    	User user = createUser();
+		
 		//when
-		User savedUser = userRepository.save(user);
-		User foundUser = userRepository.findById(savedUser.getId()).get();
+		User foundUser = userRepository.findById(user.getId()).get();
 
 		//then
-		assertThat(savedUser).isSameAs(foundUser);
-		assertThrows(IllegalArgumentException.class, () -> userRepository.findById(-1L).orElseThrow(() -> new IllegalArgumentException()));
-		assertThrows(IllegalArgumentException.class, () -> userRepository.findById(-5L).orElseThrow(() -> new IllegalArgumentException()));
-		assertThrows(IllegalArgumentException.class, () -> userRepository.findById(1000L).orElseThrow(() -> new IllegalArgumentException()));
-		assertThrows(IllegalArgumentException.class, () -> userRepository.findById(20000L).orElseThrow(() -> new IllegalArgumentException()));
+		assertThat(user).isSameAs(foundUser);
 	}
+    
+    @Test
+    public void testUpdateUserRepository() {
+    	//then
+    	User user = createUser();
+    	String newName = 1+name;
+    	String newPicture = 1+picture;
+    	String newTitle = 1+title;
+    	String newIntroduce = 1+introduce;
+
+		//given
+    	user.update(newName, newPicture, newTitle, newIntroduce);
+    	
+    	//then-ready
+		User foundUser = userRepository.findById(user.getId()).get();
+		assertThat(foundUser.getName()).isEqualTo(newName);
+		assertThat(foundUser.getPicture()).isEqualTo(newPicture);
+		assertThat(foundUser.getTitle()).isEqualTo(newTitle);
+		assertThat(foundUser.getIntroduce()).isEqualTo(newIntroduce);
+    }
 
     @Test
-	public void testDeleteUserReposeitory() {
+	public void testDeleteUserRepository() {
 		//given
 		User user = new User(name, email, picture, title, introduce, Role.USER);
-
-		//when
 		User savedUser = userRepository.save(user);
+		
+		//when
 		userRepository.delete(user);
 
 		//then

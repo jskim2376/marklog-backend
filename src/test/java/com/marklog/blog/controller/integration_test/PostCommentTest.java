@@ -1,4 +1,4 @@
-package com.marklog.blog.domain.integration_test;
+package com.marklog.blog.controller.integration_test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

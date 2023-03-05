@@ -1,4 +1,4 @@
-package com.marklog.blog.domain.integration_test;
+package com.marklog.blog.controller.integration_test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -108,9 +108,9 @@ public class PostTest {
 	}
 
 	public void createPostLike(Long id) {
-		String uri = "/api/v1/post/like/";
+		String uri = "/api/v1/post/"+id+"/like";
 		// when
-		wc.post().uri(uri + id).header("Authorization", "Bearer " + accessToken1)
+		wc.post().uri(uri).header("Authorization", "Bearer " + accessToken1)
 				.contentType(MediaType.APPLICATION_JSON).retrieve().toEntity(String.class).block();
 	}
 
@@ -224,28 +224,6 @@ public class PostTest {
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 	}
 
-	@Test
-	public void testGetAllPost() throws JsonMappingException, JsonProcessingException, JSONException {
-		// given
-		String searchText = "test";
-		String searchContent = "search";
-		createPost(searchText, searchContent);
-
-		// when
-		ResponseEntity<String> responseEntity = wc.get().uri(uri).attribute("text", searchContent).retrieve()
-				.toEntity(String.class).block();
-
-		// then-ready
-		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
-		String getTitle = jsonObject.getJSONArray("content").getJSONObject(0).getString("title");
-		Long size = jsonObject.getLong("size");
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getTitle).isEqualTo(postTitle);
-		assertThat(size).isEqualTo(20);
-	}
-	
 	@Test
 	public void testRecentPost() throws JsonMappingException, JsonProcessingException, JSONException {
 		// given

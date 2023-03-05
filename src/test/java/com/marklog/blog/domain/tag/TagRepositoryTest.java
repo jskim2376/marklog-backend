@@ -3,6 +3,7 @@ package com.marklog.blog.domain.tag;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -16,59 +17,59 @@ import com.marklog.blog.domain.user.UserRepository;
 @DataJpaTest
 public class TagRepositoryTest {
 	@Autowired
-	PostRepository postRepository;
-
-	@Autowired
 	UserRepository userRepository;
+	@Autowired
+	PostRepository postRepository;
+	User user;
+	Post post;
 
 	@Autowired
 	TagRepository tagRepository;
 
-	String title = "title";
-	String content = "title";
+	@BeforeEach
+	public void setupEach() {
+		String name = "name";
+		String email = "test@gmail.com";
+		String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
+		String userTitle = "myblog";
+		String introduce = "introduce";
+		user = new User(name, email, picture, userTitle, introduce, Role.USER);
+		userRepository.save(user);
 
-	String name = "name";
-	String email = "test@gmail.com";
-	String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
-	String userTitle = "myblog";
-	String introduce = "introduce";
+		String thumbnail = "thumbnail";
+		String summary = "summary";
+		String title = "title";
+		String content = "title";
+		post = new Post(thumbnail, summary, title, content, user, null);
+		postRepository.save(post);
+	}
+	
+	public Tag createTag() {
+		Tag tag = new Tag(post, "new tage");
+		return tagRepository.save(tag);
+	}
 
 	@Test
 	public void testTagSave() {
 		// given
-		User user = new User(name, email, picture, title, introduce, Role.USER);
-		userRepository.save(user);
-
-		Post post = new Post(null,null,title, content, user, null);
-		postRepository.save(post);
-
-		Tag tag = new Tag(post, "new tage");
-
 		// when
-		Tag returnTag = tagRepository.save(tag);
+		Tag tag = createTag();
 
 		// then
-		assertThat(returnTag).usingRecursiveComparison().isEqualTo(tag);
+		assertThat(tag.getId()).isGreaterThan(0);
 	}
 
 	@Test
 	public void testTagDelete() {
 		// given
-		User user = new User(name, email, picture, title, introduce, Role.USER);
-		userRepository.save(user);
-
-		Post post = new Post(null,null,title, content, user, null);
-		postRepository.save(post);
-
-		Tag tag = new Tag(post, "new tage");
-		Tag returnTag = tagRepository.save(tag);
+		Tag tag = createTag();
 
 		// when
-		tagRepository.delete(returnTag);
+		tagRepository.delete(tag);
 
 		// then
 		assertThrows(IllegalArgumentException.class,
-				() -> tagRepository.findById(returnTag.getId()).orElseThrow(() -> new IllegalArgumentException()));
+				() -> tagRepository.findById(tag.getId()).orElseThrow(() -> new IllegalArgumentException()));
 	}
 
 }

@@ -45,13 +45,14 @@ public class PostComment extends BaseTimeEntity {
 	@JoinColumn(name = "PARENT_ID")
 	private PostComment parent;
 
-	@OneToMany(mappedBy = "parent", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "parent", fetch = FetchType.EAGER, cascade =  CascadeType.REMOVE)
 	private List<PostComment> childList = new ArrayList<>();
 
 	@Builder
 	public PostComment(Post post, User user, String content) {
 		this.content = content;
 		this.post = post;
+		post.getPostComments().add(this);
 		this.user = user;
 	}
 

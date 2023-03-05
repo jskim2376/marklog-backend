@@ -1,5 +1,7 @@
 package com.marklog.blog.controller;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -14,7 +16,6 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -36,30 +37,27 @@ public class PostLikeControllerTest {
 	@Test
 	public void testSavePostLikeByPostConrtoller() throws Exception {
 		// given
-		String path = "/v1/post/like/1";
+		String path = "/v1/post/1/like";
 		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(1L, "test@test.com", Role.USER);
-		Authentication authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null, Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
+		Authentication authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null,
+				Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
 		// when
-		ResultActions ra = mvc.perform(post(path)
-				.with(SecurityMockMvcRequestPostProcessors.csrf())
-				.with(SecurityMockMvcRequestPostProcessors.authentication(authentication)));
+		ResultActions ra = mvc.perform(post(path).with(csrf()).with(authentication(authentication)));
 
 		// then
 		ra.andExpect(status().isCreated());
 	}
 
-
 	@Test
 	public void testDeletePostLikeByPostController() throws Exception {
 		// given
-		String path = "/v1/post/like/1";
+		String path = "/v1/post/1/like";
 		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(1L, "test@test.com", Role.USER);
-		Authentication authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null, Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
+		Authentication authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null,
+				Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
 
 		// when
-		ResultActions ra = mvc.perform(delete(path)
-				.with(SecurityMockMvcRequestPostProcessors.authentication(authentication))
-				.with(SecurityMockMvcRequestPostProcessors.csrf()));
+		ResultActions ra = mvc.perform(delete(path).with(authentication(authentication)).with(csrf()));
 
 		// then
 		ra.andExpect(status().isNoContent());

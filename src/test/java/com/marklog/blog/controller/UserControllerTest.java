@@ -1,6 +1,7 @@
 package com.marklog.blog.controller;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -24,7 +25,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -63,29 +63,26 @@ public class UserControllerTest {
 		time = LocalDateTime.now();
 	}
 
-	@WithMockUser(roles="USER")
+	@WithMockUser(roles = "USER")
 	@Test
 	public void testGetAllUserConrtoller() throws Exception {
-		//given
+		// given
 		User user = new User(name, email, picture, title, introduce, Role.USER);
 		UserResponseDto userResponseDto = new UserResponseDto(user);
 		List<UserResponseDto> content = new ArrayList<>();
 		content.add(userResponseDto);
 
 		int pageCount = 0;
-		int size=20;
+		int size = 20;
 		Pageable pageable = PageRequest.of(pageCount, size);
 		Page<UserResponseDto> page = new PageImpl<>(content, pageable, 1);
 		when(userService.findAll(pageable)).thenReturn(page);
 
-		//when
+		// when
 		ResultActions ra = mvc.perform(get("/v1/user"));
-		//then
-		ra
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.size").value(20))
-		.andExpect(jsonPath("$.totalElements").value(1))
-		.andExpect(jsonPath("$.content[0].email").value(email));
+		// then
+		ra.andExpect(status().isOk()).andExpect(jsonPath("$.size").value(20))
+				.andExpect(jsonPath("$.totalElements").value(1)).andExpect(jsonPath("$.content[0].email").value(email));
 
 	}
 
@@ -116,8 +113,8 @@ public class UserControllerTest {
 		UserUpdateRequestDto updateRequestDto = new UserUpdateRequestDto(putName, putPicture, putTitle, putIntroduce);
 
 		// when
-		ResultActions ra = mvc.perform(put(path).with(SecurityMockMvcRequestPostProcessors.csrf())
-				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(updateRequestDto)));
+		ResultActions ra = mvc.perform(
+				put(path).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(asJsonString(updateRequestDto)));
 		// then
 		ra.andExpect(status().isNoContent());
 
@@ -128,7 +125,7 @@ public class UserControllerTest {
 	public void testDeleteUserController() throws Exception {
 		// given
 		// when
-		ResultActions ra = mvc.perform(delete(path).with(SecurityMockMvcRequestPostProcessors.csrf()));
+		ResultActions ra = mvc.perform(delete(path).with(csrf()));
 		// then
 		ra.andExpect(status().isNoContent());
 

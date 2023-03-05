@@ -15,7 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Component
 public class PostListResponseDto {
-	private String thumnail;
+	private Long postId;
+	private String thumbnail;
 	private String title;
 	private String summary;
 	@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
@@ -23,11 +24,12 @@ public class PostListResponseDto {
 	private int commentCount;
 	private int likeCount;
 	private String picture;
-	private Long userId;
 	private String userName;
+	private Long userId;
 
 	public PostListResponseDto(Post entity) {
-		this.thumnail = entity.getThumbnail();
+		this.postId = entity.getId();
+		this.thumbnail = entity.getThumbnail();
 		this.title = entity.getTitle();
 		this.summary = entity.getSummary();
 		this.modifiedDate = entity.getModifiedDate();
