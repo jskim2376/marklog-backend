@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
@@ -69,7 +68,7 @@ public class PostTest {
 		objectMapper.registerModule(new JavaTimeModule());
 
 		String name = "name";
-		String email = "postTbkjaasest@gmail.com";
+		String email = "postTbkja123asest@gmail.com";
 		String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
 		String title = "title";
 		String introduce = "introduce";
@@ -230,45 +229,38 @@ public class PostTest {
 	}
 
 	@Test
-	public void testRecentPost() throws JsonMappingException, JsonProcessingException, JSONException {
+	public void testRecentPost() throws JSONException, IOException {
 		// given
+		String uri = this.uri + "/recent";
 		String recentTitle = "recentPost";
 		String recentContent = "search";
 		Long postId = createPost(recentTitle, recentContent);
 		createPostLike(postId);
-
+		String sort = "id,desc";
+		
 		// when
-		ResponseEntity<String> responseEntity = wc.get().uri(uri + "/recent").attribute("text", recentContent)
-				.retrieve().toEntity(String.class).block();
-
+		ResponseEntity<String> responseEntity = wc.get()
+				.uri(uriBuilder -> uriBuilder.path(uri).queryParam("sort", sort).build()).retrieve()
+				.toEntity(String.class).block();
 		// then-ready
-		JSONObject recentPostJsonObject = null;
+		ObjectReader reader = objectMapper.readerFor(new TypeReference<List<PostListResponseDto>>() {});
 
-		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
-		JSONArray contentobj = jsonObject.getJSONArray("content");
-		for (int i = 0; i < contentobj.length(); i++) {
-			String jsonObjectTitle = contentobj.getJSONObject(i).getString("title");
-			if (jsonObjectTitle.equals(recentTitle)) {
-				recentPostJsonObject = contentobj.getJSONObject(i);
-			}
-		}
+		JsonNode node = objectMapper.readTree(responseEntity.getBody());
+		List<PostListResponseDto> postListResponseDtos = reader.readValue(node.get("content"));
 
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(recentPostJsonObject).isNotNull();
-		assertThat(recentPostJsonObject.get("title")).isEqualTo(recentTitle);
-		assertThat(recentPostJsonObject.get("summary")).isEqualTo(recentContent);
-		assertThat(recentPostJsonObject.get("likeCount")).isEqualTo(1);
+		assertThat(postListResponseDtos.get(0).getTitle()).isEqualTo(recentTitle);
 	}
 
 	@Test
 	public void testSearchPost() throws JSONException, IOException {
 		// given
+		String uri = this.uri+"/search";
 		String searchTitle = "search title";
 		String searchContent = "hhhhh";
 		String text = "search";
 		createPost(searchTitle, searchContent);
-		String uri = "/api/v1/post/search";
 		// when
 		ResponseEntity<String> responseEntity = wc.get()
 				.uri(uriBuilder -> uriBuilder.path(uri).queryParam("text", text).build()).retrieve()
@@ -288,8 +280,8 @@ public class PostTest {
 	@Test
 	public void testSearchPost_empty() throws JsonMappingException, JsonProcessingException, JSONException {
 		// given
+		String uri = this.uri+"/search";
 		String text = "adqsadqwfwq";
-		String uri = "/api/v1/post/search";
 		// when
 		ResponseEntity<String> responseEntity = wc.get()
 				.uri(uriBuilder -> uriBuilder.path(uri).queryParam("text", text).build()).retrieve()

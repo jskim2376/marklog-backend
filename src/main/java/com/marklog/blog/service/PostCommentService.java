@@ -25,6 +25,7 @@ public class PostCommentService {
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
 	private final PostCommentRepository postCommentRepository;
+	private final NoticeService noticeService;
 
 	public Long save(Long postId, Long userId, PostCommentRequestDto requestDto) {
 		Post post = postRepository.getReferenceById(postId);
@@ -39,6 +40,8 @@ public class PostCommentService {
 			postComment.setParent(parentPostComment);
 		}
 		postComment = postCommentRepository.save(postComment);
+		
+		noticeService.pushNoticeByUserId(post.getId() + "에 새로운 댓글이 추가 되었습니다.", userId);
 		return postComment.getId();
 	}
 
