@@ -111,14 +111,10 @@ public class NoticeServiceTest {
 	@Test
 	public void testDeleteNotice() {
 		//given
-		Notice notice = new Notice(noticeContent, user);
-		
-		when(noticeRepository.getReferenceById(noticeId)).thenReturn(notice);
-
 		//then
 		noticeService.deleteNotice(noticeId);
 		
 		//then
-		verify(noticeRepository).delete(notice);
+		verify(noticeRepository).deleteById(noticeId);
 	}
 }

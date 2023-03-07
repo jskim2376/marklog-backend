@@ -10,6 +10,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -95,14 +97,13 @@ public class NoticeControllerTest {
 		NoticeResponseDto noticeResponseDto = new NoticeResponseDto(noticeId, noticeContent, false, userId);
 		notices.add(noticeResponseDto);
 
-		doThrow(NoSuchElementException.class).when(noticeService).findAllUnCheckNotice(userId);
+		when(noticeService.findAllUnCheckNotice(userId)).thenReturn(new ArrayList<>());
 		// when
 		ResultActions ra = mvc.perform(get(path).with(csrf()).with(authentication(authentication)));
 
 		// then
-		ra.andExpect(status().isNotFound());
+		ra.andExpect(status().isOk()).andExpect(content().string("[]"));
 	}
-
 	@Test
 	public void testCheckNotice() throws Exception {
 		// given

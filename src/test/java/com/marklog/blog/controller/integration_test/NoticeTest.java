@@ -237,12 +237,11 @@ public class NoticeTest {
 		ObjectReader reader = objectMapper.readerFor(new TypeReference<List<NoticeResponseDto>>() {
 		});
 		List<NoticeResponseDto> noticeResponseDtos = reader.readValue(responseEntity.getBody());
-
 		
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(noticeResponseDtos.size()).isEqualTo(1);
-		assertThat(noticeResponseDtos.get(0).getContent().startsWith(postId.toString())).isTrue();
+		assertThat(noticeResponseDtos.get(0).getContent().contains("댓글이")).isTrue();
 		
 	}
 

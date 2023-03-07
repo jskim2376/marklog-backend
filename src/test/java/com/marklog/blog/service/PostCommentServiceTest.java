@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.marklog.blog.controller.dto.PostCommentRequestDto;
 import com.marklog.blog.controller.dto.PostCommentResponseDto;
 import com.marklog.blog.controller.dto.PostCommentUpdateRequestDto;
+import com.marklog.blog.domain.notice.NoticeRepository;
 import com.marklog.blog.domain.post.Post;
 import com.marklog.blog.domain.post.PostRepository;
 import com.marklog.blog.domain.post.comment.PostComment;
@@ -35,6 +36,8 @@ public class PostCommentServiceTest {
 	PostRepository postRepository;
 	@Mock
 	PostCommentRepository postCommentRepository;
+	@Mock
+	NoticeService noticeService;
 
 	PostCommentService postCommentService;
 	Long postCommentId = 1L;
@@ -60,7 +63,7 @@ public class PostCommentServiceTest {
 		String title = "title";
 		String content = "title";
 		post = new Post(thumbnail, summary, title, content, user, null);
-		postCommentService = new PostCommentService(postRepository, userRepository, postCommentRepository);
+		postCommentService = new PostCommentService(postRepository, userRepository, postCommentRepository, noticeService);
 	}
 
 	@Test

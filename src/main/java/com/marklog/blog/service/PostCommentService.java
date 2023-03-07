@@ -41,7 +41,7 @@ public class PostCommentService {
 		}
 		postComment = postCommentRepository.save(postComment);
 		
-		noticeService.pushNoticeByUserId(post.getId() + "에 새로운 댓글이 추가 되었습니다.", userId);
+		noticeService.pushNoticeByUserId("\'"+post.getTitle()+"\'" + "에 새로운 댓글이 추가 되었습니다.", userId);
 		return postComment.getId();
 	}
 
