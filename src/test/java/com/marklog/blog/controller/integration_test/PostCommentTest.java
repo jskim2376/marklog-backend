@@ -24,9 +24,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.marklog.blog.config.auth.JwtTokenProvider;
-import com.marklog.blog.controller.dto.PostCommentRequestDto;
-import com.marklog.blog.controller.dto.PostCommentResponseDto;
-import com.marklog.blog.controller.dto.PostCommentUpdateRequestDto;
 import com.marklog.blog.domain.post.Post;
 import com.marklog.blog.domain.post.PostRepository;
 import com.marklog.blog.domain.post.comment.PostComment;
@@ -34,6 +31,9 @@ import com.marklog.blog.domain.post.comment.PostCommentRepository;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
+import com.marklog.blog.dto.PostCommentResponseDto;
+import com.marklog.blog.dto.PostCommentSaveRequestDto;
+import com.marklog.blog.dto.PostCommentUpdateRequestDto;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -89,7 +89,7 @@ public class PostCommentTest {
 		String postSummary = "summary";
 		String postTitle = "post title";
 		String postContent = "post content";
-		post = new Post(postThumbnail, postSummary, postTitle, postContent, user1, null);
+		post = new Post(postThumbnail, postSummary, postTitle, postContent, user1);
 		postRepository.save(post);
 
 		uri = "/api/v1/post/" + post.getId() + "/comment/";
@@ -108,11 +108,11 @@ public class PostCommentTest {
 	@Test
 	public void testPostPostComment() throws JsonProcessingException {
 		// given
-		PostCommentRequestDto postCommentRequestDto = new PostCommentRequestDto(null, postCommentContent);
+		PostCommentSaveRequestDto postCommentSaveRequestDto = new PostCommentSaveRequestDto(null, postCommentContent);
 		// when
 		ResponseEntity<String> responseEntity = wc.post().uri(uri).header("Authorization", "Bearer " + accessToken1)
 				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(objectMapper.writeValueAsString(postCommentRequestDto)).retrieve().toEntity(String.class)
+				.bodyValue(objectMapper.writeValueAsString(postCommentSaveRequestDto)).retrieve().toEntity(String.class)
 				.block();
 
 		// then-ready
@@ -127,13 +127,13 @@ public class PostCommentTest {
 	public void testPostPostComment_child() throws JsonProcessingException {
 		// given
 		PostComment postComment = createPostComment(postCommentContent);
-		PostCommentRequestDto postCommentRequestDto = new PostCommentRequestDto(postComment.getId(),
+		PostCommentSaveRequestDto postCommentSaveRequestDto = new PostCommentSaveRequestDto(postComment.getId(),
 				postCommentContent);
 
 		// when
 		ResponseEntity<String> responseEntity = wc.post().uri(uri).header("Authorization", "Bearer " + accessToken1)
 				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(objectMapper.writeValueAsString(postCommentRequestDto)).retrieve().toEntity(String.class)
+				.bodyValue(objectMapper.writeValueAsString(postCommentSaveRequestDto)).retrieve().toEntity(String.class)
 				.block();
 
 		// then-ready
@@ -147,11 +147,11 @@ public class PostCommentTest {
 	@Test
 	public void testPostPostComment_인증이_없을때() throws JsonProcessingException {
 		// given
-		PostCommentRequestDto postCommentRequestDto = new PostCommentRequestDto(null, postCommentContent);
+		PostCommentSaveRequestDto postCommentSaveRequestDto = new PostCommentSaveRequestDto(null, postCommentContent);
 
 		// when
 		ResponseEntity<String> responseEntity = wc.post().uri(uri).contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(objectMapper.writeValueAsString(postCommentRequestDto))
+				.bodyValue(objectMapper.writeValueAsString(postCommentSaveRequestDto))
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 
 		// then

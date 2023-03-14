@@ -1,7 +1,9 @@
 package com.marklog.blog.domain.tag;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,7 +27,7 @@ public class Tag {
 	@Column(length = 50, nullable = false)
 	private String name;
 
-	@ManyToOne
+	@ManyToOne(optional = false, cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "POST_ID")
 	private Post post;
 
@@ -33,5 +35,6 @@ public class Tag {
 	public Tag(Post post, String name) {
 		this.post = post;
 		this.name = name;
+		post.getTags().add(this);
 	}
 }

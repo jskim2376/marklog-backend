@@ -47,13 +47,15 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.marklog.blog.config.auth.JwtTokenProvider;
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
-import com.marklog.blog.controller.dto.PostListResponseDto;
-import com.marklog.blog.controller.dto.PostResponseDto;
-import com.marklog.blog.controller.dto.PostSaveRequestDto;
-import com.marklog.blog.controller.dto.PostUpdateRequestDto;
-import com.marklog.blog.controller.dto.TagResponseDto;
+import com.marklog.blog.domain.post.Post;
 import com.marklog.blog.domain.tag.Tag;
 import com.marklog.blog.domain.user.Role;
+import com.marklog.blog.domain.user.User;
+import com.marklog.blog.dto.PostListResponseDto;
+import com.marklog.blog.dto.PostResponseDto;
+import com.marklog.blog.dto.PostSaveRequestDto;
+import com.marklog.blog.dto.PostUpdateRequestDto;
+import com.marklog.blog.dto.TagNameResponseDto;
 import com.marklog.blog.service.PostLikeService;
 import com.marklog.blog.service.PostService;
 
@@ -75,34 +77,47 @@ public class PostControllerTest {
 	Authentication authentication;
 
 	String path = "/v1/post/";
+
 	Long postId = 1L;
-	LocalDateTime time;
 	String title = "title";
+	String thumbnail = "thumbnail";
+	String summary = "summary";
+	String picture="picture";
 	String content = "content";
+	LocalDateTime time;
+	
+	String tagName = "tagName";
+	
 	PostResponseDto postResponseDto;
+	PostListResponseDto postListResponseDto;
 	Page<PostListResponseDto> page;
 
 	@BeforeEach
 	public void setUp() {
 		time = LocalDateTime.now();
+		
 		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(1L, "test@test.com", Role.USER);
 		authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null,
 				Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
 
-		List<Tag> tags = new ArrayList<>();
-		tags.add(new Tag(null, "tag1"));
-		tags.add(new Tag(null, "tag2"));
-
+		List<TagNameResponseDto> tagNameResponseDtos = new ArrayList<>();
+		TagNameResponseDto tagNameResponseDto = new TagNameResponseDto(tagName);
+		tagNameResponseDtos.add(tagNameResponseDto);
+		
 		postResponseDto = new PostResponseDto(time, time, title, content, userId, userName,
-				TagResponseDto.toEntityDto(tags), null);
+				tagNameResponseDtos, null);
+		postListResponseDto = new PostListResponseDto(postId, thumbnail, title, summary, time, 0, 0, picture, userName, userId, tagNameResponseDtos);
 
 		List<PostListResponseDto> content = new ArrayList<>();
-		PostListResponseDto postListResponseDto = new PostListResponseDto(postId, "thumbnail", title, "summary", time,
-				0, 0, "picture", userName, userId);
+		PostListResponseDto postListResponseDto = new PostListResponseDto(postId, thumbnail, title, summary, time,
+				0, 0,  picture, userName, userId, null);
 		content.add(postListResponseDto);
+
 		int pageCount = 0;
 		int size = 20;
 		Pageable pageable = PageRequest.of(pageCount, size, Sort.by("id").descending());
+
+		
 		page = new PageImpl<>(content, pageable, 1);
 
 	}
@@ -160,6 +175,55 @@ public class PostControllerTest {
 				.andExpect(jsonPath("$.content[0].picture").value("picture"))
 				.andExpect(jsonPath("$.content[0].userName").value(userName))
 				.andExpect(jsonPath("$.content[0].userId").value(userId));
+	}
+	
+	@WithMockUser
+	@Test
+	public void testTagNamePostConrtoller() throws Exception {
+		// given
+		List<PostListResponseDto> postListResponseDtos = new ArrayList<>();
+		postListResponseDtos.add(postListResponseDto);
+		when(postService.findAllByTagName(any(Pageable.class), eq(tagName))).thenReturn(postListResponseDtos);
+
+		// when
+		ResultActions ra = mvc.perform(get("/v1/post/tag").param("tag-name", tagName).with(csrf()));
+
+		// then
+		ra.andExpect(status().isOk())
+		.andExpect(jsonPath("$[0].postId").value(postId))
+		.andExpect(jsonPath("$[0].thumbnail").value(thumbnail))
+		.andExpect(jsonPath("$[0].title").value(title))
+		.andExpect(jsonPath("$[0].summary").value(summary))
+		.andExpect(jsonPath("$[0].commentCount").value(0))
+		.andExpect(jsonPath("$[0].likeCount").value(0))
+		.andExpect(jsonPath("$[0].picture").value(picture))
+		.andExpect(jsonPath("$[0].userName").value(userName))
+		.andExpect(jsonPath("$[0].userId").value(userId));
+	}
+	
+	@WithMockUser
+	@Test
+	public void testTagNameAndUserIdPostConrtoller() throws Exception {
+		// given
+		List<PostListResponseDto> postListResponseDtos = new ArrayList<>();
+		postListResponseDtos.add(postListResponseDto);
+		
+		when(postService.findAllByTagNameAndUserId(any(Pageable.class),  eq(tagName),  eq(userId))).thenReturn(postListResponseDtos);
+
+		// when
+		ResultActions ra = mvc.perform(get("/v1/post/tag").param("tag-name", tagName).param("user-id", userId.toString()).with(csrf()));
+
+		// then
+		ra.andExpect(status().isOk())
+		.andExpect(jsonPath("$[0].postId").value(postId))
+		.andExpect(jsonPath("$[0].thumbnail").value(thumbnail))
+		.andExpect(jsonPath("$[0].title").value(title))
+		.andExpect(jsonPath("$[0].summary").value(summary))
+		.andExpect(jsonPath("$[0].commentCount").value(0))
+		.andExpect(jsonPath("$[0].likeCount").value(0))
+		.andExpect(jsonPath("$[0].picture").value(picture))
+		.andExpect(jsonPath("$[0].userName").value(userName))
+		.andExpect(jsonPath("$[0].userId").value(userId));
 	}
 
 	@Test

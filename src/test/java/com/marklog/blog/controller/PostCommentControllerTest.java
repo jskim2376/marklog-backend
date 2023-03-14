@@ -39,10 +39,10 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.marklog.blog.config.auth.JwtTokenProvider;
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
-import com.marklog.blog.controller.dto.PostCommentRequestDto;
-import com.marklog.blog.controller.dto.PostCommentResponseDto;
-import com.marklog.blog.controller.dto.PostCommentUpdateRequestDto;
 import com.marklog.blog.domain.user.Role;
+import com.marklog.blog.dto.PostCommentResponseDto;
+import com.marklog.blog.dto.PostCommentSaveRequestDto;
+import com.marklog.blog.dto.PostCommentUpdateRequestDto;
 import com.marklog.blog.service.PostCommentService;
 
 @MockBean(JpaMetamodelMappingContext.class)
@@ -114,12 +114,12 @@ public class PostCommentControllerTest {
 	@Test
 	public void testPostPostCommentController() throws Exception {
 		// given
-		PostCommentRequestDto postCommentRequestDto = new PostCommentRequestDto(null, commentContent);
-		when(postCommentService.save(anyLong(), anyLong(), any(PostCommentRequestDto.class))).thenReturn(id);
+		PostCommentSaveRequestDto postCommentSaveRequestDto = new PostCommentSaveRequestDto(null, commentContent);
+		when(postCommentService.save(anyLong(), anyLong(), any(PostCommentSaveRequestDto.class))).thenReturn(id);
 
 		// when
 		ResultActions ra = mvc.perform(post(path).with(csrf()).with(authentication(authentication))
-				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(postCommentRequestDto)));
+				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(postCommentSaveRequestDto)));
 
 		// then
 		ra.andExpect(status().isCreated()).andExpect(header().exists(HttpHeaders.LOCATION));

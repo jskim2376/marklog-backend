@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.marklog.blog.controller.dto.NoticeResponseDto;
+import com.marklog.blog.dto.NoticeResponseDto;
 import com.marklog.blog.service.NoticeService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,14 +23,14 @@ import lombok.RequiredArgsConstructor;
 @RestController
 public class NoticeController {
 	private final NoticeService noticeService;
-	
+
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or principal.id==#userId)")
 	@GetMapping("/{userId}/uncheck")
 	public ResponseEntity<List<NoticeResponseDto>> getAllUnCheckNotice(@PathVariable Long userId) {
 		List<NoticeResponseDto> notices = noticeService.findAllUnCheckNotice(userId);
 		return ResponseEntity.ok(notices);
 	}
-	
+
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or hasPermission(#id, 'notice', null))")
 	@PutMapping("/{id}")
 	public ResponseEntity<?> checkNotice(@PathVariable Long id) {
@@ -41,7 +41,7 @@ public class NoticeController {
 			return ResponseEntity.notFound().build();
 		}
 	}
-	
+
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or hasPermission(#id, 'notice', null))")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteNotice(@PathVariable Long id) {
@@ -52,6 +52,6 @@ public class NoticeController {
 			return ResponseEntity.notFound().build();
 		}
 	}
-	
-	
+
+
 }

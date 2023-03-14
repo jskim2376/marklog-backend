@@ -1,5 +1,6 @@
 package com.marklog.blog.controller;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -21,10 +22,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
-import com.marklog.blog.controller.dto.PostListResponseDto;
-import com.marklog.blog.controller.dto.PostResponseDto;
-import com.marklog.blog.controller.dto.PostSaveRequestDto;
-import com.marklog.blog.controller.dto.PostUpdateRequestDto;
+import com.marklog.blog.dto.PostListResponseDto;
+import com.marklog.blog.dto.PostResponseDto;
+import com.marklog.blog.dto.PostSaveRequestDto;
+import com.marklog.blog.dto.PostUpdateRequestDto;
 import com.marklog.blog.service.PostLikeService;
 import com.marklog.blog.service.PostService;
 
@@ -39,19 +40,27 @@ public class PostController {
 
 	@GetMapping("/recent")
 	public Page<PostListResponseDto> recentPost(Pageable pageable) {
-		Page<PostListResponseDto> p = postService.recentPost(pageable);
-		return p;
+		return postService.recentPost(pageable);
 	}
 
 	@GetMapping("/search")
 	public Page<PostListResponseDto> search(Pageable pageable, @RequestParam(value = "text") String text) {
-		Page<PostListResponseDto> page = postService.search(pageable, text.split(" "));
-		return page;
+		return postService.search(pageable, text.split(" "));
+	}
+
+	@GetMapping("/tag")
+	public List<PostListResponseDto> tagName(Pageable pageable, @RequestParam(value = "tag-name") String tagName,
+			@RequestParam(required = false, value = "user-id") Long userId) {
+		if (userId == null) {
+			return postService.findAllByTagName(pageable, tagName);
+		} else {
+			return postService.findAllByTagNameAndUserId(pageable, tagName, userId);
+		}
 	}
 
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping
-	public ResponseEntity<?> postPostById(@RequestBody PostSaveRequestDto requestDto,
+	public ResponseEntity<?> postPostByUserId(@RequestBody PostSaveRequestDto requestDto,
 			@AuthenticationPrincipal UserAuthenticationDto userAuthenticationDto) {
 		Long id = postService.save(userAuthenticationDto.getId(), requestDto);
 		HttpHeaders header = new HttpHeaders();

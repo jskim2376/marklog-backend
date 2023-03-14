@@ -46,7 +46,7 @@ public class PostLikeRepositoryTest {
 		String summary = "summary";
 		String title = "title";
 		String content = "title";
-		post = new Post(thumbnail, summary, title, content, user, null);
+		post = new Post(thumbnail, summary, title, content, user);
 		postRepository.save(post);
 	}
 

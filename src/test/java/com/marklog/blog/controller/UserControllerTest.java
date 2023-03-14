@@ -34,10 +34,10 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.marklog.blog.config.auth.JwtTokenProvider;
-import com.marklog.blog.controller.dto.UserResponseDto;
-import com.marklog.blog.controller.dto.UserUpdateRequestDto;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
+import com.marklog.blog.dto.UserResponseDto;
+import com.marklog.blog.dto.UserUpdateRequestDto;
 import com.marklog.blog.service.UserService;
 
 @MockBean(JpaMetamodelMappingContext.class)

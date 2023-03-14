@@ -16,10 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.marklog.blog.controller.dto.PostCommentRequestDto;
-import com.marklog.blog.controller.dto.PostCommentResponseDto;
-import com.marklog.blog.controller.dto.PostCommentUpdateRequestDto;
-import com.marklog.blog.domain.notice.NoticeRepository;
 import com.marklog.blog.domain.post.Post;
 import com.marklog.blog.domain.post.PostRepository;
 import com.marklog.blog.domain.post.comment.PostComment;
@@ -27,6 +23,9 @@ import com.marklog.blog.domain.post.comment.PostCommentRepository;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
+import com.marklog.blog.dto.PostCommentResponseDto;
+import com.marklog.blog.dto.PostCommentSaveRequestDto;
+import com.marklog.blog.dto.PostCommentUpdateRequestDto;
 
 @ExtendWith(MockitoExtension.class)
 public class PostCommentServiceTest {
@@ -62,14 +61,14 @@ public class PostCommentServiceTest {
 		String summary = "summary";
 		String title = "title";
 		String content = "title";
-		post = new Post(thumbnail, summary, title, content, user, null);
+		post = new Post(thumbnail, summary, title, content, user);
 		postCommentService = new PostCommentService(postRepository, userRepository, postCommentRepository, noticeService);
 	}
 
 	@Test
 	public void testPostCommentServiceSave() {
 		// given
-		PostCommentRequestDto requestDto = new PostCommentRequestDto(null, commentContent);
+		PostCommentSaveRequestDto requestDto = new PostCommentSaveRequestDto(null, commentContent);
 
 		when(postRepository.getReferenceById(postId)).thenReturn(post);
 		when(userRepository.getReferenceById(userId)).thenReturn(user);
@@ -89,7 +88,7 @@ public class PostCommentServiceTest {
 	@Test
 	public void testPostCommentServiceSaveWithChild() {
 		// given
-		PostCommentRequestDto requestDto = new PostCommentRequestDto(postCommentId, commentContent);
+		PostCommentSaveRequestDto requestDto = new PostCommentSaveRequestDto(postCommentId, commentContent);
 		when(postRepository.getReferenceById(postId)).thenReturn(post);
 		when(userRepository.getReferenceById(userId)).thenReturn(user);
 		PostComment postComment = spy(new PostComment(post, user, commentContent + 2));

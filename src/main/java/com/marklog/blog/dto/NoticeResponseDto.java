@@ -1,4 +1,4 @@
-package com.marklog.blog.controller.dto;
+package com.marklog.blog.dto;
 
 import com.marklog.blog.domain.notice.Notice;
 
@@ -21,5 +21,5 @@ public class NoticeResponseDto {
 		this.checkFlag = notice.getCheckFlag();
 		this.userId = notice.getUser().getId();
 	}
-	
+
 }

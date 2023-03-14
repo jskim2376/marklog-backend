@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
-import com.marklog.blog.controller.dto.PostCommentRequestDto;
-import com.marklog.blog.controller.dto.PostCommentResponseDto;
-import com.marklog.blog.controller.dto.PostCommentUpdateRequestDto;
+import com.marklog.blog.dto.PostCommentResponseDto;
+import com.marklog.blog.dto.PostCommentSaveRequestDto;
+import com.marklog.blog.dto.PostCommentUpdateRequestDto;
 import com.marklog.blog.service.PostCommentService;
 
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class PostCommentController {
 
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/{postId}/comment")
-	public ResponseEntity<?> postPostComment(@PathVariable Long postId, @RequestBody PostCommentRequestDto requestDto,
+	public ResponseEntity<?> postPostComment(@PathVariable Long postId, @RequestBody PostCommentSaveRequestDto requestDto,
 			@AuthenticationPrincipal UserAuthenticationDto userAuthenticationDto) {
 		Long userId = userAuthenticationDto.getId();
 		Long commentId = postCommentService.save(postId, userId, requestDto);

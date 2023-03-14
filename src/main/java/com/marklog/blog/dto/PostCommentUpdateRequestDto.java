@@ -1,4 +1,4 @@
-package com.marklog.blog.controller.dto;
+package com.marklog.blog.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostCommentRequestDto {
-	private Long parentComment;
+public class PostCommentUpdateRequestDto {
 	private String content;
 }

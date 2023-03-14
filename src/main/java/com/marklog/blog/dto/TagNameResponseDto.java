@@ -1,4 +1,4 @@
-package com.marklog.blog.controller.dto;
+package com.marklog.blog.dto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,14 +12,14 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TagResponseDto {
+public class TagNameResponseDto {
 	String name;
 
-	public static List<TagResponseDto> toEntityDto(List<Tag> tags) {
-		List<TagResponseDto> tagList = new ArrayList<>();
+	public static List<TagNameResponseDto> toEntityDto(List<Tag> tags) {
+		List<TagNameResponseDto> tagList = new ArrayList<>();
 
 		for (Tag tag : tags) {
-			tagList.add(new TagResponseDto(tag.getName()));
+			tagList.add(new TagNameResponseDto(tag.getName()));
 		}
 
 		return tagList;

@@ -1,4 +1,4 @@
-package com.marklog.blog.controller.dto;
+package com.marklog.blog.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +23,7 @@ public class PostResponseDto {
 	private String content;
 	private Long userId;
 	private String userName;
-	private List<TagResponseDto> tagList;
+	private List<TagNameResponseDto> tagList;
 	private Boolean like;
 
 	public PostResponseDto(Post entity) {
@@ -33,7 +33,7 @@ public class PostResponseDto {
 		this.content = entity.getContent();
 		this.userId = entity.getUser().getId();
 		this.userName = entity.getUser().getName();
-		this.tagList = TagResponseDto.toEntityDto(entity.getTags());
+		this.tagList = TagNameResponseDto.toEntityDto(entity.getTags());
 		this.like = false;
 	}
 

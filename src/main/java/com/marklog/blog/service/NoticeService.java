@@ -8,11 +8,11 @@ import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
 
-import com.marklog.blog.controller.dto.NoticeResponseDto;
 import com.marklog.blog.domain.notice.Notice;
 import com.marklog.blog.domain.notice.NoticeRepository;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
+import com.marklog.blog.dto.NoticeResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,7 +34,7 @@ public class NoticeService {
 		return new NoticeResponseDto(notice);
 	}
 
-	
+
 	public void pushNoticeByUserId(String content, Long userId) {
 		User user = userRepository.getReferenceById(userId);
 		Notice notice = new Notice(content, user);

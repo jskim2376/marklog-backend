@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -25,16 +24,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.marklog.blog.config.auth.JwtTokenProvider;
-import com.marklog.blog.controller.dto.NoticeResponseDto;
-import com.marklog.blog.controller.dto.PostCommentRequestDto;
-import com.marklog.blog.controller.dto.PostSaveRequestDto;
 import com.marklog.blog.domain.notice.Notice;
 import com.marklog.blog.domain.notice.NoticeRepository;
-import com.marklog.blog.domain.post.Post;
-import com.marklog.blog.domain.post.comment.PostComment;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
+import com.marklog.blog.dto.NoticeResponseDto;
+import com.marklog.blog.dto.PostCommentSaveRequestDto;
+import com.marklog.blog.dto.PostSaveRequestDto;
 
 import reactor.core.publisher.Mono;
 
@@ -110,11 +107,11 @@ public class NoticeTest {
 		String location = header.getLocation().toString();
 		return Long.valueOf(location.substring(uri.length()));
 	}
-	
+
 	public Long createPostComment(Long postId) {
 		String uri = "/api/v1/post/" + postId + "/comment/";
 
-		PostCommentRequestDto postSaveRequestDto = new PostCommentRequestDto(null, "comment");
+		PostCommentSaveRequestDto postSaveRequestDto = new PostCommentSaveRequestDto(null, "comment");
 		ResponseEntity<String> responseEntity = wc.post().uri(uri).header("Authorization", "Bearer " + accessToken1)
 				.body(Mono.just(postSaveRequestDto), PostSaveRequestDto.class).retrieve().toEntity(String.class)
 				.block();
@@ -227,7 +224,7 @@ public class NoticeTest {
 		// given
 		String uri = this.uri + user1.getId() + "/uncheck";
 		Long postId = createPost();
-		Long postCommentid = createPostComment(postId);
+		createPostComment(postId);
 
 		// when
 		ResponseEntity<String> responseEntity = wc.get().uri(uri).header("Authorization", "Bearer " + accessToken1)
@@ -237,12 +234,12 @@ public class NoticeTest {
 		ObjectReader reader = objectMapper.readerFor(new TypeReference<List<NoticeResponseDto>>() {
 		});
 		List<NoticeResponseDto> noticeResponseDtos = reader.readValue(responseEntity.getBody());
-		
+
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(noticeResponseDtos.size()).isEqualTo(1);
 		assertThat(noticeResponseDtos.get(0).getContent().contains("댓글이")).isTrue();
-		
+
 	}
 
 	@Test

@@ -15,12 +15,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.marklog.blog.controller.dto.NoticeResponseDto;
 import com.marklog.blog.domain.notice.Notice;
 import com.marklog.blog.domain.notice.NoticeRepository;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
+import com.marklog.blog.dto.NoticeResponseDto;
 
 @ExtendWith(MockitoExtension.class)
 public class NoticeServiceTest {
@@ -32,7 +32,7 @@ public class NoticeServiceTest {
 
 	User user;
 	Long userId = 1L;
-	
+
 	NoticeService noticeService;
 	Long noticeId = 2L;
 	String noticeContent = "content";
@@ -60,13 +60,13 @@ public class NoticeServiceTest {
 
 		// when
 		List<NoticeResponseDto> findNotices = noticeService.findAllUnCheckNotice(userId);
-		
+
 		//then
 		assertThat(notices.get(0).getContent()).isSameAs(findNotices.get(0).getContent());
 		assertThat(notices.get(0).getCheckFlag()).isSameAs(findNotices.get(0).getCheckFlag());
 		assertThat(notices.get(0).getUser().getId()).isSameAs(findNotices.get(0).getUserId());
 	}
-	
+
 	@Test
 	public void testFindById() {
 		// given
@@ -76,21 +76,21 @@ public class NoticeServiceTest {
 
 		// when
 		NoticeResponseDto noticeResponseDto = noticeService.findById(noticeId);
-		
+
 		//then
 		assertThat(noticeResponseDto.getContent()).isEqualTo(notice.getContent());
 		assertThat(noticeResponseDto.getCheckFlag()).isSameAs(false);
-		
+
 	}
-	
+
 	@Test
 	public void testPushNoticeByUserId() {
 		//given
 		when(userRepository.getReferenceById(userId)).thenReturn(user);
-		
+
 		//when
 		noticeService.pushNoticeByUserId(noticeContent, userId);
-		
+
 		//then
 		verify(noticeRepository).save(any(Notice.class));
 	}
@@ -100,20 +100,20 @@ public class NoticeServiceTest {
 		//given
 		Optional<Notice> notice = Optional.of(new Notice(noticeContent, user));
 		when(noticeRepository.findById(noticeId)).thenReturn(notice);
-		
+
 		//when
 		noticeService.checkNoticeById(noticeId);
-		
+
 		//then
 		assertThat(notice.get().getCheckFlag()).isTrue();
 	}
-	
+
 	@Test
 	public void testDeleteNotice() {
 		//given
 		//then
 		noticeService.deleteNotice(noticeId);
-		
+
 		//then
 		verify(noticeRepository).deleteById(noticeId);
 	}

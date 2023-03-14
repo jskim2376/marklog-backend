@@ -6,15 +6,15 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.marklog.blog.controller.dto.PostCommentRequestDto;
-import com.marklog.blog.controller.dto.PostCommentResponseDto;
-import com.marklog.blog.controller.dto.PostCommentUpdateRequestDto;
 import com.marklog.blog.domain.post.Post;
 import com.marklog.blog.domain.post.PostRepository;
 import com.marklog.blog.domain.post.comment.PostComment;
 import com.marklog.blog.domain.post.comment.PostCommentRepository;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
+import com.marklog.blog.dto.PostCommentResponseDto;
+import com.marklog.blog.dto.PostCommentSaveRequestDto;
+import com.marklog.blog.dto.PostCommentUpdateRequestDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +27,7 @@ public class PostCommentService {
 	private final PostCommentRepository postCommentRepository;
 	private final NoticeService noticeService;
 
-	public Long save(Long postId, Long userId, PostCommentRequestDto requestDto) {
+	public Long save(Long postId, Long userId, PostCommentSaveRequestDto requestDto) {
 		Post post = postRepository.getReferenceById(postId);
 		User user = userRepository.getReferenceById(userId);
 
@@ -40,7 +40,7 @@ public class PostCommentService {
 			postComment.setParent(parentPostComment);
 		}
 		postComment = postCommentRepository.save(postComment);
-		
+
 		noticeService.pushNoticeByUserId("\'"+post.getTitle()+"\'" + "에 새로운 댓글이 추가 되었습니다.", userId);
 		return postComment.getId();
 	}

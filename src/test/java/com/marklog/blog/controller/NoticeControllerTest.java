@@ -8,10 +8,9 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,9 +33,9 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.marklog.blog.config.auth.JwtTokenProvider;
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
-import com.marklog.blog.controller.dto.NoticeResponseDto;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
+import com.marklog.blog.dto.NoticeResponseDto;
 import com.marklog.blog.service.NoticeService;
 
 @MockBean(JpaMetamodelMappingContext.class)

@@ -13,7 +13,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.marklog.blog.controller.dto.AccessTokenDto;
+import com.marklog.blog.dto.AccessTokenResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,9 +36,9 @@ public class JwtOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccess
 		response.addHeader("Set-Cookie", responseCookie.toString());
 
 		String access_token = jwt.createAccessToken(id, email);
-		AccessTokenDto accessTokenDto = new AccessTokenDto(access_token);
+		AccessTokenResponseDto accessTokenResponseDto = new AccessTokenResponseDto(access_token);
 		ObjectMapper mapper = new ObjectMapper();
-		response.getWriter().write(mapper.writeValueAsString(accessTokenDto));
+		response.getWriter().write(mapper.writeValueAsString(accessTokenResponseDto));
 		response.setContentType("application/json");
 		response.setHeader("Location", "/");
 		response.setStatus(302);

@@ -23,11 +23,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.marklog.blog.config.auth.dto.OAuthAttributes;
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
-import com.marklog.blog.controller.dto.UserResponseDto;
-import com.marklog.blog.controller.dto.UserUpdateRequestDto;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
+import com.marklog.blog.dto.UserResponseDto;
+import com.marklog.blog.dto.UserUpdateRequestDto;
 
 @ExtendWith(SpringExtension.class)
 public class UserServiceTest {

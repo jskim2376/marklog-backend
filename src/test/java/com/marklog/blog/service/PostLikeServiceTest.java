@@ -54,7 +54,7 @@ public class PostLikeServiceTest {
 				+ "# adsadasd as sa dsa dad ada s dsa\r\n"
 				+ "hihihi thithithiad sad sa dasd sa dsad da a dsasasdsaa a sa sa saa sa  ad  ada\r\n"
 				+ "asdad asd sa dsa dsa sad a dad  a  s as dsa dd sa da sa dsa sa dsa asd sa dsa\r\n";
-		post = spy(new Post(null, null, title, content, user, null));
+		post = spy(new Post(null, null, title, content, user));
 		postLikeService = new PostLikeService(postRepository, userRepository, postLikeRepository);
 	}
 

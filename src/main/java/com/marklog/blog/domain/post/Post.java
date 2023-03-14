@@ -53,14 +53,13 @@ public class Post extends BaseTimeEntity {
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	private List<PostComment> postComments = new ArrayList<>();
 
-	public Post(String thubnail, String summary, String title, String content, User user, List<Tag> tags) {
+	public Post(String thubnail, String summary, String title, String content, User user) {
 		this.thumbnail = thubnail;
 		this.summary = summary;
 		this.title = title;
 		this.content = content;
 		this.user = user;
 		this.user.getPosts().add(this);
-		this.tags = tags;
 	}
 
 	public void update(String title, String content) {

@@ -23,10 +23,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import com.marklog.blog.controller.dto.PostListResponseDto;
-import com.marklog.blog.controller.dto.PostResponseDto;
-import com.marklog.blog.controller.dto.PostSaveRequestDto;
-import com.marklog.blog.controller.dto.PostUpdateRequestDto;
 import com.marklog.blog.domain.post.Post;
 import com.marklog.blog.domain.post.PostRepository;
 import com.marklog.blog.domain.tag.Tag;
@@ -34,6 +30,10 @@ import com.marklog.blog.domain.tag.TagRepository;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
+import com.marklog.blog.dto.PostListResponseDto;
+import com.marklog.blog.dto.PostResponseDto;
+import com.marklog.blog.dto.PostSaveRequestDto;
+import com.marklog.blog.dto.PostUpdateRequestDto;
 import com.querydsl.core.types.Predicate;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +41,7 @@ public class PostServiceTest {
 	@Mock
 	UserRepository userRepository;
 	User user;
+	Long userId = 2L;
 
 	@Mock
 	PostRepository postRepository;
@@ -58,6 +59,7 @@ public class PostServiceTest {
 			+ "# adsadasd as sa dsa dad ada s dsa\r\n"
 			+ "hihihi thithithiad sad sa dasd sa dsad da a dsasasdsaa a sa sa saa sa  ad  ada\r\n"
 			+ "asdad asd sa dsa dsa sad a dad  a  s as dsa dd sa da sa dsa sa dsa asd sa dsa\r\n";
+	String tagName = "tagName";
 
 	@BeforeEach
 	public void setUp() {
@@ -67,11 +69,8 @@ public class PostServiceTest {
 		String userTitle = "myblog";
 		String introduce = "introduce";
 		user = new User(name, email, picture, userTitle, introduce, Role.USER);
-
-		List<Tag> tags = new ArrayList<>();
-		tags.add(new Tag(null, "tag1"));
-		tags.add(new Tag(null, "tag2"));
-		post = spy(new Post(thumbnail, summary, title, content, user, tags));
+		post = spy(new Post(thumbnail, summary, title, content, user));
+		post.getTags().add(new Tag(post, tagName));
 		postService = new PostService(postRepository, userRepository, tagRepository);
 	}
 
@@ -116,6 +115,48 @@ public class PostServiceTest {
 		assertThat(postResponsePage.getTotalElements()).isEqualTo(1);
 	}
 
+	@Test
+	public void testFindAllByTagName() {
+		// given
+		int pageCount = 0;
+		int size = 20;
+		Pageable pageable = PageRequest.of(pageCount, size);
+		
+		List<Post> posts = new ArrayList<>();
+		posts.add(post);
+		
+		when(postRepository.findAllByTagName(pageable, tagName)).thenReturn(posts);
+
+		// when
+		List<PostListResponseDto> postListResponseDtos = postService.findAllByTagName(pageable, tagName);
+		PostListResponseDto postListResponseDto = postListResponseDtos.get(0);
+		// then
+		assertThat(postListResponseDtos.size()).isEqualTo(1);
+		assertThat(postListResponseDto.getTitle()).isEqualTo(title);
+		assertThat(postListResponseDto.getTagList().get(0).getName()).isEqualTo(tagName);
+	}
+
+	@Test
+	public void testFindAllByTagNamAndeUserId() {
+		// given
+		int pageCount = 0;
+		int size = 20;
+		Pageable pageable = PageRequest.of(pageCount, size);
+		
+		List<Post> posts = new ArrayList<>();
+		posts.add(post);
+		when(postRepository.findAllByTagNameAndUserId(pageable, tagName,userId)).thenReturn(posts);
+
+		// when
+		List<PostListResponseDto> postListResponseDtos = postService.findAllByTagNameAndUserId(pageable, tagName, userId);
+		PostListResponseDto postListResponseDto = postListResponseDtos.get(0);
+		// then
+		assertThat(postListResponseDtos.size()).isEqualTo(1);
+		assertThat(postListResponseDto.getTitle()).isEqualTo(title);
+		assertThat(postListResponseDto.getTagList().get(0).getName()).isEqualTo(tagName);
+	}
+
+	
 	@Test
 	public void testSavePostService() {
 		//given

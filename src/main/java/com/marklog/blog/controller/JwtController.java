@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.marklog.blog.config.auth.JwtTokenProvider;
-import com.marklog.blog.controller.dto.AccessTokenDto;
+import com.marklog.blog.dto.AccessTokenResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,13 +25,13 @@ public class JwtController {
 	}
 
 	@GetMapping("/refresh")
-	public ResponseEntity<AccessTokenDto> tokenRefresh(@CookieValue(value = "refresh_token") String refresh_token) {
+	public ResponseEntity<AccessTokenResponseDto> tokenRefresh(@CookieValue(value = "refresh_token") String refresh_token) {
 		if (refresh_token != null && jwtTokenProvider.validateToken(refresh_token)) {
 			Long id = jwtTokenProvider.getId(refresh_token);
 			String email = jwtTokenProvider.getEmail(refresh_token);
 			String accessToken = jwtTokenProvider.createAccessToken(id, email);
-			AccessTokenDto accessTokenDto = new AccessTokenDto(accessToken);
-			return ResponseEntity.ok(accessTokenDto);
+			AccessTokenResponseDto accessTokenResponseDto = new AccessTokenResponseDto(accessToken);
+			return ResponseEntity.ok(accessTokenResponseDto);
 		} else {
 			return ResponseEntity.badRequest().build();
 		}

@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -19,49 +21,77 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.marklog.blog.controller.dto.PostResponseDto;
 import com.marklog.blog.domain.postlike.PostLikeRepository;
 import com.marklog.blog.domain.tag.Tag;
+import com.marklog.blog.domain.tag.TagRepository;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
+import com.marklog.blog.dto.PostResponseDto;
 import com.querydsl.core.types.dsl.BooleanExpression;
-
+@Transactional
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DataJpaTest
 public class PostRepostioryTest {
 	@Autowired
 	UserRepository userRepository;
 	User user;
+	User user2;
 
 	@Autowired
 	PostRepository postRepository;
 	@Autowired
 	PostLikeRepository postLikeRepository;
+	@Autowired
+	TagRepository tagRepository;
 
 	String thumbnail = "hi";
 	String sumary = "content";
 	String title = "title";
 	String content = "content";
 	List<Tag> tags;
+	String tagName1 = "tag1";
+	String tagName2 = "tag2";
 
 	@BeforeEach
 	public void setUpEach() {
 		String name = "name";
-		String email = "test@gmail.com";
+		String email = "testPostRepostiroy@gmail.com";
 		String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
 		String userTitle = "myblog";
 		String introduce = "introduce";
 		user = new User(name, email, picture, userTitle, introduce, Role.USER);
 		userRepository.save(user);
 
-		tags = new ArrayList<>();
-		tags.add(new Tag(null, "tag1"));
-		tags.add(new Tag(null, "tag2"));
+		user2 = new User(name, 2+email, picture, userTitle, introduce, Role.USER);
+		userRepository.save(user2);
+
 	}
 
 	public Post createPost() {
-		Post post = new Post(thumbnail, sumary, title, content, user, tags);
+		Post post = new Post(thumbnail, sumary, title, content, user);
+		post = postRepository.save(post);
+
+		Tag tag1 = new Tag(post, tagName1);
+		tagRepository.saveAndFlush(tag1);
+		Tag tag2 = new Tag(post, tagName2);
+		tagRepository.saveAndFlush(tag2);
+		return post;
+	}
+	
+	public Post createPostUser2() {
+		Post post = new Post(thumbnail, sumary, title, content, user2);
+		post = postRepository.save(post);
+
+		Tag tag1 = new Tag(post, tagName1);
+		tagRepository.saveAndFlush(tag1);
+		Tag tag2 = new Tag(post, tagName2);
+		tagRepository.saveAndFlush(tag2);
+		return post;
+	}
+
+	public Post createPostNoTag() {
+		Post post = new Post(thumbnail, sumary, title, content, user);
 		postRepository.save(post);
 		return post;
 	}
@@ -96,7 +126,7 @@ public class PostRepostioryTest {
 	public void testFindAllTitleContentPostRepository_by_content() throws JsonProcessingException {
 		// given
 		String newContent = "qwertyasdf";
-		Post post = new Post(thumbnail, sumary, title, newContent, user, tags);
+		Post post = new Post(thumbnail, sumary, title, newContent, user);
 		postRepository.save(post);
 
 		String searchText = newContent;
@@ -120,7 +150,7 @@ public class PostRepostioryTest {
 	public void testFindAllTitleContentPostRepository_by_title() throws JsonProcessingException {
 		// given
 		String newTitle = "qwertyasdf";
-		Post post = new Post(thumbnail, sumary, newTitle, content, user, tags);
+		Post post = new Post(thumbnail, sumary, newTitle, content, user);
 		postRepository.save(post);
 
 		String searchText = newTitle;
@@ -168,10 +198,10 @@ public class PostRepostioryTest {
 	public void testFindAllTitleContentPostRepository_multi_keyword() throws JsonProcessingException {
 		// given
 		String newTitle = "multi_keyword1";
-		Post post = new Post(thumbnail, sumary, newTitle, content, user, tags);
+		Post post = new Post(thumbnail, sumary, newTitle, content, user);
 		postRepository.save(post);
 		String newTitle2 = "multi_keyword2";
-		Post post2 = new Post(thumbnail, sumary, newTitle2, content, user, tags);
+		Post post2 = new Post(thumbnail, sumary, newTitle2, content, user);
 		postRepository.save(post2);
 
 		String searchText = newTitle;
@@ -197,6 +227,49 @@ public class PostRepostioryTest {
 	}
 
 	@Test
+	public void testFindAllByTagName() throws JsonProcessingException {
+		// given
+		createPost();
+		createPost();
+		createPostNoTag();
+		PageRequest pageRequest = PageRequest.of(0, 4);
+
+		// when
+		List<Post> posts = postRepository.findAllByTagName(pageRequest, tagName1);
+
+		// then-ready
+		PostResponseDto postDto1 = new PostResponseDto(posts.get(0));
+		PostResponseDto postDto2 = new PostResponseDto(posts.get(1));
+
+		// then
+		assertThat(posts.size()).isEqualTo(2);
+		assertThat(postDto1.getTagList().get(0).getName()).isEqualTo(tagName1);
+		assertThat(postDto2.getTagList().get(0).getName()).isEqualTo(tagName1);
+	}
+	
+	@Test
+	public void testFindAllByTagNameAndUserId() throws JsonProcessingException {
+		// given
+		createPost();
+		createPost();
+		createPostNoTag();
+		createPostUser2();
+		PageRequest pageRequest = PageRequest.of(0, 4);
+
+		// when
+		List<Post> posts = postRepository.findAllByTagNameAndUserId(pageRequest, tagName1, user.getId());
+
+		// then-ready
+		PostResponseDto postDto1 = new PostResponseDto(posts.get(0));
+		PostResponseDto postDto2 = new PostResponseDto(posts.get(1));
+
+		// then
+		assertThat(posts.size()).isEqualTo(2);
+		assertThat(postDto1.getTagList().get(0).getName()).isEqualTo(tagName1);
+		assertThat(postDto2.getTagList().get(0).getName()).isEqualTo(tagName1);
+	}
+
+	@Test
 	public void testSavePostRepository() {
 		// given
 		// when
@@ -209,7 +282,7 @@ public class PostRepostioryTest {
 	public void testSavePostRepository_Users_없을때_테스트() {
 		// given
 		User emptyUser = new User();
-		Post post = new Post(thumbnail, sumary, title, content, emptyUser, tags);
+		Post post = new Post(thumbnail, sumary, title, content, emptyUser);
 		// when
 		Executable save = () -> postRepository.save(post);
 		// then
@@ -225,7 +298,7 @@ public class PostRepostioryTest {
 
 		// then
 		assertThat(post).isSameAs(findPost);
-		assertThat(findPost.getTags().get(0).getName()).isEqualTo("tag1");
+		assertThat(findPost.getTags().get(0).getName()).isEqualTo(tagName1);
 	}
 
 	@Test

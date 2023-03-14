@@ -1,6 +1,4 @@
-package com.marklog.blog.controller.dto;
-
-import java.util.List;
+package com.marklog.blog.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,9 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostSaveRequestDto {
-	private String title;
+public class PostCommentSaveRequestDto {
+	private Long parentComment;
 	private String content;
-	private List<String> tagList;
-
 }

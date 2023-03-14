@@ -65,9 +65,9 @@ public class PostidTest {
 		String postSummary = "summary";
 		String postTitle = "post title";
 		String postContent = "post content";
-		post = new Post(postThumbnail, postSummary, postTitle, postContent, user1, null);
+		post = new Post(postThumbnail, postSummary, postTitle, postContent, user1);
 		postRepository.save(post);
-		post2 = new Post(postThumbnail, postSummary, postTitle, postContent, user1, null);
+		post2 = new Post(postThumbnail, postSummary, postTitle, postContent, user1);
 		postRepository.save(post2);
 	}
 

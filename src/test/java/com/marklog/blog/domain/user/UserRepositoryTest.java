@@ -14,9 +14,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
 @Transactional
 @AutoConfigureTestDatabase(replace = Replace.NONE)
+@DataJpaTest
 public class UserRepositoryTest {
 	@Autowired
 	UserRepository userRepository;

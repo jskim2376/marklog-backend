@@ -21,12 +21,12 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.marklog.blog.config.auth.JwtTokenProvider;
-import com.marklog.blog.controller.dto.PostUpdateRequestDto;
-import com.marklog.blog.controller.dto.UserResponseDto;
-import com.marklog.blog.controller.dto.UserUpdateRequestDto;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
+import com.marklog.blog.dto.PostUpdateRequestDto;
+import com.marklog.blog.dto.UserResponseDto;
+import com.marklog.blog.dto.UserUpdateRequestDto;
 
 import reactor.core.publisher.Mono;
 

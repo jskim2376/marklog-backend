@@ -1,6 +1,8 @@
 package com.marklog.blog.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
@@ -14,10 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.marklog.blog.controller.dto.PostListResponseDto;
-import com.marklog.blog.controller.dto.PostResponseDto;
-import com.marklog.blog.controller.dto.PostSaveRequestDto;
-import com.marklog.blog.controller.dto.PostUpdateRequestDto;
 import com.marklog.blog.domain.post.Post;
 import com.marklog.blog.domain.post.PostRepository;
 import com.marklog.blog.domain.post.QPost;
@@ -25,6 +23,10 @@ import com.marklog.blog.domain.tag.Tag;
 import com.marklog.blog.domain.tag.TagRepository;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
+import com.marklog.blog.dto.PostListResponseDto;
+import com.marklog.blog.dto.PostResponseDto;
+import com.marklog.blog.dto.PostSaveRequestDto;
+import com.marklog.blog.dto.PostUpdateRequestDto;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 import lombok.RequiredArgsConstructor;
@@ -85,7 +87,7 @@ public class PostService {
 		String thumbnail = ejectThumbnail(html);
 		String summary = ejectSummary(html);
 
-		Post post = new Post(thumbnail, summary, requestDto.getTitle(), requestDto.getContent(), user, null);
+		Post post = new Post(thumbnail, summary, requestDto.getTitle(), requestDto.getContent(), user);
 		post = postRepository.save(post);
 
 		List<String> tagNames = requestDto.getTagList();
@@ -146,5 +148,12 @@ public class PostService {
 		Page<PostListResponseDto> page = postRepository.findAll(predicate, pageable).map(PostListResponseDto::new);
 		return page;
 	}
-
+	
+	public List<PostListResponseDto> findAllByTagName(Pageable pageable, String tagName) {
+		return postRepository.findAllByTagName(pageable, tagName).stream().map(PostListResponseDto::new).collect(Collectors.toList());
+	}
+	
+	public List<PostListResponseDto> findAllByTagNameAndUserId(Pageable pageable, String tagName, Long userId) {
+		return postRepository.findAllByTagNameAndUserId(pageable, tagName, userId).stream().map(PostListResponseDto::new).collect(Collectors.toList());
+	}
 }

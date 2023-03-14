@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.marklog.blog.controller.dto.UserResponseDto;
-import com.marklog.blog.controller.dto.UserUpdateRequestDto;
+import com.marklog.blog.dto.UserResponseDto;
+import com.marklog.blog.dto.UserUpdateRequestDto;
 import com.marklog.blog.service.UserService;
 
 import lombok.RequiredArgsConstructor;

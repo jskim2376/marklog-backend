@@ -52,8 +52,8 @@ public class PostComment extends BaseTimeEntity {
 	public PostComment(Post post, User user, String content) {
 		this.content = content;
 		this.post = post;
-		post.getPostComments().add(this);
 		this.user = user;
+		post.getPostComments().add(this);
 	}
 
 	public void update(String content) {

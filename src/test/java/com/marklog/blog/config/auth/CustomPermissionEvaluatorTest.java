@@ -13,9 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
-import com.marklog.blog.controller.dto.NoticeResponseDto;
-import com.marklog.blog.controller.dto.PostCommentResponseDto;
-import com.marklog.blog.controller.dto.PostResponseDto;
+import com.marklog.blog.dto.NoticeResponseDto;
+import com.marklog.blog.dto.PostCommentResponseDto;
+import com.marklog.blog.dto.PostResponseDto;
 import com.marklog.blog.service.NoticeService;
 import com.marklog.blog.service.PostCommentService;
 import com.marklog.blog.service.PostService;

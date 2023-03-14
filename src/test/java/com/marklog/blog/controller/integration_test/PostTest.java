@@ -29,13 +29,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.marklog.blog.config.auth.JwtTokenProvider;
-import com.marklog.blog.controller.dto.PostListResponseDto;
-import com.marklog.blog.controller.dto.PostResponseDto;
-import com.marklog.blog.controller.dto.PostSaveRequestDto;
-import com.marklog.blog.controller.dto.PostUpdateRequestDto;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
+import com.marklog.blog.dto.PostListResponseDto;
+import com.marklog.blog.dto.PostResponseDto;
+import com.marklog.blog.dto.PostSaveRequestDto;
+import com.marklog.blog.dto.PostUpdateRequestDto;
 
 import reactor.core.publisher.Mono;
 
@@ -60,7 +60,8 @@ public class PostTest {
 	String uri = "/api/v1/post/";
 	String postTitle = "post title";
 	String postContent = "post content";
-
+	String tagName = "tagName";
+	
 	@BeforeAll
 	public void setUp() {
 		wc = WebClient.create("http://localhost:" + port);
@@ -68,7 +69,7 @@ public class PostTest {
 		objectMapper.registerModule(new JavaTimeModule());
 
 		String name = "name";
-		String email = "postTbkja123asest@gmail.com";
+		String email = "postTestemail@gmail.com";
 		String picture = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/40px-How_to_use_icon.svg.png";
 		String title = "title";
 		String introduce = "introduce";
@@ -88,7 +89,9 @@ public class PostTest {
 	}
 
 	public Long createPost() {
-		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, null);
+		List<String> tags = new ArrayList<>();
+		tags.add(tagName);
+		PostSaveRequestDto postSaveRequestDto = new PostSaveRequestDto(postTitle, postContent, tags);
 		ResponseEntity<String> responseEntity = wc.post().uri(uri).header("Authorization", "Bearer " + accessToken1)
 				.body(Mono.just(postSaveRequestDto), PostSaveRequestDto.class).retrieve().toEntity(String.class)
 				.block();
@@ -117,6 +120,115 @@ public class PostTest {
 		wc.post().uri(uri).header("Authorization", "Bearer " + accessToken1).contentType(MediaType.APPLICATION_JSON)
 				.retrieve().toEntity(String.class).block();
 	}
+	
+	@Test
+	public void testRecentPost() throws JSONException, IOException {
+		// given
+		String uri = this.uri + "/recent";
+		String recentTitle = "recentPost";
+		String recentContent = "search";
+		Long postId = createPost(recentTitle, recentContent);
+		createPostLike(postId);
+		String sort = "id,desc";
+
+		// when
+		ResponseEntity<String> responseEntity = wc.get()
+				.uri(uriBuilder -> uriBuilder.path(uri).queryParam("sort", sort).build()).retrieve()
+				.toEntity(String.class).block();
+		// then-ready
+		ObjectReader reader = objectMapper.readerFor(new TypeReference<List<PostListResponseDto>>() {});
+
+		JsonNode node = objectMapper.readTree(responseEntity.getBody());
+		List<PostListResponseDto> postListResponseDtos = reader.readValue(node.get("content"));
+
+		// then
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(postListResponseDtos.get(0).getTitle()).isEqualTo(recentTitle);
+	}
+
+	@Test
+	public void testSearchPost() throws JSONException, IOException {
+		// given
+		String uri = this.uri+"/search";
+		String searchTitle = "search title";
+		String searchContent = "hhhhh";
+		String text = "search";
+		createPost(searchTitle, searchContent);
+		// when
+		ResponseEntity<String> responseEntity = wc.get()
+				.uri(uriBuilder -> uriBuilder.path(uri).queryParam("text", text).build()).retrieve()
+				.toEntity(String.class).block();
+
+		// then-ready
+		ObjectReader reader = objectMapper.readerFor(new TypeReference<List<PostListResponseDto>>() {
+		});
+		JsonNode node = objectMapper.readTree(responseEntity.getBody());
+		List<PostListResponseDto> postListResponseDtos = reader.readValue(node.get("content"));
+
+		// then
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(postListResponseDtos.get(0).getTitle().contains(text)).isTrue();
+	}
+
+	@Test
+	public void testSearchPost_empty() throws JsonMappingException, JsonProcessingException, JSONException {
+		// given
+		String uri = this.uri+"/search";
+		String text = "adqsadqwfwq";
+		// when
+		ResponseEntity<String> responseEntity = wc.get()
+				.uri(uriBuilder -> uriBuilder.path(uri).queryParam("text", text).build()).retrieve()
+				.toEntity(String.class).block();
+
+		// then-ready
+		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
+		Boolean empty = jsonObject.getBoolean("empty");
+
+		// then
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(empty).isTrue();
+	}
+	
+	@Test
+	public void testTagName() throws JSONException, IOException {
+		// given
+		String uri = this.uri+"/tag";
+		createPost();
+		// when
+		ResponseEntity<String> responseEntity = wc.get()
+				.uri(uriBuilder -> uriBuilder.path(uri).queryParam("tag-name", tagName).build()).retrieve()
+				.toEntity(String.class).block();
+
+		// then-ready
+		ObjectReader reader = objectMapper.readerFor(new TypeReference<List<PostListResponseDto>>() {});
+		List<PostListResponseDto> postListResponseDtos = reader.readValue(responseEntity.getBody());
+
+		// then
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(postListResponseDtos.get(0).getTitle().equals(postTitle)).isTrue();
+		assertThat(postListResponseDtos.get(0).getTagList().get(0).getName().equals(tagName)).isTrue();
+	}
+	
+	@Test
+	public void testTagNameAndUserId() throws JSONException, IOException {
+		// given
+		String uri = this.uri+"/tag";
+		createPost();
+		// when
+		ResponseEntity<String> responseEntity = wc.get()
+				.uri(uriBuilder -> uriBuilder.path(uri).queryParam("tag-name", tagName).queryParam("user-id", user1.getId()).build()).retrieve()
+				.toEntity(String.class).block();
+
+		// then-ready
+		ObjectReader reader = objectMapper.readerFor(new TypeReference<List<PostListResponseDto>>() {});
+		List<PostListResponseDto> postListResponseDtos = reader.readValue(responseEntity.getBody());
+
+		// then
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(postListResponseDtos.get(0).getTitle().equals(postTitle)).isTrue();
+		assertThat(postListResponseDtos.get(0).getTagList().get(0).getName().equals(tagName)).isTrue();
+	}
+
 
 	@Test
 	public void testPostPost() throws JsonMappingException, JsonProcessingException {
@@ -228,73 +340,7 @@ public class PostTest {
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 	}
 
-	@Test
-	public void testRecentPost() throws JSONException, IOException {
-		// given
-		String uri = this.uri + "/recent";
-		String recentTitle = "recentPost";
-		String recentContent = "search";
-		Long postId = createPost(recentTitle, recentContent);
-		createPostLike(postId);
-		String sort = "id,desc";
-		
-		// when
-		ResponseEntity<String> responseEntity = wc.get()
-				.uri(uriBuilder -> uriBuilder.path(uri).queryParam("sort", sort).build()).retrieve()
-				.toEntity(String.class).block();
-		// then-ready
-		ObjectReader reader = objectMapper.readerFor(new TypeReference<List<PostListResponseDto>>() {});
 
-		JsonNode node = objectMapper.readTree(responseEntity.getBody());
-		List<PostListResponseDto> postListResponseDtos = reader.readValue(node.get("content"));
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(postListResponseDtos.get(0).getTitle()).isEqualTo(recentTitle);
-	}
-
-	@Test
-	public void testSearchPost() throws JSONException, IOException {
-		// given
-		String uri = this.uri+"/search";
-		String searchTitle = "search title";
-		String searchContent = "hhhhh";
-		String text = "search";
-		createPost(searchTitle, searchContent);
-		// when
-		ResponseEntity<String> responseEntity = wc.get()
-				.uri(uriBuilder -> uriBuilder.path(uri).queryParam("text", text).build()).retrieve()
-				.toEntity(String.class).block();
-
-		// then-ready
-		ObjectReader reader = objectMapper.readerFor(new TypeReference<List<PostListResponseDto>>() {
-		});
-		JsonNode node = objectMapper.readTree(responseEntity.getBody());
-		List<PostListResponseDto> postListResponseDtos = reader.readValue(node.get("content"));
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(postListResponseDtos.get(0).getTitle().contains(text)).isTrue();
-	}
-
-	@Test
-	public void testSearchPost_empty() throws JsonMappingException, JsonProcessingException, JSONException {
-		// given
-		String uri = this.uri+"/search";
-		String text = "adqsadqwfwq";
-		// when
-		ResponseEntity<String> responseEntity = wc.get()
-				.uri(uriBuilder -> uriBuilder.path(uri).queryParam("text", text).build()).retrieve()
-				.toEntity(String.class).block();
-
-		// then-ready
-		JSONObject jsonObject = new JSONObject(responseEntity.getBody());
-		Boolean empty = jsonObject.getBoolean("empty");
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(empty).isTrue();
-	}
 
 	@Test
 	public void testPutPost() throws JsonMappingException, JsonProcessingException {

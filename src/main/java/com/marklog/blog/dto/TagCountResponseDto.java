@@ -1,12 +1,13 @@
-package com.marklog.blog.controller.dto;
+package com.marklog.blog.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccessTokenDto {
-	private String access_token;
+@Getter
+public class TagCountResponseDto {
+	String name;
+	Long count;
 }
