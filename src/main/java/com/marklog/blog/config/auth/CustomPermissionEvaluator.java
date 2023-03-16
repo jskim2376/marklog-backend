@@ -52,14 +52,6 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 					if (postCommentUserId == authUserId) {
 						return true;
 					}
-				} else if (targetType.equals("notice")) {
-					Long postCommentId = (Long) targetId;
-					NoticeResponseDto notice = noticeService.findById(postCommentId);
-					Long noticeUserId = notice.getUserId();
-					Long authUserId = ((UserAuthenticationDto) authentication.getPrincipal()).getId();
-					if (noticeUserId == authUserId) {
-						return true;
-					}
 				}
 			}
 		} catch (NoSuchElementException e) {

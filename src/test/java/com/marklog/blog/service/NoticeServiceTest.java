@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.marklog.blog.domain.notice.Notice;
 import com.marklog.blog.domain.notice.NoticeRepository;
+import com.marklog.blog.domain.notice.NoticeType;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
@@ -49,72 +50,51 @@ public class NoticeServiceTest {
 	}
 
 	@Test
-	public void testFindAllUnCheckNotice() {
+	public void testNoticeServiceSave() {
+	//given
+	when(userRepository.getReferenceById(userId)).thenReturn(user);
+	String content = "content";
+	String url = "/post/1";
+
+	//when
+	noticeService.save(userId, NoticeType.POST, content, url);
+
+	//then
+	verify(noticeRepository).save(any(Notice.class));
+}
+
+	@Test
+	public void testNoticeServiceFindAll() {
 		// given
+		String content = "content";
+		String url = "/post/1";
+		Notice notice = new Notice(NoticeType.POST, content, url, user);
+
 		List<Notice> notices = new ArrayList<>();
-		Notice notice = new Notice(noticeContent, user);
 		notices.add(notice);
 
 		when(userRepository.getReferenceById(userId)).thenReturn(user);
-		when(noticeRepository.findAllByUserAndCheckFlagFalse(user)).thenReturn(notices);
+		when(noticeRepository.findAllByUser(user)).thenReturn(notices);
 
 		// when
-		List<NoticeResponseDto> findNotices = noticeService.findAllUnCheckNotice(userId);
+		List<NoticeResponseDto> findNotices = noticeService.findAllByUserId(userId);
 
-		//then
+		// then
 		assertThat(notices.get(0).getContent()).isSameAs(findNotices.get(0).getContent());
-		assertThat(notices.get(0).getCheckFlag()).isSameAs(findNotices.get(0).getCheckFlag());
-		assertThat(notices.get(0).getUser().getId()).isSameAs(findNotices.get(0).getUserId());
+		assertThat(notices.get(0).getNoticeType()).isSameAs(findNotices.get(0).getNoticeType());
+		assertThat(notices.get(0).getUrl()).isSameAs(findNotices.get(0).getUrl());
+		assertThat(findNotices.get(0).getUserId()).isNull();
 	}
 
 	@Test
-	public void testFindById() {
+	public void testNoticeServiceDeleteAll() {
 		// given
-		Notice notice = new Notice(noticeContent, user);
-		Optional<Notice> optinal = Optional.of(notice);
-		when(noticeRepository.findById(noticeId)).thenReturn(optinal);
-
-		// when
-		NoticeResponseDto noticeResponseDto = noticeService.findById(noticeId);
-
-		//then
-		assertThat(noticeResponseDto.getContent()).isEqualTo(notice.getContent());
-		assertThat(noticeResponseDto.getCheckFlag()).isSameAs(false);
-
-	}
-
-	@Test
-	public void testPushNoticeByUserId() {
-		//given
 		when(userRepository.getReferenceById(userId)).thenReturn(user);
+		
+		// then
+		noticeService.deleteAllNoticeByUserId(userId);
 
-		//when
-		noticeService.pushNoticeByUserId(noticeContent, userId);
-
-		//then
-		verify(noticeRepository).save(any(Notice.class));
-	}
-
-	@Test
-	public void testCheckNoticeByid() {
-		//given
-		Optional<Notice> notice = Optional.of(new Notice(noticeContent, user));
-		when(noticeRepository.findById(noticeId)).thenReturn(notice);
-
-		//when
-		noticeService.checkNoticeById(noticeId);
-
-		//then
-		assertThat(notice.get().getCheckFlag()).isTrue();
-	}
-
-	@Test
-	public void testDeleteNotice() {
-		//given
-		//then
-		noticeService.deleteNotice(noticeId);
-
-		//then
-		verify(noticeRepository).deleteById(noticeId);
+		// then
+		verify(noticeRepository).deleteAllByUser(user);
 	}
 }

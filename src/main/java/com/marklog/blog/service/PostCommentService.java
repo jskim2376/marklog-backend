@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.marklog.blog.domain.notice.NoticeType;
 import com.marklog.blog.domain.post.Post;
 import com.marklog.blog.domain.post.PostRepository;
 import com.marklog.blog.domain.post.comment.PostComment;
@@ -41,7 +42,20 @@ public class PostCommentService {
 		}
 		postComment = postCommentRepository.save(postComment);
 
-		noticeService.pushNoticeByUserId("\'"+post.getTitle()+"\'" + "에 새로운 댓글이 추가 되었습니다.", userId);
+		NoticeType noticeType;
+		String noticeContent;
+		String url = "/post/"+post.getId();
+		if(postComment.getParent() == null){
+			noticeType = NoticeType.POST;
+			noticeContent = "글 \'"+postComment.getContent()+"\' 에 새로운 댓글이 추가 되었습니다.";
+			
+		}else {
+			noticeType = NoticeType.COMMENT;
+			noticeContent = "댓글 \'"+postComment.getContent()+"\' 에 새로운 댓글이 추가 되었습니다.";
+		}
+		
+		noticeService.save(userId, noticeType, noticeContent, url);
+		
 		return postComment.getId();
 	}
 

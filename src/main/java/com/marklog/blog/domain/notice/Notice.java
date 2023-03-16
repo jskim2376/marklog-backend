@@ -2,6 +2,8 @@ package com.marklog.blog.domain.notice;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -23,23 +25,26 @@ public class Notice {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private NoticeType noticeType;
+
 	@Column(columnDefinition = "TEXT", nullable = false)
 	private String content;
-
-	@Column(nullable = false)
-	@ColumnDefault("false")
-	private Boolean checkFlag = false;
-
+	
+	@Column
+	private String url;
+	
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	public Notice(String content, User user) {
+	public Notice(NoticeType noticeType, String content, String url, User user) {
+		this.noticeType = noticeType;
 		this.content = content;
+		this.url = url;
 		this.user = user;
 	}
-
-	public void setCheckFlag(Boolean checkFlag) {
-		this.checkFlag = checkFlag;
-	}
+	
+	
 }

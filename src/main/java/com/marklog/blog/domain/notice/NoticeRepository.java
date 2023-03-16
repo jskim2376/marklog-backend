@@ -8,8 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.marklog.blog.domain.user.User;
 
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
-	Optional<Notice> findByUser(User user);
-
-	List<Notice> findAllByUserAndCheckFlagFalse(User user);
-
+	List<Notice> findAllByUser(User user);
+	void deleteAllByUser(User user);
 }

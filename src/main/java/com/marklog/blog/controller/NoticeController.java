@@ -19,38 +19,23 @@ import com.marklog.blog.service.NoticeService;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@RequestMapping("/v1/notice")
+@RequestMapping("/v1/user/{userId}/notice/")
 @RestController
 public class NoticeController {
 	private final NoticeService noticeService;
 
 	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or principal.id==#userId)")
-	@GetMapping("/{userId}/uncheck")
-	public ResponseEntity<List<NoticeResponseDto>> getAllUnCheckNotice(@PathVariable Long userId) {
-		List<NoticeResponseDto> notices = noticeService.findAllUnCheckNotice(userId);
+	@GetMapping
+	public ResponseEntity<List<NoticeResponseDto>> getAllNoticeByUserId(@PathVariable Long userId) {
+		List<NoticeResponseDto> notices = noticeService.findAllByUserId(userId);
 		return ResponseEntity.ok(notices);
 	}
 
-	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or hasPermission(#id, 'notice', null))")
-	@PutMapping("/{id}")
-	public ResponseEntity<?> checkNotice(@PathVariable Long id) {
-		try {
-			noticeService.checkNoticeById(id);
-			return ResponseEntity.noContent().build();
-		}catch(NoSuchElementException e) {
-			return ResponseEntity.notFound().build();
-		}
-	}
-
-	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or hasPermission(#id, 'notice', null))")
-	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteNotice(@PathVariable Long id) {
-		try {
-			noticeService.deleteNotice(id);
-			return ResponseEntity.noContent().build();
-		}catch(EmptyResultDataAccessException e) {
-			return ResponseEntity.notFound().build();
-		}
+	@PreAuthorize("isAuthenticated() and (hasRole('ADMIN') or principal.id==#userId)")
+	@DeleteMapping
+	public ResponseEntity<?> deleteAllNotice(@PathVariable Long userId) {
+		noticeService.deleteAllNoticeByUserId(userId);
+		return ResponseEntity.noContent().build();
 	}
 
 

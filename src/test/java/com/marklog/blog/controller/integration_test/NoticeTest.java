@@ -26,6 +26,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.marklog.blog.config.auth.JwtTokenProvider;
 import com.marklog.blog.domain.notice.Notice;
 import com.marklog.blog.domain.notice.NoticeRepository;
+import com.marklog.blog.domain.notice.NoticeType;
+import com.marklog.blog.domain.post.Post;
+import com.marklog.blog.domain.post.comment.PostComment;
 import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
@@ -56,7 +59,7 @@ public class NoticeTest {
 	String accessToken2;
 	String accessTokenAdmin;
 
-	String uri = "/api/v1/notice/";
+	String uri;
 	Long noticeNotExist = 0L;
 	String noticeContent = "noticeContent";
 
@@ -75,7 +78,8 @@ public class NoticeTest {
 		user1 = new User(name, email, picture, title, introduce, Role.USER);
 		userRepository.save(user1);
 		accessToken1 = jwtTokenProvider.createAccessToken(user1.getId(), email);
-
+		uri = "/api/v1/user/"+user1.getId()+"/notice/";
+		
 		User user2 = new User(name, 2 + email, picture, title, introduce, Role.USER);
 		userRepository.save(user2);
 		accessToken2 = jwtTokenProvider.createAccessToken(user2.getId(), 2 + email);
@@ -91,7 +95,9 @@ public class NoticeTest {
 	}
 
 	public Notice createNotice() {
-		Notice notice = new Notice(noticeContent, user1);
+		String content = "content";
+		String url="/post/1";
+		Notice notice = new Notice(NoticeType.POST, content, url, user1);
 		return noticeRepository.save(notice);
 	}
 
@@ -108,6 +114,7 @@ public class NoticeTest {
 		return Long.valueOf(location.substring(uri.length()));
 	}
 
+
 	public Long createPostComment(Long postId) {
 		String uri = "/api/v1/post/" + postId + "/comment/";
 
@@ -121,11 +128,23 @@ public class NoticeTest {
 		String location = header.getLocation().toString();
 		return Long.valueOf(location.substring(uri.length()));
 	}
+	public Long createPostComment(Long postId, Long postCommentId) {
+		String uri = "/api/v1/post/" + postId + "/comment/";
+
+		PostCommentSaveRequestDto postSaveRequestDto = new PostCommentSaveRequestDto(postCommentId, "comment");
+		ResponseEntity<String> responseEntity = wc.post().uri(uri).header("Authorization", "Bearer " + accessToken1)
+				.body(Mono.just(postSaveRequestDto), PostSaveRequestDto.class).retrieve().toEntity(String.class)
+				.block();
+
+		HttpHeaders header = responseEntity.getHeaders();
+		// then
+		String location = header.getLocation().toString();
+		return Long.valueOf(location.substring(uri.length()));
+	}
 
 	@Test
-	public void testGetAllUnCheckNotice() throws IOException {
+	public void testGetAll() throws IOException {
 		// given
-		String uri = this.uri + user1.getId() + "/uncheck";
 		createNotice();
 		createNotice();
 		createNotice();
@@ -142,14 +161,11 @@ public class NoticeTest {
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(noticeResponseDtos.size()).isEqualTo(3);
-		assertThat(noticeResponseDtos.get(0).getCheckFlag()).isFalse();
 	}
 
 	@Test
-	public void testGetAllUnCheckNotice_result_zero() throws IOException {
+	public void testGetAll_result_zero() throws IOException {
 		// given
-		String uri = this.uri + user1.getId() + "/uncheck";
-
 		// when
 		ResponseEntity<String> responseEntity = wc.get().uri(uri).header("Authorization", "Bearer " + accessToken1)
 				.retrieve().toEntity(String.class).block();
@@ -165,9 +181,8 @@ public class NoticeTest {
 	}
 
 	@Test
-	public void testGetAllUnCheckNotice_no_auth() throws IOException {
+	public void testGetAll_no_auth() throws IOException {
 		// given
-		String uri = this.uri + user1.getId() + "/uncheck";
 		createNotice();
 		createNotice();
 		createNotice();
@@ -181,9 +196,8 @@ public class NoticeTest {
 	}
 
 	@Test
-	public void testGetAllUnCheckNotice_Admin() throws IOException {
+	public void testGetAll_Admin() throws IOException {
 		// given
-		String uri = this.uri + user1.getId() + "/uncheck";
 		createNotice();
 		createNotice();
 		createNotice();
@@ -200,31 +214,67 @@ public class NoticeTest {
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(noticeResponseDtos.size()).isEqualTo(3);
-		assertThat(noticeResponseDtos.get(0).getCheckFlag()).isFalse();
 	}
 
+
 	@Test
-	public void testGetAllUnCheckNotice_diffrent_auth() throws IOException {
+	public void testDeleteAllNotice() throws IOException {
 		// given
-		String uri = this.uri + user1.getId() + "/uncheck";
-		createNotice();
-		createNotice();
 		createNotice();
 
 		// when
-		ResponseEntity<String> responseEntity = wc.get().uri(uri).header("Authorization", "Bearer " + accessToken2)
+		ResponseEntity<String> responseEntity = wc.delete().uri(uri).header("Authorization", "Bearer " + accessToken1)
+				.retrieve().toEntity(String.class).block();
+
+		// then
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+	}
+
+	@Test
+	public void testDeleteAllNotice_no_auth() throws IOException {
+		// given
+		createNotice();
+
+		// when
+		ResponseEntity<String> responseEntity = wc.delete().uri(uri)
+				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
+
+		// then
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+	}
+
+	@Test
+	public void testDeleteAllNotice_Admin() throws IOException {
+		// given
+		createNotice();
+
+		// when
+		ResponseEntity<String> responseEntity = wc.delete().uri(uri)
+				.header("Authorization", "Bearer " + accessTokenAdmin).retrieve().toEntity(String.class).block();
+
+		// then
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+	}
+
+	@Test
+	public void testDeleteAllNotice_diffrent_auth() throws IOException {
+		// given
+		createNotice();
+
+		// when
+		ResponseEntity<String> responseEntity = wc.delete().uri(uri).header("Authorization", "Bearer " + accessToken2)
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
 
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 	}
-
+	
 	@Test
 	public void testPostPostComment() throws JsonProcessingException {
 		// given
-		String uri = this.uri + user1.getId() + "/uncheck";
 		Long postId = createPost();
 		createPostComment(postId);
+		createPostComment(postId, postId);
 
 		// when
 		ResponseEntity<String> responseEntity = wc.get().uri(uri).header("Authorization", "Bearer " + accessToken1)
@@ -237,147 +287,14 @@ public class NoticeTest {
 
 		// then
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(noticeResponseDtos.size()).isEqualTo(1);
-		assertThat(noticeResponseDtos.get(0).getContent().contains("댓글이")).isTrue();
+		assertThat(noticeResponseDtos.size()).isEqualTo(2);
+		assertThat(noticeResponseDtos.get(0).getContent().startsWith("글")).isTrue();
+		assertThat(noticeResponseDtos.get(0).getNoticeType()).isEqualTo(NoticeType.POST);
+		assertThat(noticeResponseDtos.get(0).getUrl()).isEqualTo("/post/"+postId);
+		assertThat(noticeResponseDtos.get(1).getContent().startsWith("댓글")).isTrue();
+		assertThat(noticeResponseDtos.get(1).getNoticeType()).isEqualTo(NoticeType.COMMENT);
+		assertThat(noticeResponseDtos.get(1).getUrl()).isEqualTo("/post/"+postId);
 
 	}
 
-	@Test
-	public void testCheckNotice() throws IOException {
-		// given
-		Notice notice = createNotice();
-		String uri = this.uri + notice.getId();
-
-		// when
-		ResponseEntity<String> responseEntity = wc.put().uri(uri).header("Authorization", "Bearer " + accessToken1)
-				.retrieve().toEntity(String.class).block();
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-	}
-
-	@Test
-	public void testCheckNotice_not_found() throws IOException {
-		// given
-		String uri = this.uri + noticeNotExist;
-
-		// when
-		ResponseEntity<String> responseEntity = wc.put().uri(uri).header("Authorization", "Bearer " + accessTokenAdmin)
-				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-	}
-
-	@Test
-	public void testCheckNotice_no_auth() throws IOException {
-		// given
-		Notice notice = createNotice();
-		String uri = this.uri + notice.getId();
-
-		// when
-		ResponseEntity<String> responseEntity = wc.put().uri(uri)
-				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
-	}
-
-	@Test
-	public void testCheckNotice_admin() throws IOException {
-		// given
-		Notice notice = createNotice();
-		String uri = this.uri + notice.getId();
-
-		// when
-		ResponseEntity<String> responseEntity = wc.put().uri(uri).header("Authorization", "Bearer " + accessTokenAdmin)
-				.retrieve().toEntity(String.class).block();
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-	}
-
-	@Test
-	public void testCheckNotice_diffrent_auth() throws IOException {
-		// given
-		Notice notice = createNotice();
-		String uri = this.uri + notice.getId();
-
-		// when
-		ResponseEntity<String> responseEntity = wc.put().uri(uri).header("Authorization", "Bearer " + accessToken2)
-				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-	}
-
-	@Test
-	public void testDeleteNotice() throws IOException {
-		// given
-		Notice notice = createNotice();
-		String uri = this.uri + notice.getId();
-
-		// when
-		ResponseEntity<String> responseEntity = wc.delete().uri(uri).header("Authorization", "Bearer " + accessToken1)
-				.retrieve().toEntity(String.class).block();
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-	}
-
-	@Test
-	public void testDeleteNotice_not_found() throws IOException {
-		// given
-		String uri = this.uri + noticeNotExist;
-
-		// when
-		ResponseEntity<String> responseEntity = wc.delete().uri(uri)
-				.header("Authorization", "Bearer " + accessTokenAdmin)
-				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-	}
-
-	@Test
-	public void testDeleteNotice_no_auth() throws IOException {
-		// given
-		Notice notice = createNotice();
-		String uri = this.uri + notice.getId();
-
-		// when
-		ResponseEntity<String> responseEntity = wc.delete().uri(uri)
-				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
-	}
-
-	@Test
-	public void testDeleteNotice_Admin() throws IOException {
-		// given
-		Notice notice = createNotice();
-		String uri = this.uri + notice.getId();
-
-		// when
-		ResponseEntity<String> responseEntity = wc.delete().uri(uri)
-				.header("Authorization", "Bearer " + accessTokenAdmin).retrieve().toEntity(String.class).block();
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-	}
-
-	@Test
-	public void testDeleteNotice_diffrent_auth() throws IOException {
-		// given
-		Notice notice = createNotice();
-		String uri = this.uri + notice.getId();
-
-		// when
-		ResponseEntity<String> responseEntity = wc.delete().uri(uri).header("Authorization", "Bearer " + accessToken2)
-				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)).block();
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-	}
 }

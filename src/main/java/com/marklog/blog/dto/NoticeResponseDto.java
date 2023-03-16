@@ -1,6 +1,7 @@
 package com.marklog.blog.dto;
 
 import com.marklog.blog.domain.notice.Notice;
+import com.marklog.blog.domain.notice.NoticeType;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,15 +11,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NoticeResponseDto {
-	private Long id;
+	private NoticeType noticeType;
 	private String content;
-	private Boolean checkFlag = false;
+	private String url;
 	private Long userId;
+	
 	public NoticeResponseDto(Notice notice) {
 		super();
-		this.id = notice.getId();
+		this.noticeType = notice.getNoticeType();
 		this.content = notice.getContent();
-		this.checkFlag = notice.getCheckFlag();
+		this.url = notice.getUrl();
 		this.userId = notice.getUser().getId();
 	}
 

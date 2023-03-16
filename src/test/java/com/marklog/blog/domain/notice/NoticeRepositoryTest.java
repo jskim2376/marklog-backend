@@ -44,20 +44,34 @@ public class NoticeRepositoryTest {
 
 	public Notice createNotice() {
 		String content = "content";
-		Notice notice = new Notice(content, user);
+		String url="/post/1";
+		Notice notice = new Notice(NoticeType.POST, content, url, user);
 		noticeRepository.save(notice);
 		return notice;
 	}
 
+	
+	
 	@Test
-	public void testNoticeFindAllByUserAndCheckFlagFalse() {
+	public void testNoticeSave() {
+		// given
+		// when
+		Notice notice = createNotice();
+
+		// then
+		assertThat(notice.getId()).isGreaterThan(0L);
+
+	}
+	
+	@Test
+	public void testNoticeFindAllByUser() {
 		// given
 		Notice notice1 = createNotice();
 		Notice notice2 = createNotice();
 		Notice notice3 = createNotice();
 
 		// when
-		List<Notice> notices = noticeRepository.findAllByUserAndCheckFlagFalse(user);
+		List<Notice> notices = noticeRepository.findAllByUser(user);
 		Notice findNotice1 = notices.get(0);
 		Notice findNotice2 = notices.get(1);
 		Notice findNotice3 = notices.get(2);
@@ -70,83 +84,30 @@ public class NoticeRepositoryTest {
 	}
 
 	@Test
-	public void testNoticeFindAllByUserAndCheckFlagFalse_checkFlag_false() {
-		// given
-		Notice notice1 = createNotice();
-		Notice notice2 = createNotice();
-		notice2.setCheckFlag(true);
-		Notice notice3 = createNotice();
-		notice3.setCheckFlag(true);
-
-		// when
-		List<Notice> notices = noticeRepository.findAllByUserAndCheckFlagFalse(user);
-		Notice findNotice1 = notices.get(0);
-
-		// then
-		assertThat(notices.size()).isEqualTo(1);
-		assertThat(findNotice1.getId()).isEqualTo(notice1.getId());
-	}
-
-	@Test
-	public void testNoticeSave() {
-		// given
-		// when
-		Notice notice = createNotice();
-
-		// then
-		assertThat(notice.getId()).isGreaterThan(0L);
-
-	}
-
-	@Test
-	public void testNoticeFindByUser() {
+	public void testNoticeFindAllByUser_user_not_exists() {
 		// given
 		createNotice();
 
 		// when
-		Notice notice = noticeRepository.findByUser(user).get();
+		List<Notice> notices = noticeRepository.findAllByUser(null);
 
 		// then
-		assertThat(notice.getId()).isGreaterThan(0L);
+		assertThat(notices.isEmpty()).isTrue();
 	}
 
+
 	@Test
-	public void testNoticeFindByUser_user_not_exists() {
+	public void testNoticeDeleteAllByUser() {
 		// given
 		createNotice();
 
 		// when
-		Optional<Notice> notice = noticeRepository.findByUser(null);
-
-		// then
-		assertThat(notice.isEmpty()).isTrue();
-	}
-
-	@Test
-	public void testNoticeUpdate() {
-		// given
-		Notice notice = createNotice();
-
-		// when
-		notice.setCheckFlag(true);
+		noticeRepository.deleteAllByUser(user);
 
 		// then-ready
-		Notice newNotice = noticeRepository.findById(notice.getId()).get();
+		List<Notice> notices = noticeRepository.findAllByUser(null);
 
 		// then
-		assertThat(newNotice.getCheckFlag()).isTrue();
-	}
-
-	@Test
-	public void testNoticeDelete() {
-		// given
-		Notice notice = createNotice();
-
-		// when
-		noticeRepository.save(notice);
-
-		// then
-		assertThat(notice.getId()).isGreaterThan(0L);
-
+		assertThat(notices.isEmpty()).isTrue();
 	}
 }
