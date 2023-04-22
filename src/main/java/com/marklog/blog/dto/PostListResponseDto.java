@@ -40,7 +40,6 @@ public class PostListResponseDto {
 		this.likeCount = entity.getPostLikes().size();
 		this.userName = entity.getUser().getName();
 		this.userId = entity.getUser().getId();
-		this.tagList = TagNameResponseDto.toEntityDto(entity.getTags());
 	}
 
 

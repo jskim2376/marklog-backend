@@ -33,7 +33,6 @@ public class PostResponseDto {
 		this.content = entity.getContent();
 		this.userId = entity.getUser().getId();
 		this.userName = entity.getUser().getName();
-		this.tagList = TagNameResponseDto.toEntityDto(entity.getTags());
 		this.like = false;
 	}
 

@@ -90,13 +90,6 @@ public class PostService {
 		Post post = new Post(thumbnail, summary, requestDto.getTitle(), requestDto.getContent(), user);
 		post = postRepository.save(post);
 
-		List<String> tagNames = requestDto.getTagList();
-		if (tagNames != null) {
-			for (String tagName : tagNames) {
-				Tag tag = Tag.builder().name(tagName).post(post).build();
-				tagRepository.save(tag);
-			}
-		}
 		return post.getId();
 	}
 
@@ -104,16 +97,6 @@ public class PostService {
 		Post post = postRepository.findById(id).orElseThrow();
 		post.update(requestDto.getTitle(), requestDto.getContent());
 
-		List<Tag> tags = tagRepository.findByPost(post);
-		for (Tag tag : tags) {
-			tagRepository.delete(tag);
-		}
-		List<String> tagNames = requestDto.getTagList();
-		if (tagNames != null) {
-			for (String tagName : tagNames) {
-				tagRepository.save(Tag.builder().name(tagName).post(post).build());
-			}
-		}
 	}
 
 	public PostResponseDto findById(Long id) {
@@ -147,13 +130,5 @@ public class PostService {
 		// when
 		Page<PostListResponseDto> page = postRepository.findAll(predicate, pageable).map(PostListResponseDto::new);
 		return page;
-	}
-	
-	public List<PostListResponseDto> findAllByTagName(Pageable pageable, String tagName) {
-		return postRepository.findAllByTagName(pageable, tagName).stream().map(PostListResponseDto::new).collect(Collectors.toList());
-	}
-	
-	public List<PostListResponseDto> findAllByTagNameAndUserId(Pageable pageable, String tagName, Long userId) {
-		return postRepository.findAllByTagNameAndUserId(pageable, tagName, userId).stream().map(PostListResponseDto::new).collect(Collectors.toList());
 	}
 }

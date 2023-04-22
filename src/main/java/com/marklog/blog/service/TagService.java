@@ -12,7 +12,4 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class TagService {
 	private final TagRepository tagRepository;
-	public List<TagCountResponseDto> countTagNameByUserId(Long userId){
-		return tagRepository.countTagNameByUserId(userId);
-	}
 }

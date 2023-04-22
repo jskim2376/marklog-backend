@@ -18,9 +18,4 @@ import lombok.RequiredArgsConstructor;
 @Controller
 public class TagController {
 	private final TagService tagService;
-
-	@GetMapping("/{userId}")
-	public ResponseEntity<List<TagCountResponseDto>> getCountTagNameByUserId(@PathVariable Long userId) {
-		return ResponseEntity.ok(tagService.countTagNameByUserId(userId));
-	}
 }

@@ -48,15 +48,6 @@ public class PostController {
 		return postService.search(pageable, text.split(" "));
 	}
 
-	@GetMapping("/tag")
-	public List<PostListResponseDto> tagName(Pageable pageable, @RequestParam(value = "tag-name") String tagName,
-			@RequestParam(required = false, value = "user-id") Long userId) {
-		if (userId == null) {
-			return postService.findAllByTagName(pageable, tagName);
-		} else {
-			return postService.findAllByTagNameAndUserId(pageable, tagName, userId);
-		}
-	}
 
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping

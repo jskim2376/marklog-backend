@@ -40,7 +40,6 @@ public class TagControllerTest {
 		TagCountResponseDto tagCountResponseDto = new TagCountResponseDto(tagName, 1L);
 		List<TagCountResponseDto> tagCountResponseDtos = new ArrayList<>();
 		tagCountResponseDtos.add(tagCountResponseDto);
-		when(tagService.countTagNameByUserId(userId)).thenReturn(tagCountResponseDtos);
 		// when
 		ResultActions ra = mvc.perform(get(path).with(csrf()));
 

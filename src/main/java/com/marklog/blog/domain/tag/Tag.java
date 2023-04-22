@@ -1,16 +1,10 @@
 package com.marklog.blog.domain.tag;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-
-import com.marklog.blog.domain.post.Post;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -27,14 +21,8 @@ public class Tag {
 	@Column(length = 50, nullable = false)
 	private String name;
 
-	@ManyToOne(optional = false, cascade = CascadeType.PERSIST)
-	@JoinColumn(name = "POST_ID")
-	private Post post;
-
 	@Builder
-	public Tag(Post post, String name) {
-		this.post = post;
+	public Tag(String name) {
 		this.name = name;
-		post.getTags().add(this);
 	}
 }
