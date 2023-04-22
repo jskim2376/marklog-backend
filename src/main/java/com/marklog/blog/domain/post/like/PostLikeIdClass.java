@@ -1,4 +1,4 @@
-package com.marklog.blog.domain.postlike;
+package com.marklog.blog.domain.post.like;
 
 import java.io.Serializable;
 import java.util.Objects;

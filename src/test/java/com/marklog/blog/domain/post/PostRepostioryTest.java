@@ -21,7 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.marklog.blog.domain.postlike.PostLikeRepository;
+import com.marklog.blog.domain.post.like.PostLikeRepository;
 import com.marklog.blog.domain.tag.Tag;
 import com.marklog.blog.domain.tag.TagRepository;
 import com.marklog.blog.domain.user.Role;

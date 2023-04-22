@@ -1,4 +1,4 @@
-package com.marklog.blog.domain.postlike;
+package com.marklog.blog.domain.post.like;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

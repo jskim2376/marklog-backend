@@ -14,7 +14,7 @@ import javax.persistence.OneToMany;
 
 import com.marklog.blog.domain.BaseTimeEntity;
 import com.marklog.blog.domain.post.comment.PostComment;
-import com.marklog.blog.domain.postlike.PostLike;
+import com.marklog.blog.domain.post.like.PostLike;
 import com.marklog.blog.domain.tag.Tag;
 import com.marklog.blog.domain.user.User;
 

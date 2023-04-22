@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 
 import com.marklog.blog.domain.post.Post;
 import com.marklog.blog.domain.post.PostRepository;
-import com.marklog.blog.domain.postlike.PostLike;
-import com.marklog.blog.domain.postlike.PostLikeIdClass;
-import com.marklog.blog.domain.postlike.PostLikeRepository;
+import com.marklog.blog.domain.post.like.PostLike;
+import com.marklog.blog.domain.post.like.PostLikeIdClass;
+import com.marklog.blog.domain.post.like.PostLikeRepository;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
 
