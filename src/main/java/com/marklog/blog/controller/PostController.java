@@ -1,11 +1,8 @@
 package com.marklog.blog.controller;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
-import com.marklog.blog.dto.PostListResponseDto;
 import com.marklog.blog.dto.PostResponseDto;
 import com.marklog.blog.dto.PostSaveRequestDto;
 import com.marklog.blog.dto.PostUpdateRequestDto;
@@ -37,17 +32,6 @@ import lombok.RequiredArgsConstructor;
 public class PostController {
 	private final PostService postService;
 	private final PostLikeService postLikeService;
-
-	@GetMapping("/recent")
-	public Page<PostListResponseDto> recentPost(Pageable pageable) {
-		return postService.recentPost(pageable);
-	}
-
-	@GetMapping("/search")
-	public Page<PostListResponseDto> search(Pageable pageable, @RequestParam(value = "text") String text) {
-		return postService.search(pageable, text.split(" "));
-	}
-
 
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping

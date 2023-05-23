@@ -55,7 +55,7 @@ import com.marklog.blog.dto.PostListResponseDto;
 import com.marklog.blog.dto.PostResponseDto;
 import com.marklog.blog.dto.PostSaveRequestDto;
 import com.marklog.blog.dto.PostUpdateRequestDto;
-import com.marklog.blog.dto.TagNameResponseDto;
+import com.marklog.blog.dto.TagResponseDto;
 import com.marklog.blog.service.PostLikeService;
 import com.marklog.blog.service.PostService;
 
@@ -100,13 +100,13 @@ public class PostControllerTest {
 		authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null,
 				Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
 
-		List<TagNameResponseDto> tagNameResponseDtos = new ArrayList<>();
-		TagNameResponseDto tagNameResponseDto = new TagNameResponseDto(tagName);
-		tagNameResponseDtos.add(tagNameResponseDto);
+		List<TagResponseDto> tagResponseDtos = new ArrayList<>();
+		TagResponseDto tagResponseDto = new TagResponseDto(tagName);
+		tagResponseDtos.add(tagResponseDto);
 		
 		postResponseDto = new PostResponseDto(time, time, title, content, userId, userName,
-				tagNameResponseDtos, null);
-		postListResponseDto = new PostListResponseDto(postId, thumbnail, title, summary, time, 0, 0, picture, userName, userId, tagNameResponseDtos);
+				tagResponseDtos, null);
+		postListResponseDto = new PostListResponseDto(postId, thumbnail, title, summary, time, 0, 0, picture, userName, userId, tagResponseDtos);
 
 		List<PostListResponseDto> content = new ArrayList<>();
 		PostListResponseDto postListResponseDto = new PostListResponseDto(postId, thumbnail, title, summary, time,

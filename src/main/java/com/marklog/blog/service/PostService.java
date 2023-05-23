@@ -1,8 +1,6 @@
 package com.marklog.blog.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
@@ -18,16 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.marklog.blog.domain.post.Post;
 import com.marklog.blog.domain.post.PostRepository;
-import com.marklog.blog.domain.post.QPost;
-import com.marklog.blog.domain.tag.Tag;
-import com.marklog.blog.domain.tag.TagRepository;
+import com.marklog.blog.domain.post.tag.PostTag;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
-import com.marklog.blog.dto.PostListResponseDto;
 import com.marklog.blog.dto.PostResponseDto;
 import com.marklog.blog.dto.PostSaveRequestDto;
 import com.marklog.blog.dto.PostUpdateRequestDto;
-import com.querydsl.core.types.dsl.BooleanExpression;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,7 +31,8 @@ import lombok.RequiredArgsConstructor;
 public class PostService {
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
-	private final TagRepository tagRepository;
+	private final TagService tagService;
+	private final PostTagService postTagService;
 
 	private String markdownToHtml(String markdown) {
 		Parser parser = Parser.builder().build();
@@ -90,6 +85,12 @@ public class PostService {
 		Post post = new Post(thumbnail, summary, requestDto.getTitle(), requestDto.getContent(), user);
 		post = postRepository.save(post);
 
+		List<String> tagList = requestDto.getTagList();
+		for(String tag:tagList) {
+			Long tagId = tagService.save(tag);
+			postTagService.save(post.getId(), tagId);
+		}
+		
 		return post.getId();
 	}
 
@@ -97,6 +98,17 @@ public class PostService {
 		Post post = postRepository.findById(id).orElseThrow();
 		post.update(requestDto.getTitle(), requestDto.getContent());
 
+		List<String> tagList = requestDto.getTagList();
+		List<PostTag> postTagList = post.getPostTags();
+		for(int i=0;i<postTagList.size();i++) {
+			postTagService.delete(postTagList.get(i).getId());
+			post.getPostTags().remove(i);
+		}
+		
+		for(String tag:tagList) {
+			Long tagId = tagService.save(tag);
+			postTagService.save(post.getId(), tagId);
+		}
 	}
 
 	public PostResponseDto findById(Long id) {
@@ -107,28 +119,10 @@ public class PostService {
 	public void delete(Long id) {
 		postRepository.deleteById(id);
 	}
-
-	public Page<PostListResponseDto> recentPost(Pageable pageable) {
-		Page<PostListResponseDto> pagePostListResponseDto = postRepository.findAll(pageable)
-				.map(PostListResponseDto::new);
+	
+	public Page<PostResponseDto> recentPost(Pageable pageable) {
+		Page<PostResponseDto> pagePostListResponseDto = postRepository.findAll(pageable)
+				.map(PostResponseDto::new);
 		return pagePostListResponseDto;
-	}
-
-	public Page<PostListResponseDto> search(Pageable pageable, String[] keywords) {
-		QPost qpost = QPost.post;
-
-		BooleanExpression predicate = null;
-		for (String keyword : keywords) {
-			if (predicate == null) {
-				predicate = qpost.content.containsIgnoreCase(keyword).or(qpost.title.containsIgnoreCase(keyword));
-			} else {
-				predicate = predicate.or(qpost.content.containsIgnoreCase(keyword))
-						.or(qpost.title.containsIgnoreCase(keyword));
-			}
-		}
-
-		// when
-		Page<PostListResponseDto> page = postRepository.findAll(predicate, pageable).map(PostListResponseDto::new);
-		return page;
 	}
 }

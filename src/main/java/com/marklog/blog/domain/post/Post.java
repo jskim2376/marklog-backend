@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import com.marklog.blog.domain.BaseTimeEntity;
 import com.marklog.blog.domain.post.comment.PostComment;
 import com.marklog.blog.domain.post.like.PostLike;
+import com.marklog.blog.domain.post.tag.PostTag;
 import com.marklog.blog.domain.user.User;
 
 import lombok.Getter;
@@ -45,7 +46,10 @@ public class Post extends BaseTimeEntity {
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	private List<PostLike> postLikes = new ArrayList<>();
-
+	
+	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+	private List<PostTag> postTags = new ArrayList<>();
+	
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	private List<PostComment> postComments = new ArrayList<>();
 
