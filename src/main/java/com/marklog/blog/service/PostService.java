@@ -19,6 +19,7 @@ import com.marklog.blog.domain.post.PostRepository;
 import com.marklog.blog.domain.post.tag.PostTag;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
+import com.marklog.blog.dto.PostListResponseDto;
 import com.marklog.blog.dto.PostResponseDto;
 import com.marklog.blog.dto.PostSaveRequestDto;
 import com.marklog.blog.dto.PostUpdateRequestDto;
@@ -120,9 +121,9 @@ public class PostService {
 		postRepository.deleteById(id);
 	}
 	
-	public Page<PostResponseDto> recentPost(Pageable pageable) {
-		Page<PostResponseDto> pagePostListResponseDto = postRepository.findAll(pageable)
-				.map(PostResponseDto::new);
+	public Page<PostListResponseDto> recentPost(Pageable pageable) {
+		Page<PostListResponseDto> pagePostListResponseDto = postRepository.findAllByOrderByIdDesc(pageable)
+				.map(PostListResponseDto::new);
 		return pagePostListResponseDto;
 	}
 }

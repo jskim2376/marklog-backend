@@ -3,6 +3,8 @@ package com.marklog.blog.controller;
 import java.util.NoSuchElementException;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +17,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.marklog.blog.config.auth.dto.UserAuthenticationDto;
+import com.marklog.blog.dto.PostListResponseDto;
 import com.marklog.blog.dto.PostResponseDto;
 import com.marklog.blog.dto.PostSaveRequestDto;
 import com.marklog.blog.dto.PostUpdateRequestDto;
@@ -33,6 +37,16 @@ public class PostController {
 	private final PostService postService;
 	private final PostLikeService postLikeService;
 
+	@GetMapping
+	public ResponseEntity<Page<PostListResponseDto>> recent(Pageable pageable) {
+		try {
+			Page<PostListResponseDto> result = postService.recentPost(pageable);
+			return ResponseEntity.ok(result);
+		} catch (NoSuchElementException e) {
+			return ResponseEntity.notFound().build();
+		}
+	}
+	
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping
 	public ResponseEntity<?> postPostByUserId(@RequestBody PostSaveRequestDto requestDto,
