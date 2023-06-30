@@ -2,6 +2,9 @@ package com.marklog.blog.controller;
 
 import java.util.NoSuchElementException;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +36,19 @@ public class UserController {
 	@GetMapping
 	public Page<UserResponseDto> getAllUsers(Pageable pageable) {
 		return userService.findAll(pageable);
+	}
+
+	@GetMapping("/logout")
+	public void logout(HttpServletResponse response) {
+	    Cookie cookie = new Cookie("refresh_token", null);
+	    cookie.setMaxAge(0);
+	    cookie.setSecure(true);
+	    cookie.setHttpOnly(true);
+	    cookie.setPath("/api");
+	    response.addCookie(cookie);
+	    
+		response.setHeader("Location", "/");
+		response.setStatus(302);
 	}
 
 	@GetMapping("/{id}")

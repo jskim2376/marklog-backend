@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Component;
 
 import com.marklog.blog.domain.post.Post;
 
@@ -14,34 +15,34 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Component
 public class PostListResponseDto {
-	@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-	private LocalDateTime createdDate;
-	@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-	private LocalDateTime modifiedDate;
+	private Long postId;
+	private String thumbnail;
 	private String title;
-	private String content;
-	private Long userId;
+	private String summary;
+	private LocalDateTime createdDate;
+	private int commentCount;
+	private int likeCount;
+	private String picture;
 	private String userName;
-	private Boolean like;
+	private Long userId;
 	private List<TagResponseDto> tagList;
 
 	public PostListResponseDto(Post entity) {
-		this.createdDate = entity.getCreatedDate();
-		this.modifiedDate = entity.getModifiedDate();
+		this.postId = entity.getId();
+		this.thumbnail = entity.getThumbnail();
 		this.title = entity.getTitle();
-		this.content = entity.getContent();
-		this.userId = entity.getUser().getId();
+		this.summary = entity.getSummary();
+		this.createdDate = entity.getCreatedDate();
+		this.commentCount = entity.getPostComments().size();
+		this.likeCount = entity.getPostLikes().size();
+		this.picture = entity.getUser().getPicture();
 		this.userName = entity.getUser().getName();
-		this.like = false;
+		this.userId = entity.getUser().getId();
 		this.tagList = TagResponseDto.toEntityDto(entity.getPostTags());
+
 	}
 
-	public static PostListResponseDto toDto(Post entity) {
-		return new PostListResponseDto(entity);
-	}
 
-	public void setLike(Boolean like) {
-		this.like = like;
-	}
 }

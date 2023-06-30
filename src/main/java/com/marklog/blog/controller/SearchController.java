@@ -32,6 +32,16 @@ public class SearchController {
 			return ResponseEntity.notFound().build();
 		}
 	}
+	
+	@GetMapping("/user")
+	public ResponseEntity<Page<PostListResponseDto>> search(Pageable pageable, @RequestParam("userId") Long userId) {
+		try {
+			Page<PostListResponseDto> result = searchService.searchByUserId(pageable, userId);
+			return ResponseEntity.ok(result);
+		} catch (NoSuchElementException e) {
+			return ResponseEntity.notFound().build();
+		}
+	}
 
 	
 	@GetMapping("/tag")

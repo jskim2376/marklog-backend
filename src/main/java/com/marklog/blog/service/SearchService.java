@@ -19,6 +19,8 @@ import com.marklog.blog.domain.post.QPost;
 import com.marklog.blog.domain.post.tag.QPostTag;
 import com.marklog.blog.domain.tag.QTag;
 import com.marklog.blog.domain.tag.Tag;
+import com.marklog.blog.domain.user.User;
+import com.marklog.blog.domain.user.UserRepository;
 import com.marklog.blog.dto.PostListResponseDto;
 import com.querydsl.core.QueryFactory;
 import com.querydsl.core.QueryResults;
@@ -36,6 +38,7 @@ public class SearchService {
 	private EntityManager entityManager;
 
 	private final PostRepository postRepository;
+	private final UserRepository userRepository;
 
 	public Page<PostListResponseDto> search(Pageable pageable, String[] keywords) {
 		QPost qpost = QPost.post;
@@ -53,7 +56,10 @@ public class SearchService {
 		Page<PostListResponseDto> page = postRepository.findAll(predicate, pageable).map(PostListResponseDto::new);
 		return page;
 	}
-
+	public Page<PostListResponseDto> searchByUserId(Pageable pageable, Long userId) {
+		User user = userRepository.getReferenceById(userId);
+		return postRepository.findAllByUserOrderByIdDesc(pageable, user).map(PostListResponseDto::new);
+	}
 	public Page<PostListResponseDto> searchByTag(Pageable pageable, String tag) {
 		JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(entityManager);
 
@@ -72,6 +78,11 @@ public class SearchService {
 
 		List<PostListResponseDto> postLists = posts.stream().map(PostListResponseDto::new).collect(Collectors.toList());
 		return new PageImpl<>(postLists, pageable, count);
+	}
+
+	public Page<PostListResponseDto> search(Pageable pageable, Long userId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

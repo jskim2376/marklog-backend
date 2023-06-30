@@ -19,7 +19,7 @@ import com.marklog.blog.service.NoticeService;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@RequestMapping("/v1/user/{userId}/notice/")
+@RequestMapping("/v1/user/{userId}/notice")
 @RestController
 public class NoticeController {
 	private final NoticeService noticeService;
