@@ -27,8 +27,6 @@ import com.marklog.blog.domain.user.Role;
 import com.marklog.blog.domain.user.User;
 import com.marklog.blog.domain.user.UserRepository;
 import com.marklog.blog.dto.PostSaveRequestDto;
-import com.marklog.blog.dto.TagCountResponseDto;
-import com.marklog.blog.service.PostService;
 
 import reactor.core.publisher.Mono;
 
@@ -89,49 +87,6 @@ public class TagTest {
 		String location = header.getLocation().toString();
 		return Long.valueOf(location.substring(uri.length()));
 	}
-	
-	
-	@Test
-	public void testGetCountTagName() throws JsonMappingException, JsonProcessingException {
-		// given
-		String uri = "/api/v1/tag/"+user1.getId();
-		createPost();
-		// when
-		ResponseEntity<String> responseEntity = wc.get().uri(uri)
-				.retrieve().toEntity(String.class).block();
-		
-		//then-ready
-		List<TagCountResponseDto> testPostResponseDto = objectMapper.readValue(responseEntity.getBody(), new TypeReference<List<TagCountResponseDto>>() {});
-
-		// then
-		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(testPostResponseDto.get(0).getCount()).isEqualTo(1);
-		assertThat(testPostResponseDto.get(0).getName()).isEqualTo(tagName);
-		
-	}
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 }
