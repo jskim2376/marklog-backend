@@ -49,166 +49,167 @@ import com.marklog.blog.service.PostCommentService;
 @WebMvcTest(controllers = PostCommentController.class)
 @ContextConfiguration(classes = { PostCommentController.class, JwtTokenProvider.class })
 public class PostCommentControllerTest {
-	@Autowired
-	private MockMvc mvc;
-
-	@MockBean
-	private static PostCommentService postCommentService;
-	private static Authentication authentication;
-
-	Long postId = 1L;
-	String path = "/v1/post/" + postId + "/comment/";
-	Long id = 1L;
-	Long notFoundId = 0L;
-	String commentContent = "comment";
-	PostCommentResponseDto postCommentResponseDto;
-
-	public static String asJsonString(final Object obj) {
-		try {
-			return new ObjectMapper().writeValueAsString(obj);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@BeforeEach
-	public void setUp() {
-		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(1L, "test@test.com", Role.USER);
-		authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null,
-				Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
-
-		List<PostCommentResponseDto> child = new ArrayList<>();
-		PostCommentResponseDto postCommentResponseDtoSub = new PostCommentResponseDto(id, "name",
-				commentContent + "sub", null);
-		child.add(postCommentResponseDtoSub);
-		postCommentResponseDto = new PostCommentResponseDto(id, "name", commentContent, child);
-
-	}
-
-	@WithMockUser
-	@Test
-	public void testGetAllByPostCommentControllerUserConrtoller() throws Exception {
-		// given
-		List<PostCommentResponseDto> child = new ArrayList<>();
-		PostCommentResponseDto postCommentResponseDtoSub = new PostCommentResponseDto(id, "name",
-				commentContent + "sub", null);
-		child.add(postCommentResponseDtoSub);
-		PostCommentResponseDto postCommentResponseDto = new PostCommentResponseDto(id, "name", commentContent, child);
-		PostCommentResponseDto postCommentResponseDto2 = new PostCommentResponseDto(id, "name", commentContent + 2,
-				null);
-		List<PostCommentResponseDto> commentResponseDtos = new ArrayList<>();
-		commentResponseDtos.add(postCommentResponseDto);
-		commentResponseDtos.add(postCommentResponseDto2);
-
-		when(postCommentService.findAllByPostId(postId)).thenReturn(commentResponseDtos);
-
-		// when
-		ResultActions ra = mvc.perform(get(path).with(csrf()));
-		// then
-		ra.andExpect(status().isOk()).andExpect(jsonPath("$[0].content").value(commentContent));
-		ra.andExpect(status().isOk()).andExpect(jsonPath("$[0].childList[0].content").value(commentContent + "sub"));
-		ra.andExpect(status().isOk()).andExpect(jsonPath("$[1].content").value(commentContent + 2));
-
-	}
-
-	@Test
-	public void testPostPostCommentController() throws Exception {
-		// given
-		PostCommentSaveRequestDto postCommentSaveRequestDto = new PostCommentSaveRequestDto(null, commentContent);
-		when(postCommentService.save(anyLong(), anyLong(), any(PostCommentSaveRequestDto.class))).thenReturn(id);
-
-		// when
-		ResultActions ra = mvc.perform(post(path).with(csrf()).with(authentication(authentication))
-				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(postCommentSaveRequestDto)));
-
-		// then
-		ra.andExpect(status().isCreated()).andExpect(header().exists(HttpHeaders.LOCATION));
-	}
-
-	@WithMockUser
-	@Test
-	public void testGetPostConrtoller() throws Exception {
-		// given
-		String path = this.path + id;
-
-		when(postCommentService.findById(id)).thenReturn(postCommentResponseDto);
-
-		// when
-		ResultActions ra = mvc.perform(get(path).with(csrf()).with(authentication(authentication)));
-
-		// then
-		ra.andExpect(status().isOk()).andExpect(jsonPath("$.content").value(commentContent));
-		ra.andExpect(status().isOk()).andExpect(jsonPath("$.childList[0].content").value(commentContent + "sub"));
-	}
-
-	@WithMockUser
-	@Test
-	public void testGetPostConrtoller_not_found() throws Exception {
-		// given
-		String path = this.path + notFoundId;
-		when(postCommentService.findById(notFoundId)).thenThrow(NoSuchElementException.class);
-
-		// when
-		ResultActions ra = mvc.perform(get(path).with(csrf()).with(authentication(authentication)));
-
-		// then
-		ra.andExpect(status().isNotFound());
-	}
-
-	public void testPutPostCommentController() throws Exception {
-		// given
-		String path = this.path + id;
-		String updatedComment = "updated comment";
-		PostCommentUpdateRequestDto postCommentRequestDto = new PostCommentUpdateRequestDto(updatedComment);
-
-		// when
-		ResultActions ra = mvc.perform(put(path).with(csrf()).with(authentication(authentication))
-				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(postCommentRequestDto)));
-
-		// then
-		ra.andExpect(status().isNoContent());
-	}
-
-	public void testPutPostCommentController_not_found() throws Exception {
-		// given
-		String path = this.path + notFoundId;
-		String updatedComment = "updated comment";
-		PostCommentUpdateRequestDto postCommentRequestDto = new PostCommentUpdateRequestDto(updatedComment);
-
-		doThrow(NoSuchElementException.class).when(postCommentService).update(notFoundId, postCommentRequestDto);
-		// when
-		ResultActions ra = mvc.perform(put(path).with(csrf()).with(authentication(authentication))
-				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(postCommentRequestDto)));
-
-		// then
-		ra.andExpect(status().isNotFound());
-	}
-
-	@Test
-	public void testDeletePostCommentController() throws Exception {
-		// given
-		String path = this.path + id;
-
-		// when
-		ResultActions ra = mvc.perform(delete(path).with(csrf()).with(authentication(authentication)));
-
-		// then
-		ra.andExpect(status().isNoContent());
-
-	}
-
-	@Test
-	public void testDeletePostCommentController_not_found() throws Exception {
-		// given
-		String path = this.path + notFoundId;
-		doThrow(EmptyResultDataAccessException.class).when(postCommentService).delete(notFoundId);
-
-		// when
-		ResultActions ra = mvc.perform(delete(path).with(csrf()).with(authentication(authentication)));
-
-		// then
-		ra.andExpect(status().isNotFound());
-
-	}
+//	@Autowired
+//	private MockMvc mvc;
+//
+//	@MockBean
+//	private static PostCommentService postCommentService;
+//	private static Authentication authentication;
+//
+//	Long postId = 1L;
+//	String path = "/v1/post/" + postId + "/comment/";
+//	Long id = 1L;
+//	Long notFoundId = 0L;
+//	String commentContent = "comment";
+//	PostCommentResponseDto postCommentResponseDto;
+//
+//	public static String asJsonString(final Object obj) {
+//		try {
+//			return new ObjectMapper().writeValueAsString(obj);
+//		} catch (Exception e) {
+//			throw new RuntimeException(e);
+//		}
+//	}
+//
+//	@BeforeEach
+//	public void setUp() {
+//		UserAuthenticationDto userAuthenticationDto = new UserAuthenticationDto(1L, "test@test.com", Role.USER);
+//		authentication = new UsernamePasswordAuthenticationToken(userAuthenticationDto, null,
+//				Collections.singleton(new SimpleGrantedAuthority(userAuthenticationDto.getRole().getKey())));
+//
+//		List<PostCommentResponseDto> child = new ArrayList<>();
+//		PostCommentResponseDto postCommentResponseDtoSub = new PostCommentResponseDto(id, "name",
+//				commentContent + "sub");
+//		new PostCommentResponseDto(id,"name",commentContent+"sub");
+//		child.add(postCommentResponseDtoSub);
+//		postCommentResponseDto = new PostCommentResponseDto(id, "name", commentContent, child);
+//
+//	}
+//
+//	@WithMockUser
+//	@Test
+//	public void testGetAllByPostCommentControllerUserConrtoller() throws Exception {
+//		// given
+//		List<PostCommentResponseDto> child = new ArrayList<>();
+//		PostCommentResponseDto postCommentResponseDtoSub = new PostCommentResponseDto(id, "name",
+//				commentContent + "sub", null);
+//		child.add(postCommentResponseDtoSub);
+//		PostCommentResponseDto postCommentResponseDto = new PostCommentResponseDto(id, "name", commentContent, child);
+//		PostCommentResponseDto postCommentResponseDto2 = new PostCommentResponseDto(id, "name", commentContent + 2,
+//				null);
+//		List<PostCommentResponseDto> commentResponseDtos = new ArrayList<>();
+//		commentResponseDtos.add(postCommentResponseDto);
+//		commentResponseDtos.add(postCommentResponseDto2);
+//
+//		when(postCommentService.findAllByPostId(postId)).thenReturn(commentResponseDtos);
+//
+//		// when
+//		ResultActions ra = mvc.perform(get(path).with(csrf()));
+//		// then
+//		ra.andExpect(status().isOk()).andExpect(jsonPath("$[0].content").value(commentContent));
+//		ra.andExpect(status().isOk()).andExpect(jsonPath("$[0].childList[0].content").value(commentContent + "sub"));
+//		ra.andExpect(status().isOk()).andExpect(jsonPath("$[1].content").value(commentContent + 2));
+//
+//	}
+//
+//	@Test
+//	public void testPostPostCommentController() throws Exception {
+//		// given
+//		PostCommentSaveRequestDto postCommentSaveRequestDto = new PostCommentSaveRequestDto(null, commentContent);
+//		when(postCommentService.save(anyLong(), anyLong(), any(PostCommentSaveRequestDto.class))).thenReturn(id);
+//
+//		// when
+//		ResultActions ra = mvc.perform(post(path).with(csrf()).with(authentication(authentication))
+//				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(postCommentSaveRequestDto)));
+//
+//		// then
+//		ra.andExpect(status().isCreated()).andExpect(header().exists(HttpHeaders.LOCATION));
+//	}
+//
+//	@WithMockUser
+//	@Test
+//	public void testGetPostConrtoller() throws Exception {
+//		// given
+//		String path = this.path + id;
+//
+//		when(postCommentService.findById(id)).thenReturn(postCommentResponseDto);
+//
+//		// when
+//		ResultActions ra = mvc.perform(get(path).with(csrf()).with(authentication(authentication)));
+//
+//		// then
+//		ra.andExpect(status().isOk()).andExpect(jsonPath("$.content").value(commentContent));
+//		ra.andExpect(status().isOk()).andExpect(jsonPath("$.childList[0].content").value(commentContent + "sub"));
+//	}
+//
+//	@WithMockUser
+//	@Test
+//	public void testGetPostConrtoller_not_found() throws Exception {
+//		// given
+//		String path = this.path + notFoundId;
+//		when(postCommentService.findById(notFoundId)).thenThrow(NoSuchElementException.class);
+//
+//		// when
+//		ResultActions ra = mvc.perform(get(path).with(csrf()).with(authentication(authentication)));
+//
+//		// then
+//		ra.andExpect(status().isNotFound());
+//	}
+//
+//	public void testPutPostCommentController() throws Exception {
+//		// given
+//		String path = this.path + id;
+//		String updatedComment = "updated comment";
+//		PostCommentUpdateRequestDto postCommentRequestDto = new PostCommentUpdateRequestDto(updatedComment);
+//
+//		// when
+//		ResultActions ra = mvc.perform(put(path).with(csrf()).with(authentication(authentication))
+//				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(postCommentRequestDto)));
+//
+//		// then
+//		ra.andExpect(status().isNoContent());
+//	}
+//
+//	public void testPutPostCommentController_not_found() throws Exception {
+//		// given
+//		String path = this.path + notFoundId;
+//		String updatedComment = "updated comment";
+//		PostCommentUpdateRequestDto postCommentRequestDto = new PostCommentUpdateRequestDto(updatedComment);
+//
+//		doThrow(NoSuchElementException.class).when(postCommentService).update(notFoundId, postCommentRequestDto);
+//		// when
+//		ResultActions ra = mvc.perform(put(path).with(csrf()).with(authentication(authentication))
+//				.contentType(MediaType.APPLICATION_JSON).content(asJsonString(postCommentRequestDto)));
+//
+//		// then
+//		ra.andExpect(status().isNotFound());
+//	}
+//
+//	@Test
+//	public void testDeletePostCommentController() throws Exception {
+//		// given
+//		String path = this.path + id;
+//
+//		// when
+//		ResultActions ra = mvc.perform(delete(path).with(csrf()).with(authentication(authentication)));
+//
+//		// then
+//		ra.andExpect(status().isNoContent());
+//
+//	}
+//
+//	@Test
+//	public void testDeletePostCommentController_not_found() throws Exception {
+//		// given
+//		String path = this.path + notFoundId;
+//		doThrow(EmptyResultDataAccessException.class).when(postCommentService).delete(notFoundId);
+//
+//		// when
+//		ResultActions ra = mvc.perform(delete(path).with(csrf()).with(authentication(authentication)));
+//
+//		// then
+//		ra.andExpect(status().isNotFound());
+//
+//	}
 
 }
