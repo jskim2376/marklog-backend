@@ -56,10 +56,12 @@ public class SearchService {
 		Page<PostListResponseDto> page = postRepository.findAll(predicate, pageable).map(PostListResponseDto::new);
 		return page;
 	}
+
 	public Page<PostListResponseDto> searchByUserId(Pageable pageable, Long userId) {
 		User user = userRepository.getReferenceById(userId);
 		return postRepository.findAllByUserOrderByIdDesc(pageable, user).map(PostListResponseDto::new);
 	}
+
 	public Page<PostListResponseDto> searchByTag(Pageable pageable, String tag) {
 		JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(entityManager);
 
@@ -68,7 +70,7 @@ public class SearchService {
 		QPost qpost = QPost.post;
 
 		BooleanExpression predicate = null;
-		predicate = qtag.name.containsIgnoreCase(tag);
+		predicate = qtag.name.equalsIgnoreCase(tag);
 
 		List<Post> posts = jpaQueryFactory.selectFrom(qpost).join(qpost.postTags, qPostTag).join(qPostTag.tag, qtag)
 				.where(predicate).offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
