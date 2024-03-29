@@ -52,7 +52,7 @@ public class PostService {
 		Document doc = Jsoup.parse(html);
 		Elements elements = doc.getElementsByTag("img");
 		if (elements.size() < 1) {
-			return null;
+			return "https://i.ibb.co/KNj5LsQ/default.jpg";
 		} else {
 			return elements.first().attr("src");
 		}
@@ -87,11 +87,11 @@ public class PostService {
 		post = postRepository.save(post);
 
 		List<String> tagList = requestDto.getTagList();
-		for(String tag:tagList) {
+		for (String tag : tagList) {
 			Long tagId = tagService.save(tag);
 			postTagService.save(post.getId(), tagId);
 		}
-		
+
 		return post.getId();
 	}
 
@@ -101,12 +101,12 @@ public class PostService {
 
 		List<String> tagList = requestDto.getTagList();
 		List<PostTag> postTagList = post.getPostTags();
-		for(int i=0;i<postTagList.size();i++) {
+		for (int i = 0; i < postTagList.size(); i++) {
 			postTagService.delete(postTagList.get(i).getId());
 			post.getPostTags().remove(i);
 		}
-		
-		for(String tag:tagList) {
+
+		for (String tag : tagList) {
 			Long tagId = tagService.save(tag);
 			postTagService.save(post.getId(), tagId);
 		}
@@ -120,7 +120,7 @@ public class PostService {
 	public void delete(Long id) {
 		postRepository.deleteById(id);
 	}
-	
+
 	public Page<PostListResponseDto> recentPost(Pageable pageable) {
 		Page<PostListResponseDto> pagePostListResponseDto = postRepository.findAllByOrderByIdDesc(pageable)
 				.map(PostListResponseDto::new);
